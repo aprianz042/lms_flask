@@ -128,7 +128,16 @@ def add_user():
 @app.route('/add_content')
 def add_content():
     konten = "add_content"
-    return render_template('home.html', konten=konten)
+    connection = get_db_connection()
+    if connection is None:
+        return "Error connecting to the database.", 500 
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT * FROM materi')
+            materi = cursor.fetchall() 
+    finally:
+        connection.close() 
+    return render_template('home.html', materi=materi, konten=konten)
 
 
 def md5_hash(password):
