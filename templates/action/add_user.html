@@ -60,7 +60,7 @@
                 <button type="submit" form="dataForm" class="btn btn-primary btn-sm">
                     <i class="fa fa-dot-circle-o"></i> Submit
                 </button>
-                <button type="reset" class="btn btn-danger btn-sm">
+                <button type="reset" class="btn btn-danger btn-sm" onclick="resetForm()">
                     <i class="fa fa-ban"></i> Reset
                 </button>
             </div>
@@ -136,4 +136,9 @@
         });
     });
 
+    // Fungsi untuk mereset formulir
+    function resetForm() {
+        form.reset(); // Mereset semua input ke nilai defaultnya
+        responseMessage.style.display = 'none'; // Menyembunyikan alert
+    }
 </script>
