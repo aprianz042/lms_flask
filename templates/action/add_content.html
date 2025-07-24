@@ -49,95 +49,22 @@
     </div><!-- .animated -->
 </div><!-- .content -->
 
-<div class="content mt-3">
-    <div class="col-lg-12">    
-        <div class="card">
-            <div class="card-header">
-                <strong>Add</strong> Content
-            </div>
-            <div class="card-body card-block">
-                <form id="dataForm" class="form-horizontal" enctype="multipart/form-data">
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="matkul" class=" form-control-label">Mata Kuliah</label></div>
-                        <div class="col-12 col-md-9">
-                            <input type="text" id="matkul" name="matkul" placeholder="Mata Kuliah ..." class="form-control" required>
-                        </div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="materi" class=" form-control-label">Judul Materi</label></div>
-                        <div class="col-12 col-md-9">
-                            <input type="text" id="materi" name="materi" placeholder="Judul Materi ..." class="form-control" required>
-                        </div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="jenis" class=" form-control-label">Jenis</label></div>
-                        <div class="col-12 col-md-9">
-                            <select name="jenis" id="jenis" class="form-control" required>
-                                <option value="0">Please select</option>
-                                <option value="dokumen">Dokumen</option>
-                                <option value="video">Video</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="deskripsi" class=" form-control-label">Deskripsi</label></div>
-                        <div class="col-12 col-md-9">
-                            <textarea name="deskripsi" id="deskripsi" rows="9" placeholder="Deskripsi / Arahan / Perintah ..." class="form-control"></textarea>
-                        </div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="kategori" class=" form-control-label">Kategori</label></div>
-                        <div class="col-12 col-md-9">
-                            <select name="kategori" id="kategori" class="form-control" required>
-                                <option value="0">Please select</option>
-                                <option value="pengajaran">Pengajaran</option>
-                                <option value="pelatihan">Pelatihan</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="berkas" class=" form-control-label">Berkas</label></div>
-                        <div class="col-12 col-md-9">
-                            <input type="file" id="berkas" name="berkas" class="form-control-file">
-                        </div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_pengampu" class=" form-control-label">Dosen / Pelatih</label></div>
-                        <div class="col-12 col-md-9">
-                            <input type="text" id="id_pengampu" name="id_pengampu" placeholder="Dosen / Pelatih Pengampu ..." class="form-control" required>
-                        </div>
-                    </div>
-
-                </form>
-            </div>
-
-            <div class="card-footer">
-                <!-- Tombol Submit di dalam Formulir -->
-                <button type="submit" form="dataForm" class="btn btn-primary btn-sm">
-                    <i class="fa fa-dot-circle-o"></i> Submit
-                </button>
-                <button type="reset" class="btn btn-danger btn-sm" onclick="resetForm()">
-                    <i class="fa fa-ban"></i> Reset
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="modal fade" id="add_materi" tabindex="-1" role="dialog" aria-labelledby="mediumModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <strong>Tambah Materi</strong>
             </div>
+            
             <div class="modal-body">
-                <form id="dataFormModal" class="form-horizontal" enctype="multipart/form-data"></form>
+                <div id="responseMessageModal" class="alert alert-dismissible fade show" role="alert" style="display: none;">
+                    <span id="responseTextModal"></span>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                
+                <form id="dataForm" class="form-horizontal" enctype="multipart/form-data">
                     <div class="row form-group">
                         <div class="col col-md-3"><label for="matkul" class=" form-control-label">Mata Kuliah</label></div>
                         <div class="col-12 col-md-9">
@@ -199,26 +126,37 @@
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
+                
                 <button type="reset" class="btn btn-danger btn-sm" onclick="resetForm()">
                     <i class="fa fa-ban"></i> Reset
                 </button>
-                <button type="submit" form="dataFormModal" class="btn btn-primary btn-sm">
+
+                <button type="submit" form="dataForm" class="btn btn-primary btn-sm">
                     <i class="fa fa-dot-circle-o"></i> Submit
                 </button>
             </div>
-
         </div>
     </div>
 </div>
 
 <script>
+    // Fungsi untuk mereset formulir
+    function resetForm() {
+        const form = document.getElementById('dataForm');
+        form.reset(); // Mereset semua input ke nilai defaultnya
+        responseMessage.style.display = 'none'; // Menyembunyikan alert
+        responseMessageModal.style.display = 'none';
+    }
+
     // Mengambil elemen formulir dan response message
     const form = document.getElementById('dataForm');
     const responseMessage = document.getElementById('responseMessage');
     const responseText = document.getElementById('responseText');
+    const responseMessageModal = document.getElementById('responseMessageModal');
+    const responseTextModal = document.getElementById('responseTextModal');
 
     form.addEventListener('submit', function(event) {
-        event.preventDefault(); // Mencegah form agar tidak mengarah ke halaman lain
+        event.preventDefault();  // Mencegah form agar tidak mengarah ke halaman lain
 
         // Ambil data dari formulir
         const mata_kuliah = document.getElementById('matkul').value;
@@ -231,15 +169,25 @@
 
         // Reset alert sebelum validasi
         responseMessage.style.display = 'none'; // Menyembunyikan alert jika ada pesan sebelumnya
+        responseMessageModal.style.display = 'none';
 
         // Validasi level (tidak boleh 0)
-        if (jenis === "0" || kategori == "0") {
-            responseText.textContent = "Jenis or Kategori is required and cannot be 'Please select'.";
-            responseMessage.classList.remove('alert-success');
-            responseMessage.classList.add('alert-danger');
-            responseMessage.style.display = 'block';  // Menampilkan alert
+        if (jenis == "0" || kategori == "0") {
+            responseTextModal.textContent = "Jenis or Kategori is required and cannot be 'Please select'.";
+            responseMessageModal.classList.remove('alert-success');
+            responseMessageModal.classList.add('alert-danger');
+            responseMessageModal.style.display = 'block';  // Menampilkan alert
             return; // Hentikan proses jika validasi gagal
         }
+
+        if (!berkas || berkas.length === 0) {
+            responseTextModal.textContent = "Berkas is required and cannot be 'Empty'.";
+            responseMessageModal.classList.remove('alert-success');
+            responseMessageModal.classList.add('alert-danger');
+            responseMessageModal.style.display = 'block';  // Menampilkan alert
+            return; // Hentikan proses jika validasi gagal
+        }
+
 
         // Buat FormData untuk mengirim data termasuk file
         let formData = new FormData();
@@ -260,30 +208,51 @@
         .then(data => {
             // Tampilkan respons dari Flask
             if (data.message) {
-                responseText.textContent = data.message;  // Menampilkan pesan sukses
-                responseMessage.classList.remove('alert-danger');
-                responseMessage.classList.add('alert-success');
-                responseMessage.style.display = 'block';  // Menampilkan alert
+                // Menyimpan pesan sukses di sessionStorage
+                sessionStorage.setItem("responseMessage", "success");
+                sessionStorage.setItem("responseText", data.message);
                 form.reset(); // Reset form setelah berhasil
-                
+                window.location.reload();  // Reload halaman untuk memuat ulang data
             } else if (data.error) {
-                responseText.textContent = "Error: " + data.error;  // Menampilkan pesan error
-                responseMessage.classList.remove('alert-success');
-                responseMessage.classList.add('alert-danger');
-                responseMessage.style.display = 'block';  // Menampilkan alert
+                // Menyimpan pesan error di sessionStorage
+                sessionStorage.setItem("responseMessage", "error");
+                sessionStorage.setItem("responseText", data.error);
+                window.location.reload();  // Reload halaman untuk memuat ulang data
             }
         })
         .catch(error => {
-            responseText.textContent = "Error: " + error.message;  // Menampilkan pesan error jika terjadi kesalahan
-            responseMessage.classList.remove('alert-success');
-            responseMessage.classList.add('alert-danger');
-            responseMessage.style.display = 'block';  // Menampilkan alert
+            // Menyimpan pesan error di sessionStorage
+            sessionStorage.setItem("responseMessage", "error");
+            sessionStorage.setItem("responseText", error.message);
+            window.location.reload();  // Reload halaman untuk memuat ulang data
         });
     });
 
-    // Fungsi untuk mereset formulir
-    function resetForm() {
-        form.reset(); // Mereset semua input ke nilai defaultnya
-        responseMessage.style.display = 'none'; // Menyembunyikan alert
-    }
+    // Fungsi untuk menampilkan pesan setelah halaman di-reload
+    window.onload = function() {
+        const responseMessage = document.getElementById('responseMessage');
+        const responseText = document.getElementById('responseText');
+
+        const storedMessage = sessionStorage.getItem("responseMessage");
+        const storedText = sessionStorage.getItem("responseText");
+
+        if (storedMessage && storedText) {
+            if (storedMessage === "success") {
+                responseText.textContent = storedText;  // Menampilkan pesan sukses
+                responseMessage.classList.remove('alert-danger');
+                responseMessage.classList.add('alert-success');
+                responseMessage.style.display = 'block';  // Menampilkan alert sukses
+            } else if (storedMessage === "error") {
+                responseText.textContent = storedText;  // Menampilkan pesan error
+                responseMessage.classList.remove('alert-success');
+                responseMessage.classList.add('alert-danger');
+                responseMessage.style.display = 'block';  // Menampilkan alert error
+            }
+
+            // Menghapus data dari sessionStorage setelah ditampilkan
+            sessionStorage.removeItem("responseMessage");
+            sessionStorage.removeItem("responseText");
+        }
+    };
+
 </script>
