@@ -9,49 +9,67 @@
     
         <div class="card">
             <div class="card-header">
-                <strong>Add</strong> Users
+                <strong>Add</strong> Content
             </div>
             <div class="card-body card-block">
-                <form id="dataForm" class="form-horizontal">
+                <form id="dataForm" class="form-horizontal" enctype="multipart/form-data">
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="nama" class=" form-control-label">Nama</label></div>
+                        <div class="col col-md-3"><label for="matkul" class=" form-control-label">Mata Kuliah</label></div>
                         <div class="col-12 col-md-9">
-                            <input type="text" id="nama" name="nama" placeholder="Enter Name..." class="form-control" required>
+                            <input type="text" id="matkul" name="matkul" placeholder="Mata Kuliah ..." class="form-control" required>
                         </div>
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="no_id" class=" form-control-label">No. Identitas</label></div>
+                        <div class="col col-md-3"><label for="materi" class=" form-control-label">Judul Materi</label></div>
                         <div class="col-12 col-md-9">
-                            <input type="text" id="no_id" name="no_id" placeholder="Enter Id Number..." class="form-control" required>
+                            <input type="text" id="materi" name="materi" placeholder="Judul Materi ..." class="form-control" required>
                         </div>
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="level" class=" form-control-label">Level</label></div>
+                        <div class="col col-md-3"><label for="jenis" class=" form-control-label">Jenis</label></div>
                         <div class="col-12 col-md-9">
-                            <select name="level" id="level" class="form-control" required>
+                            <select name="jenis" id="jenis" class="form-control" required>
                                 <option value="0">Please select</option>
-                                <option value="operator">Operator</option>
-                                <option value="dosen">Dosen</option>
-                                <option value="mahasiswa">Mahasiswa</option>
+                                <option value="dokumen">Dokumen</option>
+                                <option value="video">Video</option>
                             </select>
                         </div>
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="email" class=" form-control-label">Email</label></div>
+                        <div class="col col-md-3"><label for="deskripsi" class=" form-control-label">Deskripsi</label></div>
                         <div class="col-12 col-md-9">
-                            <input type="email" id="email" name="email" placeholder="Enter Email..." class="form-control" required>
+                            <textarea name="deskripsi" id="deskripsi" rows="9" placeholder="Deskripsi / Arahan / Perintah ..." class="form-control"></textarea>
                         </div>
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="password" class=" form-control-label">Password</label></div>
+                        <div class="col col-md-3"><label for="kategori" class=" form-control-label">Kategori</label></div>
                         <div class="col-12 col-md-9">
-                            <input type="password" id="password" name="password" placeholder="Enter Password..." class="form-control" required>
+                            <select name="kategori" id="kategori" class="form-control" required>
+                                <option value="0">Please select</option>
+                                <option value="pengajaran">Pengajaran</option>
+                                <option value="pelatihan">Pelatihan</option>
+                            </select>
                         </div>
                     </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="berkas" class=" form-control-label">Berkas</label></div>
+                        <div class="col-12 col-md-9">
+                            <input type="file" id="berkas" name="berkas" class="form-control-file">
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_pengampu" class=" form-control-label">Dosen / Pelatih</label></div>
+                        <div class="col-12 col-md-9">
+                            <input type="text" id="id_pengampu" name="id_pengampu" placeholder="Dosen / Pelatih Pengampu ..." class="form-control" required>
+                        </div>
+                    </div>
+
                 </form>
             </div>
 
@@ -78,40 +96,40 @@
         event.preventDefault(); // Mencegah form agar tidak mengarah ke halaman lain
 
         // Ambil data dari formulir
-        const nama = document.getElementById('nama').value;
-        const no_id = document.getElementById('no_id').value;
-        const level = document.getElementById('level').value;
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
+        const mata_kuliah = document.getElementById('matkul').value;
+        const judul = document.getElementById('materi').value;
+        const jenis = document.getElementById('jenis').value;
+        const deskripsi = document.getElementById('deskripsi').value;
+        const kategori = document.getElementById('kategori').value;
+        const berkas = document.getElementById('berkas').files[0]; // Ambil file yang diupload
+        const id_pengampu = document.getElementById('id_pengampu').value;
 
         // Reset alert sebelum validasi
         responseMessage.style.display = 'none'; // Menyembunyikan alert jika ada pesan sebelumnya
 
         // Validasi level (tidak boleh 0)
-        if (level === "0") {
-            responseText.textContent = "Level is required and cannot be 'Please select'.";
+        if (jenis === "0" || kategori == "0") {
+            responseText.textContent = "Jenis or Kategori is required and cannot be 'Please select'.";
             responseMessage.classList.remove('alert-success');
             responseMessage.classList.add('alert-danger');
             responseMessage.style.display = 'block';  // Menampilkan alert
             return; // Hentikan proses jika validasi gagal
         }
 
-        // Validasi password minimal 6 karakter
-        if (password.length < 6) {
-            responseText.textContent = "Password must be at least 6 characters long.";
-            responseMessage.classList.remove('alert-success');
-            responseMessage.classList.add('alert-danger');
-            responseMessage.style.display = 'block';  // Menampilkan alert
-            return; // Hentikan proses jika validasi gagal
-        }
+        // Buat FormData untuk mengirim data termasuk file
+        let formData = new FormData();
+        formData.append("mata_kuliah", mata_kuliah);
+        formData.append("judul", judul);
+        formData.append("jenis", jenis);
+        formData.append("deskripsi", deskripsi);
+        formData.append("kategori", kategori);
+        formData.append("berkas", berkas);  // Menambahkan file
+        formData.append("id_pengampu", id_pengampu);
 
         // Kirim data menggunakan fetch() ke API Flask
-        fetch('http://127.0.0.1:5000/insert_user', {
+        fetch('http://127.0.0.1:5000/insert_content', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ nama: nama, no_id: no_id, level: level, email: email, password: password })
+            body: formData
         })
         .then(response => response.json())
         .then(data => {
@@ -121,6 +139,8 @@
                 responseMessage.classList.remove('alert-danger');
                 responseMessage.classList.add('alert-success');
                 responseMessage.style.display = 'block';  // Menampilkan alert
+                form.reset(); // Reset form setelah berhasil
+                
             } else if (data.error) {
                 responseText.textContent = "Error: " + data.error;  // Menampilkan pesan error
                 responseMessage.classList.remove('alert-success');

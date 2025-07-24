@@ -5,6 +5,10 @@ from flask import Flask, render_template, Response, request, jsonify
 from deepface import DeepFace
 import pymysql
 import hashlib
+from werkzeug.utils import secure_filename
+import random
+import string
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -121,14 +125,19 @@ def add_user():
     konten = "add_user"
     return render_template('home.html', konten=konten)
 
+@app.route('/add_content')
+def add_content():
+    konten = "add_content"
+    return render_template('home.html', konten=konten)
+
 
 def md5_hash(password):
     # Menghasilkan hash MD5 dari password
     return hashlib.md5(password.encode()).hexdigest()
 
 # Endpoint untuk menambah data
-@app.route('/add', methods=['POST'])
-def add_record():
+@app.route('/insert_user', methods=['POST'])
+def add_record_user():
     # Ambil data dari request JSON
     data = request.get_json()
     
@@ -155,6 +164,75 @@ def add_record():
         return jsonify({"error": str(e)}), 500
     finally:
         connection.close()
+
+
+ALLOWED_EXTENSIONS = {'pdf', 'mp4', 'docx', 'xlsx', 'rar', 'zip'}  # Daftar ekstensi yang diizinkan
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def generate_filename(extension):
+    random_string = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    now = datetime.now()
+    timestamp = now.strftime("%d%m%Y_%H%M%S")  # Format: tanggal_bulan_tahun_jam_menit_detik
+    filename = f"IPDN_{random_string}_{timestamp}.{extension}"
+    return filename
+
+@app.route('/insert_content', methods=['POST'])
+def add_record_content():
+    # Ambil data dari request form
+    data = request.form  # Mengambil data form, bukan JSON karena ada file
+    mata_kuliah = data.get('mata_kuliah')
+    judul = data.get('judul')
+    jenis = data.get('jenis')
+    deskripsi = data.get('deskripsi')
+    kategori = data.get('kategori')
+    id_pengampu = data.get('id_pengampu')
+    berkas = request.files['berkas']  # Ambil file dari input "berkas"
+
+    # Validasi input
+    if jenis == "0" or kategori == "0":
+        return jsonify({"error": "Jenis dan Kategori tidak boleh kosong"}), 400
+
+    if not berkas:
+        return jsonify({"error": "Berkas tidak boleh kosong"}), 400
+
+    if not mata_kuliah or not judul or not deskripsi or not id_pengampu:
+        return jsonify({"error": "Semua field (Mata Kuliah, Judul, Deskripsi, Dosen/Pelatih) harus diisi"}), 400
+
+    # Periksa ekstensi file
+    if not allowed_file(berkas.filename):
+        return jsonify({"error": "Tipe file tidak diizinkan. Hanya file PDF, video, dan audio yang diperbolehkan."}), 400
+
+    # Mengambil ekstensi file
+    extension = berkas.filename.rsplit('.', 1)[1].lower()
+    
+    # Generate nama file baru
+    filename = generate_filename(extension)
+
+    # Menyimpan file yang diupload ke folder yang ditentukan
+    upload_folder = os.path.join('static', 'materi')  # Folder penyimpanan file
+    if not os.path.exists(upload_folder):
+        os.makedirs(upload_folder)  # Membuat folder jika belum ada
+    file_path = os.path.join(upload_folder, filename)
+    berkas.save(file_path)  # Menyimpan file di folder
+
+    # Insert data ke database
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            sql = """
+                INSERT INTO materi (mata_kuliah, judul, jenis, deskripsi, kategori, berkas, id_pengampu)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """
+            # Menyimpan nama file yang diupload ke database
+            cursor.execute(sql, (mata_kuliah, judul, jenis, deskripsi, kategori, filename, id_pengampu))
+            connection.commit()
+        return jsonify({"message": "Record inserted successfully"}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        connection.close()
+
 
 if __name__ == '__main__':
     app.run(debug=True)

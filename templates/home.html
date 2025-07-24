@@ -27,7 +27,9 @@
         {% if konten == 'video' %}
             {% include 'modules/video.html' %}
         {% elif konten == 'add_user' %}
-            {% include 'action/add_user.html' %}    
+            {% include 'action/add_user.html' %} 
+        {% elif konten == 'add_content' %}
+            {% include 'action/add_content.html' %}    
         {% else %}
             {% include 'modules/home.html' %}
         {% endif %}
