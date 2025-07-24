@@ -1,0 +1,139 @@
+<div class="content mt-3">
+    <div class="col-lg-12">
+        <div id="responseMessage" class="alert alert-dismissible fade show" role="alert" style="display: none;">
+            <span id="responseText"></span>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    
+        <div class="card">
+            <div class="card-header">
+                <strong>Add</strong> Users
+            </div>
+            <div class="card-body card-block">
+                <form id="dataForm" class="form-horizontal">
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="nama" class=" form-control-label">Nama</label></div>
+                        <div class="col-12 col-md-9">
+                            <input type="text" id="nama" name="nama" placeholder="Enter Name..." class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="no_id" class=" form-control-label">No. Identitas</label></div>
+                        <div class="col-12 col-md-9">
+                            <input type="text" id="no_id" name="no_id" placeholder="Enter Id Number..." class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="level" class=" form-control-label">Level</label></div>
+                        <div class="col-12 col-md-9">
+                            <select name="level" id="level" class="form-control" required>
+                                <option value="0">Please select</option>
+                                <option value="operator">Operator</option>
+                                <option value="dosen">Dosen</option>
+                                <option value="mahasiswa">Mahasiswa</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="email" class=" form-control-label">Email</label></div>
+                        <div class="col-12 col-md-9">
+                            <input type="email" id="email" name="email" placeholder="Enter Email..." class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="password" class=" form-control-label">Password</label></div>
+                        <div class="col-12 col-md-9">
+                            <input type="password" id="password" name="password" placeholder="Enter Password..." class="form-control" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card-footer">
+                <!-- Tombol Submit di dalam Formulir -->
+                <button type="submit" form="dataForm" class="btn btn-primary btn-sm">
+                    <i class="fa fa-dot-circle-o"></i> Submit
+                </button>
+                <button type="reset" class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Reset
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Mengambil elemen formulir dan response message
+    const form = document.getElementById('dataForm');
+    const responseMessage = document.getElementById('responseMessage');
+    const responseText = document.getElementById('responseText');
+
+    form.addEventListener('submit', function(event) {
+        event.preventDefault(); // Mencegah form agar tidak mengarah ke halaman lain
+
+        // Ambil data dari formulir
+        const nama = document.getElementById('nama').value;
+        const no_id = document.getElementById('no_id').value;
+        const level = document.getElementById('level').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        // Reset alert sebelum validasi
+        responseMessage.style.display = 'none'; // Menyembunyikan alert jika ada pesan sebelumnya
+
+        // Validasi level (tidak boleh 0)
+        if (level === "0") {
+            responseText.textContent = "Level is required and cannot be 'Please select'.";
+            responseMessage.classList.remove('alert-success');
+            responseMessage.classList.add('alert-danger');
+            responseMessage.style.display = 'block';  // Menampilkan alert
+            return; // Hentikan proses jika validasi gagal
+        }
+
+        // Validasi password minimal 6 karakter
+        if (password.length < 6) {
+            responseText.textContent = "Password must be at least 6 characters long.";
+            responseMessage.classList.remove('alert-success');
+            responseMessage.classList.add('alert-danger');
+            responseMessage.style.display = 'block';  // Menampilkan alert
+            return; // Hentikan proses jika validasi gagal
+        }
+
+        // Kirim data menggunakan fetch() ke API Flask
+        fetch('http://127.0.0.1:5000/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ nama: nama, no_id: no_id, level: level, email: email, password: password })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Tampilkan respons dari Flask
+            if (data.message) {
+                responseText.textContent = data.message;  // Menampilkan pesan sukses
+                responseMessage.classList.remove('alert-danger');
+                responseMessage.classList.add('alert-success');
+                responseMessage.style.display = 'block';  // Menampilkan alert
+            } else if (data.error) {
+                responseText.textContent = "Error: " + data.error;  // Menampilkan pesan error
+                responseMessage.classList.remove('alert-success');
+                responseMessage.classList.add('alert-danger');
+                responseMessage.style.display = 'block';  // Menampilkan alert
+            }
+        })
+        .catch(error => {
+            responseText.textContent = "Error: " + error.message;  // Menampilkan pesan error jika terjadi kesalahan
+            responseMessage.classList.remove('alert-success');
+            responseMessage.classList.add('alert-danger');
+            responseMessage.style.display = 'block';  // Menampilkan alert
+        });
+    });
+
+</script>
