@@ -1,7 +1,7 @@
 import os
 import cv2
 import numpy as np
-from flask import Flask, render_template, Response, request, jsonify
+from flask import Flask, flash, render_template, Response, request, jsonify, redirect, url_for
 from deepface import DeepFace
 import pymysql
 import hashlib
@@ -286,6 +286,36 @@ def add_record_content():
     finally:
         connection.close()
 
+
+# Fungsi untuk menghapus data berdasarkan id
+@app.route('/hapus/<int:id>', methods=['POST'])
+def hapus(id):
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            # Query untuk mendapatkan nama berkas berdasarkan id
+            cursor.execute("SELECT berkas FROM materi WHERE id = %s", (id,))
+            result = cursor.fetchone()
+            
+            if result:
+                berkas = result["berkas"]  # Ambil nama berkas
+                berkas_path = os.path.join('static', 'materi', berkas)  # Lokasi file yang akan dihapus
+                
+                # Cek jika file ada dan hapus file
+                if os.path.exists(berkas_path):
+                    os.remove(berkas_path)  # Menghapus file dari direktori
+                
+                # Query untuk menghapus materi berdasarkan id
+                cursor.execute("DELETE FROM materi WHERE id = %s", (id,))
+                connection.commit()
+                return jsonify({"message": "Record deleted successfully"}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        connection.close()
+    
+    # Setelah berhasil menghapus, redirect kembali ke halaman utama
+    return redirect(url_for('add_content'))
 
 if __name__ == '__main__':
     app.run(debug=True)
