@@ -9,6 +9,7 @@ from werkzeug.utils import secure_filename
 import random
 import string
 from datetime import datetime
+from frontal import half_flip
 
 app = Flask(__name__)
 
@@ -82,8 +83,29 @@ def generate_video():
         # Tulis teks emosi di frame
         cv2.putText(frame, f"Emotion: {dominant_emotion}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
+        frontal = half_flip(frame)
         # Encode frame sebagai JPEG
         _, jpeg = cv2.imencode('.jpg', frame)
+        frame_bytes = jpeg.tobytes()
+
+        # Hasilkan frame dalam format yang bisa ditampilkan
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n\r\n')
+
+    cap.release()
+
+def frontal_video():
+    # Inisialisasi webcam
+    cap = cv2.VideoCapture(0)  # 0 berarti webcam default
+
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        frontal = half_flip(frame)
+        # Encode frame sebagai JPEG
+        _, jpeg = cv2.imencode('.jpg', frontal)
         frame_bytes = jpeg.tobytes()
 
         # Hasilkan frame dalam format yang bisa ditampilkan
@@ -115,6 +137,28 @@ def index():
 @app.route('/video_feed')
 def video_feed():
     return Response(generate_video(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/video_frontal')
+def video_frontal():
+    return Response(frontal_video(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/debug_video')
+def debug_video():
+    connection = get_db_connection()
+    if connection is None:
+        return "Error connecting to the database.", 500
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT berkas FROM materi WHERE id = 1')
+            path = cursor.fetchone()  
+            if path:
+                path = path['berkas']
+            else:
+                path = None 
+            konten = "debug"       
+    finally:
+        connection.close()  # Pastikan koneksi ditutup setelah selesai
+    return render_template('home.html', konten=konten, video=path)
 
 @app.route('/home')
 def home():

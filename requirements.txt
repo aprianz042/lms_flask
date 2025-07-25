@@ -4,3 +4,5 @@ tf-keras
 flask
 deepface
 pymysql
+mediapipe
+scikit-image
