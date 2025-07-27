@@ -26,10 +26,16 @@
         <!-- .content -->
         {% if konten == 'video' %}
             {% include 'modules/video.html' %}
+            
         {% elif konten == 'add_user' %}
             {% include 'action/add_user.html' %} 
+        {% elif konten == 'add_kelas' %}
+            {% include 'action/add_kelas.html' %} 
         {% elif konten == 'add_content' %}
             {% include 'action/add_content.html' %}
+        {% elif konten == 'add_pengajar' %}
+            {% include 'action/add_pengajar.html' %}
+
         {% elif konten == 'debug' %}
             {% include 'modules/debug.html' %}    
         {% else %}
