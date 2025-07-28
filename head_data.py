@@ -145,8 +145,8 @@ def data_wajah(img):
                 
             # Cek mata kanan
             if eyes_ratio_kanan < EAR_THRESHOLD:
-                status_mata_kanan = "Tertutup"
-                arah_mata_kanan = "Tertutup"
+                status_mata_kanan = "tertutup"
+                arah_mata_kanan = "tertutup"
             else:
                 deteksi_mata_kanan = eye_cascade.detectMultiScale(right_eye_roi, scaleFactor=scaleFactor, minNeighbors=minNeighbors, minSize=minSize)
                 jumlah_deteksi_mata_kanan = len(deteksi_mata_kanan)
@@ -154,24 +154,24 @@ def data_wajah(img):
                     deteksi_mata_kanan = eye_cascade_r.detectMultiScale(right_eye_roi, scaleFactor=scaleFactor, minNeighbors=minNeighbors, minSize=minSize)
                     jumlah_deteksi_mata_kanan = len(deteksi_mata_kanan)        
                 if jumlah_deteksi_mata_kanan > 0:
-                    status_mata_kanan = "Terbuka"
+                    status_mata_kanan = "terbuka"
                     ###################################### Arah Mata ########################################
                     ratio_mata_kanan = ratio_horizontal(poin_pupil_kanan[0], poin_batas_mata_kanan_right[0], poin_batas_mata_kanan_left[0])
                     if ratio_mata_kanan < 0.4:
-                        arah_mata_kanan = "Kanan"
+                        arah_mata_kanan = "kanan"
                     elif ratio_mata_kanan > 0.6:
-                        arah_mata_kanan = "Kiri"
+                        arah_mata_kanan = "kiri"
                     else:
-                        arah_mata_kanan = "Tengah"
+                        arah_mata_kanan = "tengah"
                     ########################################################################################
                 else:
-                    status_mata_kanan = "Tertutup_objek"
-                    arah_mata_kanan = "Tertutup_objek"
+                    status_mata_kanan = "tertutup_objek"
+                    arah_mata_kanan = "tertutup_objek"
                 
             # Cek mata kiri
             if eyes_ratio_kiri < EAR_THRESHOLD:
-                status_mata_kiri = "Tertutup"
-                arah_mata_kiri = "Tertutup"
+                status_mata_kiri = "tertutup"
+                arah_mata_kiri = "tertutup"
             else:
                 deteksi_mata_kiri = eye_cascade.detectMultiScale(left_eye_roi, scaleFactor=scaleFactor, minNeighbors=minNeighbors, minSize=minSize)
                 jumlah_deteksi_mata_kiri = len(deteksi_mata_kiri)
@@ -179,19 +179,19 @@ def data_wajah(img):
                     deteksi_mata_kiri = eye_cascade_l.detectMultiScale(left_eye_roi, scaleFactor=scaleFactor, minNeighbors=minNeighbors, minSize=minSize)
                     jumlah_deteksi_mata_kiri = len(deteksi_mata_kiri)
                 if jumlah_deteksi_mata_kiri > 0:
-                    status_mata_kiri = "Terbuka"
+                    status_mata_kiri = "terbuka"
                     ###################################### Arah Mata ########################################
                     ratio_mata_kiri = ratio_horizontal(poin_pupil_kiri[0], poin_batas_mata_kiri_left[0], poin_batas_mata_kiri_right[0])
                     if ratio_mata_kiri < 0.4:
-                        arah_mata_kiri = "Kiri"
+                        arah_mata_kiri = "kiri"
                     elif ratio_mata_kiri > 0.6:
-                        arah_mata_kiri = "Kanan"
+                        arah_mata_kiri = "kanan"
                     else:
-                        arah_mata_kiri = "Tengah"
+                        arah_mata_kiri = "tengah"
                     ########################################################################################
                 else:
-                    status_mata_kiri = "Tertutup_objek"
-                    arah_mata_kiri = "Tertutup_objek"
+                    status_mata_kiri = "tertutup_objek"
+                    arah_mata_kiri = "tertutup_objek"
     
             for idx in LEFT_EYE_IDX:
                 x, y = int(landmarks[idx].x * frame_w), int(landmarks[idx].y * frame_h)
@@ -205,29 +205,40 @@ def data_wajah(img):
             ######################################## Head pose ######################################        
             # Hitung headpose horizontal
             headpose = ratio_horizontal(poin_atas_hidung[0], poin_batas_mata_kanan_right[0], poin_batas_mata_kiri_left[0])
-            
+            print(headpose)
+
             if headpose < 0.4:
-                arah_kepala = "Kanan"
+                arah_kepala = "kanan"
+                if status_mata_kiri == "terbuka":
+                    arah_mata = arah_mata_kiri
+                else:
+                    arah_mata = "tertutup"
+
             elif headpose > 0.6:
-                arah_kepala = "Kiri"
+                arah_kepala = "kiri"
+                if status_mata_kanan == "terbuka":
+                    arah_mata = arah_mata_kanan
+                else:
+                    arah_mata = "tertutup"
+            
             else:
-                arah_kepala = "Tengah"
+                arah_kepala = "tengah"
+                if status_mata_kiri == "terbuka":
+                    arah_mata = arah_mata_kiri
+                elif status_mata_kanan == "terbuka":
+                    arah_mata = arah_mata_kanan
+                else:
+                    arah_mata = "tertutup"
 
             gaze_ = {
                 "face_detected": True,
-                "status_mata_kanan": status_mata_kanan,
-                "status_mata_kiri": status_mata_kiri,
-                "arah_mata_kanan": arah_mata_kanan,
-                "arah_mata_kiri": arah_mata_kiri,
+                "arah_mata": arah_mata,
                 "arah_kepala": arah_kepala
             }
         else:
             gaze_ = {
                 "face_detected": False,
-                "status_mata_kanan": "Error",
-                "status_mata_kiri": "Error",
-                "arah_mata_kanan": "Error",
-                "arah_mata_kiri": "Error",
+                "arah_mata": "Error",
                 "arah_kepala": "Error"
             }
     return gaze_

@@ -83,21 +83,19 @@ def generate_video():
         #cv2.putText(frame, f"Emotion: {dominant_emotion}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
         data_ = data_wajah(frame)
-        status_mata_kanan = data_["status_mata_kanan"]
-        status_mata_kiri = data_["status_mata_kiri"]
-        arah_mata_kanan = data_["arah_mata_kanan"]
-        arah_mata_kiri = data_["arah_mata_kiri"]
-        arah_kepala = data_["arah_kepala"]
-        cv2.putText(frame, f"s_mata kanan: {status_mata_kanan}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-        cv2.putText(frame, f"s_mata kiri: {status_mata_kiri}", (50, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-        cv2.putText(frame, f"mata kanan: {arah_mata_kanan}", (50, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-        cv2.putText(frame, f"mata kiri: {arah_mata_kiri}", (50, 140), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-        cv2.putText(frame, f"arah_kepala: {arah_kepala}", (50, 170), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        face_detected = data_["face_detected"]
+        if face_detected == True:
+            arah_mata = data_["arah_mata"]
+            arah_kepala = data_["arah_kepala"]
+            cv2.putText(frame, f"arah_mata: {arah_mata}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            cv2.putText(frame, f"arah_kepala: {arah_kepala}", (50, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        else:
+            cv2.putText(frame, f"Tidak ada wajah terdeteksi", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
-        frontal = half_flip(frame)
+        #frontal = half_flip(frame)
         
         # Encode frame sebagai JPEG
-        _, jpeg = cv2.imencode('.jpg', frontal)
+        _, jpeg = cv2.imencode('.jpg', frame)
         frame_bytes = jpeg.tobytes()
 
         # Hasilkan frame dalam format yang bisa ditampilkan
