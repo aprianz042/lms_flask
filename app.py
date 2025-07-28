@@ -10,6 +10,7 @@ import random
 import string
 from datetime import datetime
 from frontal import half_flip
+from head_data import data_wajah
 
 app = Flask(__name__)
 
@@ -78,14 +79,25 @@ def generate_video():
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
         # Analisis emosi menggunakan DeepFace
-        dominant_emotion = analyze_emotion(frame)
+        #dominant_emotion = analyze_emotion(frame)
+        #cv2.putText(frame, f"Emotion: {dominant_emotion}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
-        # Tulis teks emosi di frame
-        cv2.putText(frame, f"Emotion: {dominant_emotion}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        data_ = data_wajah(frame)
+        status_mata_kanan = data_["status_mata_kanan"]
+        status_mata_kiri = data_["status_mata_kiri"]
+        arah_mata_kanan = data_["arah_mata_kanan"]
+        arah_mata_kiri = data_["arah_mata_kiri"]
+        arah_kepala = data_["arah_kepala"]
+        cv2.putText(frame, f"s_mata kanan: {status_mata_kanan}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(frame, f"s_mata kiri: {status_mata_kiri}", (50, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(frame, f"mata kanan: {arah_mata_kanan}", (50, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(frame, f"mata kiri: {arah_mata_kiri}", (50, 140), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(frame, f"arah_kepala: {arah_kepala}", (50, 170), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
         frontal = half_flip(frame)
+        
         # Encode frame sebagai JPEG
-        _, jpeg = cv2.imencode('.jpg', frame)
+        _, jpeg = cv2.imencode('.jpg', frontal)
         frame_bytes = jpeg.tobytes()
 
         # Hasilkan frame dalam format yang bisa ditampilkan

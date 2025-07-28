@@ -403,10 +403,7 @@ def images_warping(data_wajah, data_landmark_src, data_landmark_dst):
     
 ############################################## Main Function ##########################################################################################
 def half_flip(img):  
-    
-    #images = cv2.imread(img)                                  # baca input image
     images = img   
-
     img_h, img_w, _ = images.shape 
     
     if img_h < 500:
@@ -416,9 +413,8 @@ def half_flip(img):
         new_width = int(new_height * aspect_ratio)
         images = cv2.resize(images, (new_width, new_height))      # resize tinggi image ke ukuran baru
     
-    img_ori = images.copy()                                   # img_ori = gambar asli
-    img_roll = correct_roll(img_ori)                          # img_roll = headpose yang sudah di luruskan (yang diproses selanjutnya)
-    img_r = img_roll.copy()                                   # img_roll yang tidak di proses (untuk visualisasi)
+    img_roll = correct_roll(images)                          # img_roll = headpose yang sudah di luruskan (yang diproses selanjutnya)
+    img_r = img_roll.copy()                                  # img_roll yang tidak di proses (untuk visualisasi)
     img_rr = img_roll.copy()
     img_rr = blurring_hand(img_rr)
       
@@ -449,9 +445,9 @@ def half_flip(img):
         ######################## landmarking full wajah - START #######################################################################################
         poin_wajah_full = list_poin_wajah(dua_D)
         wajah_full_masked = masking_img(img_roll, poin_wajah_full, 'putih')
-        warpp_full = images_warping(img_r, poin_wajah_full, poin_wajah_full)
-        face_ori = potong_area_(warpp_full, poin_wajah_full)
-        face_ori = cv2.resize(face_ori, (224, 224))
+        #warpp_full = images_warping(img_r, poin_wajah_full, poin_wajah_full)
+        #face_ori = potong_area_(warpp_full, poin_wajah_full)
+        #face_ori = cv2.resize(face_ori, (224, 224))
         ######################## END - landmarking full wajah #########################################################################################
             
         
@@ -472,28 +468,27 @@ def half_flip(img):
         ######################## Combine Wajah & Hand - START #########################################################################################
         # jika ada objek tangan, maka digabung dengan wajah
         if combine_face_hand == 'True':       
-            target_shape = (hand_masked.shape[1], hand_masked.shape[0])   
-
-            if wajah_full_masked.shape != hand_masked_[0].shape:
-                wajah_full_masked = cv2.resize(wajah_full_masked, target_shape)
+            #target_shape = (hand_masked.shape[1], hand_masked.shape[0])   
+            #if wajah_full_masked.shape != hand_masked_[0].shape:
+            #    wajah_full_masked = cv2.resize(wajah_full_masked, target_shape)
             
             mask_hand_full = np.any(hand_masked != [0, 0, 0], axis=-1)
-            hasil_full = wajah_full_masked.copy()
+            hasil_full = wajah_full_masked
             hasil_full[mask_hand_full] = hand_masked[mask_hand_full]
             
             mask_hand_kanan = np.any(hand_masked != [0, 0, 0], axis=-1)
-            hasil_kanan = face_kanan_masked.copy()
+            hasil_kanan = face_kanan_masked
             hasil_kanan[mask_hand_kanan] = hand_masked[mask_hand_kanan]
     
             mask_hand_kiri = np.any(hand_masked != [0, 0, 0], axis=-1)    # Mask area non-hitam dari hand_masked
             
-            hasil_kiri = face_kiri_masked.copy()                          # hasil_kanan = tangan kanan dan wajah kanan
+            #hasil_kiri = face_kiri_masked.copy()                          # hasil_kanan = tangan kanan dan wajah kanan
             hasil_kiri[mask_hand_kiri] = hand_masked[mask_hand_kiri]      # hasil_kiri = tangan kiri dan wajah kanan
         
         # jika tidak ada objek tangan langsung pakai gambar marking wajah kiri kanan
         else:                              
-            hasil_kanan = face_kanan_masked.copy()                        # hasil_kiri = tangan kiri dan wajah kanan               
-            hasil_kiri = face_kiri_masked.copy()                          # hasil_kiri = tangan kiri dan wajah kanan                
+            hasil_kanan = face_kanan_masked                        # hasil_kiri = tangan kiri dan wajah kanan               
+            hasil_kiri = face_kiri_masked                          # hasil_kiri = tangan kiri dan wajah kanan                
         ######################## END - Combine Wajah & Hand ###########################################################################################
         
         ######################## warping wajah asli kanan - START #####################################################################################                            
@@ -528,7 +523,3 @@ def half_flip(img):
    
     return flip_output
     ######################## END - Proses Wajah ######################################################################################################
-
-
-#img = 'images/img (6).jpg'
-#output_image = half_flip(img)
