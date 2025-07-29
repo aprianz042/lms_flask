@@ -10,6 +10,7 @@ from datetime import datetime
 from frontal import half_flip
 from head_data import data_wajah
 from video_process import generate_video, frontal_video
+from stopCam import stop_
 
 app = Flask(__name__)
 
@@ -35,6 +36,7 @@ def get_db_connection():
 # Route untuk menampilkan semua data user dan materi
 @app.route('/data')
 def data():
+    stop_()
     connection = get_db_connection()
     if connection is None:
         return "Error connecting to the database.", 500  # Mengembalikan error jika koneksi gagal
@@ -67,6 +69,7 @@ def analyze_emotion(frame):
 # Route utama untuk halaman web
 @app.route('/')
 def index():
+    stop_()
     connection = get_db_connection()
     if connection is None:
         return "Error connecting to the database.", 500
@@ -116,11 +119,13 @@ def home():
 
 @app.route('/add_user')
 def add_user():
+    stop_()
     konten = "add_user"
     return render_template('home.html', konten=konten)
 
 @app.route('/add_kelas')
 def add_kelas():
+    stop_()
     konten = "add_kelas"
     connection = get_db_connection()
     if connection is None:
@@ -135,6 +140,7 @@ def add_kelas():
 
 @app.route('/add_content')
 def add_content():
+    stop_()
     konten = "add_content"
     connection = get_db_connection()
     if connection is None:
@@ -158,6 +164,7 @@ def add_content():
 
 @app.route('/add_pengajar')
 def add_pengajar():
+    stop_()
     konten = "add_pengajar"
     connection = get_db_connection()
     if connection is None:
@@ -178,6 +185,7 @@ def md5_hash(password):
 # Endpoint untuk menambah data
 @app.route('/insert_user', methods=['POST'])
 def add_record_user():
+    stop_()
     # Ambil data dari request JSON
     data = request.get_json()
     
@@ -207,6 +215,7 @@ def add_record_user():
 
 @app.route('/insert_kelas', methods=['POST'])
 def add_record_kelas():
+    stop_()
     # Ambil data dari request JSON
     data = request.get_json()
     nama_kelas = data.get('nama_kelas')
@@ -241,6 +250,7 @@ def add_record_kelas():
 
 @app.route('/insert_pengajar', methods=['POST'])
 def add_record_pengajar():
+    stop_()
     # Ambil data dari request JSON
     data = request.get_json()
     
@@ -308,6 +318,7 @@ def generate_filename(extension):
 
 @app.route('/insert_content', methods=['POST'])
 def add_record_content():
+    stop_()
     # Ambil data dari request form
     data = request.form  # Mengambil data form, bukan JSON karena ada file
     
