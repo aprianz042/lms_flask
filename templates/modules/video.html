@@ -45,7 +45,12 @@
         <button id="startBtn" class="btn btn-primary">Start</button>
         <button id="pauseBtn" class="btn btn-warning" style="display:none;">Pause</button>
         <button id="replayBtn" class="btn btn-success" style="display:none;">Replay</button>
+
+        <p id="wajah"> </p>
+        <p id="arah_mata">Arah Mata: </p>
+        <p id="arah_kepala">Arah Kepala: </p>
     </div>    
+    
 
 </div>
 
@@ -111,3 +116,17 @@
     pauseBtn.style.display = 'none'; // Hide pause button initially
     replayBtn.style.display = 'none'; // Hide replay button initially
 </script>
+
+<script>
+    const eventSource = new EventSource('/sse');
+
+    eventSource.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+
+        // Memperbarui UI dengan arah mata dan arah kepala
+        document.getElementById("wajah").textContent = "Face Detected: " + data.face_detected;
+        document.getElementById("arah_mata").textContent = "Arah Mata: " + data.arah_mata;
+        document.getElementById("arah_kepala").textContent = "Arah Kepala: " + data.arah_kepala;
+    };
+</script>
+

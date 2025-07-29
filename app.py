@@ -1,5 +1,6 @@
 import os
 from flask import Flask, flash, render_template, Response, request, jsonify, redirect, url_for
+from flask import Response as FlaskResponse
 from deepface import DeepFace
 import pymysql
 import hashlib
@@ -11,6 +12,8 @@ from frontal import half_flip
 from head_data import data_wajah
 from video_process import generate_video, frontal_video
 from stopCam import stop_
+import time
+import json
 
 app = Flask(__name__)
 
@@ -90,6 +93,16 @@ def index():
 @app.route('/video_feed')
 def video_feed():
     return Response(generate_video(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/sse')
+def sse():
+    def event_stream():
+        for data in generate_video():
+            # Ambil data dari video stream dan kirimkan ke HTML dalam format JSON
+            yield data
+            time.sleep(0.1)  # Menunggu sebentar sebelum mengirim data berikutnya
+    
+    return FlaskResponse(event_stream(), mimetype='text/event-stream')
 
 @app.route('/video_frontal')
 def video_frontal():
@@ -406,4 +419,4 @@ def hapus(id):
     return redirect(url_for('add_content'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, threaded=True)
