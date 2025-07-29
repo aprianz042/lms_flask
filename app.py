@@ -14,10 +14,10 @@ from video_process import generate_video, frontal_video
 app = Flask(__name__)
 
 # Konfigurasi koneksi MySQL menggunakan PyMySQL
-host = 'ipdnkalbar.ac.id'
-user = 'u1049330_tesis'
-password = 'kodokloncat'
-database = 'u1049330_tesis'
+host = os.getenv('DB_HOST')
+user = os.getenv('DB_USER')
+password = os.getenv('DB_PASSWORD')
+database = os.getenv('DB_DATABASE')
 
 # Fungsi untuk mendapatkan koneksi ke database MySQL dengan penanganan kesalahan
 def get_db_connection():
