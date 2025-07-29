@@ -72,7 +72,7 @@ def index():
         return "Error connecting to the database.", 500
     try:
         with connection.cursor() as cursor:
-            cursor.execute('SELECT berkas FROM materi WHERE id = 4')
+            cursor.execute('SELECT berkas FROM materi WHERE id = 6')
             path = cursor.fetchone()  
             if path:
                 path = path['berkas']

@@ -1,7 +1,7 @@
 <div class="content mt-3">
 
     <div class="col-sm-12">
-        <div class="alert  alert-success alert-dismissible fade show" role="alert">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
             <span class="badge badge-pill badge-success">Camera Access Required</span> Facial Expression Recognition.
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
@@ -9,9 +9,8 @@
         </div>
     </div>
 
-    <div class="col-lg-9">
-        <!--<video width="100%" height="100%" controls autoplay>-->
-        <video width="100%" height="100%" controls>
+    <div class="col-lg-9">    
+        <video id="videoPlayer" width="100%" height="100%">
             {% if video %}
                 <source src="{{ url_for('static', filename='materi/' + video) }}" type="video/mp4">
             {% else %}
@@ -22,7 +21,93 @@
     </div>
 
     <div class="col-lg-3">
-        <img src="{{ url_for('video_feed') }}" width="100%" height="auto" />
+        <!-- Video Feed, initially hidden -->
+        <img id="videoFeed" src="{{ url_for('video_feed') }}" width="100%" height="auto" style="display:none;" />
+
+        <!-- Progress Bar to indicate completion (hidden initially) -->
+        <div id="progressWrapper" style="display:none; margin: 10px 0px 10px 0px;">
+            <div id="progressBar" style="width: 100%; background-color: #f3f3f3; height: 20px; border-radius: 5px;">
+                <div id="progress" style="width: 0%; height: 100%; background-color: green; border-radius: 5px;"></div>
+            </div>
+        </div>
+    
+        <!-- Video selesai message -->
+        <div id="videoCompleteMessage" style="display:none; margin: 10px 0px 10px 0px;">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <span class="badge badge-pill badge-success">Video Selesai</span>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Start, Pause, and Replay buttons -->
+        <button id="startBtn" class="btn btn-primary">Start</button>
+        <button id="pauseBtn" class="btn btn-warning" style="display:none;">Pause</button>
+        <button id="replayBtn" class="btn btn-success" style="display:none;">Replay</button>
     </div>    
 
 </div>
+
+<script>
+    // Get the video player and buttons
+    var video = document.getElementById('videoPlayer');
+    var startBtn = document.getElementById('startBtn');
+    var pauseBtn = document.getElementById('pauseBtn');
+    var replayBtn = document.getElementById('replayBtn');
+    var progressWrapper = document.getElementById('progressWrapper');
+    var progressBar = document.getElementById('progress');
+    var videoCompleteMessage = document.getElementById('videoCompleteMessage');
+    var videoFeed = document.getElementById('videoFeed');  // Video feed element
+
+    // Start button functionality
+    startBtn.addEventListener('click', function() {
+        video.play();
+        startBtn.style.display = 'none'; // Hide start button when video is playing
+        pauseBtn.style.display = 'block'; // Show pause button when video is playing
+        progressWrapper.style.display = 'block'; // Show progress bar when video starts
+        progressBar.style.width = '0%'; // Reset progress bar to 0% initially
+        videoCompleteMessage.style.display = 'none'; // Hide "Video Selesai" message initially
+        videoFeed.style.display = 'block'; // Show video feed when playing
+    });
+
+    // Pause button functionality
+    pauseBtn.addEventListener('click', function() {
+        video.pause();
+        startBtn.style.display = 'block'; // Show start button when video is paused
+        pauseBtn.style.display = 'none'; // Hide pause button when video is paused
+    });
+
+    // Replay button functionality
+    replayBtn.addEventListener('click', function() {
+        video.currentTime = 0; // Reset video to the beginning
+        video.play(); // Play the video
+        startBtn.style.display = 'none'; // Hide start button when video is playing
+        pauseBtn.style.display = 'block'; // Show pause button when video is playing
+        progressWrapper.style.display = 'block'; // Show progress bar when video starts
+        progressBar.style.width = '0%'; // Reset progress bar to 0% initially
+        videoCompleteMessage.style.display = 'none'; // Hide "Video Selesai" message initially
+        replayBtn.style.display = 'none'; // Hide replay button after it's clicked
+        videoFeed.style.display = 'block'; // Show video feed when replaying
+    });
+
+    // Event listener to track video progress
+    video.addEventListener('timeupdate', function() {
+        var progress = (video.currentTime / video.duration) * 100; // Calculate progress percentage
+        progressBar.style.width = progress + '%'; // Update progress bar width as the video plays
+    });
+
+    // Check if the video has ended
+    video.addEventListener('ended', function() {
+        startBtn.style.display = 'none'; // Hide start button after video ends
+        pauseBtn.style.display = 'none'; // Hide pause button after video ends
+        replayBtn.style.display = 'block'; // Show replay button after video ends
+        progressWrapper.style.display = 'none'; // Hide progress bar after video ends
+        videoCompleteMessage.style.display = 'block'; // Show "Video Selesai" message after video ends
+        videoFeed.style.display = 'none'; // Hide video feed after video ends
+    });
+
+    // Initially disable the pause button
+    pauseBtn.style.display = 'none'; // Hide pause button initially
+    replayBtn.style.display = 'none'; // Hide replay button initially
+</script>
