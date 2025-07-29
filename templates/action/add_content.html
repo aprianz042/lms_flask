@@ -107,7 +107,47 @@
                     <div class="row form-group">
                         <div class="col col-md-3"><label for="matkul" class=" form-control-label">Mata Kuliah</label></div>
                         <div class="col-12 col-md-9">
-                            <input type="text" id="matkul" name="matkul" placeholder="Mata Kuliah ..." class="form-control" required>
+                            <select name="matkul" id="matkul" class="form-control" required>
+                                <option value="0">Pilih Mata Kuliah ...</option>
+                                {% for matkul in matkul %}
+                                <option value="{{ matkul.id_mata_kuliah }}">{{ matkul.nama_mata_kuliah }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_kelas" class=" form-control-label">Mata Kuliah</label></div>
+                        <div class="col-12 col-md-9">
+                            <select name="id_kelas" id="id_kelas" class="form-control" required>
+                                <option value="0">Pilih Kelas ...</option>
+                                {% for kelas in kelas %}
+                                <option value="{{ kelas.id_kelas }}">{{ kelas.nama_kelas }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="tahun_ajaran" class=" form-control-label">Tahun Ajaran</label></div>
+                        <div class="col-12 col-md-9">
+                            <select name="tahun_ajaran" id="tahun_ajaran" class="form-control" required>
+                                <option value="0">Pilih Tahun Ajaran ...</option>
+                                <option value="2024/2025" default>2024/2025</option>
+                                <option value="2025/2026">2025/2026</option>
+                                <option value="2026/2027">2026/2027</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="semester" class=" form-control-label">Semester</label></div>
+                        <div class="col-12 col-md-9">
+                            <select name="semester" id="semester" class="form-control" required>
+                                <option value="0">Pilih Tahun Ajaran ...</option>
+                                <option value="ganjil">Ganjil</option>
+                                <option value="genap">Genap</option>
+                            </select>
                         </div>
                     </div>
 
@@ -155,9 +195,14 @@
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_pengampu" class=" form-control-label">Dosen / Pelatih</label></div>
+                        <div class="col col-md-3"><label for="id_pengampu" class=" form-control-label">Pengampu</label></div>
                         <div class="col-12 col-md-9">
-                            <input type="text" id="id_pengampu" name="id_pengampu" placeholder="Dosen / Pelatih Pengampu ..." class="form-control" required>
+                            <select name="id_pengampu" id="id_pengampu" class="form-control" required>
+                                <option value="0">Pilih Pengampu ...</option>
+                                {% for pengajar in pengajar %}
+                                <option value="{{ pengajar.id_pengajar }}">{{ pengajar.nama_pengajar }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
                 </form>
@@ -198,8 +243,11 @@
         event.preventDefault();  // Mencegah form agar tidak mengarah ke halaman lain
 
         // Ambil data dari formulir
-        const mata_kuliah = document.getElementById('matkul').value;
-        const judul = document.getElementById('materi').value;
+        const id_mata_kuliah = document.getElementById('matkul').value;
+        const id_kelas = document.getElementById('id_kelas').value;
+        const tahun_ajaran = document.getElementById('tahun_ajaran').value;
+        const semester = document.getElementById('semester').value;
+        const judul_materi = document.getElementById('materi').value;
         const jenis = document.getElementById('jenis').value;
         const deskripsi = document.getElementById('deskripsi').value;
         const kategori = document.getElementById('kategori').value;
@@ -230,8 +278,11 @@
 
         // Buat FormData untuk mengirim data termasuk file
         let formData = new FormData();
-        formData.append("mata_kuliah", mata_kuliah);
-        formData.append("judul", judul);
+        formData.append("mata_kuliah", id_mata_kuliah);
+        formData.append("kelas", id_kelas);
+        formData.append("tahun_ajaran", tahun_ajaran);
+        formData.append("semester", semester);
+        formData.append("judul", judul_materi);
         formData.append("jenis", jenis);
         formData.append("deskripsi", deskripsi);
         formData.append("kategori", kategori);

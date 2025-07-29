@@ -1,6 +1,4 @@
 import os
-import cv2
-import numpy as np
 from flask import Flask, flash, render_template, Response, request, jsonify, redirect, url_for
 from deepface import DeepFace
 import pymysql
@@ -11,6 +9,7 @@ import string
 from datetime import datetime
 from frontal import half_flip
 from head_data import data_wajah
+from video_process import generate_video, frontal_video
 
 app = Flask(__name__)
 
@@ -65,65 +64,6 @@ def analyze_emotion(frame):
     except Exception as e:
         return "Error in analysis"
 
-# Fungsi untuk menangani video stream
-def generate_video():
-    # Inisialisasi webcam
-    cap = cv2.VideoCapture(0)  # 0 berarti webcam default
-
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
-
-        # Ubah frame ke format yang bisa ditampilkan di HTML
-        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-        # Analisis emosi menggunakan DeepFace
-        #dominant_emotion = analyze_emotion(frame)
-        #cv2.putText(frame, f"Emotion: {dominant_emotion}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-
-        data_ = data_wajah(frame)
-        face_detected = data_["face_detected"]
-        if face_detected == True:
-            arah_mata = data_["arah_mata"]
-            arah_kepala = data_["arah_kepala"]
-            cv2.putText(frame, f"arah_mata: {arah_mata}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-            cv2.putText(frame, f"arah_kepala: {arah_kepala}", (50, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-        else:
-            cv2.putText(frame, f"Tidak ada wajah terdeteksi", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-
-        #frontal = half_flip(frame)
-        
-        # Encode frame sebagai JPEG
-        _, jpeg = cv2.imencode('.jpg', frame)
-        frame_bytes = jpeg.tobytes()
-
-        # Hasilkan frame dalam format yang bisa ditampilkan
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n\r\n')
-
-    cap.release()
-
-def frontal_video():
-    # Inisialisasi webcam
-    cap = cv2.VideoCapture(0)  # 0 berarti webcam default
-
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
-
-        frontal = half_flip(frame)
-        # Encode frame sebagai JPEG
-        _, jpeg = cv2.imencode('.jpg', frontal)
-        frame_bytes = jpeg.tobytes()
-
-        # Hasilkan frame dalam format yang bisa ditampilkan
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n\r\n')
-
-    cap.release()
-
 # Route utama untuk halaman web
 @app.route('/')
 def index():
@@ -132,7 +72,7 @@ def index():
         return "Error connecting to the database.", 500
     try:
         with connection.cursor() as cursor:
-            cursor.execute('SELECT berkas FROM materi WHERE id = 1')
+            cursor.execute('SELECT berkas FROM materi WHERE id = 2')
             path = cursor.fetchone()  
             if path:
                 path = path['berkas']
@@ -203,9 +143,18 @@ def add_content():
         with connection.cursor() as cursor:
             cursor.execute('SELECT * FROM materi')
             materi = cursor.fetchall() 
+
+            cursor.execute('SELECT * FROM mata_kuliah')
+            matkul = cursor.fetchall() 
+
+            cursor.execute('SELECT * FROM pengajar WHERE kategori = "dosen" ')
+            pengajar = cursor.fetchall()
+
+            cursor.execute('SELECT * FROM kelas')
+            kelas = cursor.fetchall() 
     finally:
         connection.close() 
-    return render_template('home.html', materi=materi, konten=konten)
+    return render_template('home.html', materi=materi, konten=konten, matkul=matkul, pengajar=pengajar, kelas=kelas)
 
 @app.route('/add_pengajar')
 def add_pengajar():
@@ -361,8 +310,12 @@ def generate_filename(extension):
 def add_record_content():
     # Ambil data dari request form
     data = request.form  # Mengambil data form, bukan JSON karena ada file
-    mata_kuliah = data.get('mata_kuliah')
-    judul = data.get('judul')
+    
+    id_mata_kuliah = data.get('mata_kuliah')
+    id_kelas =  data.get('kelas')
+    tahun_ajaran = data.get('tahun_ajaran')
+    semester = data.get('semester')
+    judul_materi = data.get('judul')
     jenis = data.get('jenis')
     deskripsi = data.get('deskripsi')
     kategori = data.get('kategori')
@@ -370,14 +323,11 @@ def add_record_content():
     berkas = request.files['berkas']  # Ambil file dari input "berkas"
 
     # Validasi input
-    if jenis == "0" or kategori == "0":
+    if jenis == "0" or kategori == "0" or id_pengampu == "0" or id_mata_kuliah == "0":
         return jsonify({"error": "Jenis dan Kategori tidak boleh kosong"}), 400
 
     if not berkas:
         return jsonify({"error": "Berkas tidak boleh kosong"}), 400
-
-    if not mata_kuliah or not judul or not deskripsi or not id_pengampu:
-        return jsonify({"error": "Semua field (Mata Kuliah, Judul, Deskripsi, Dosen/Pelatih) harus diisi"}), 400
 
     # Periksa ekstensi file
     if not allowed_file(berkas.filename):
@@ -401,11 +351,11 @@ def add_record_content():
     try:
         with connection.cursor() as cursor:
             sql = """
-                INSERT INTO materi (mata_kuliah, judul, jenis, deskripsi, kategori, berkas, id_pengampu)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO materi (id_mata_kuliah, id_kelas, tahun_ajaran, semester, judul_materi, jenis, deskripsi, kategori, berkas, id_pengampu)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             # Menyimpan nama file yang diupload ke database
-            cursor.execute(sql, (mata_kuliah, judul, jenis, deskripsi, kategori, filename, id_pengampu))
+            cursor.execute(sql, (id_mata_kuliah, id_kelas, tahun_ajaran, semester ,judul_materi, jenis, deskripsi, kategori, berkas, id_pengampu))
             connection.commit()
         return jsonify({"message": "Record inserted successfully"}), 201
     except Exception as e:

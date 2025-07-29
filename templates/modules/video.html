@@ -13,7 +13,7 @@
         <!--<video width="100%" height="100%" controls autoplay>-->
         <video width="100%" height="100%" controls>
             {% if video %}
-                <source src="{{ url_for('static', filename='uploads/' + video) }}" type="video/mp4">
+                <source src="{{ url_for('static', filename='materi/' + video) }}" type="video/mp4">
             {% else %}
                 <p>No video found.</p>
             {% endif %}
