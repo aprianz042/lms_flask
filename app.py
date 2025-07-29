@@ -72,7 +72,7 @@ def index():
         return "Error connecting to the database.", 500
     try:
         with connection.cursor() as cursor:
-            cursor.execute('SELECT berkas FROM materi WHERE id = 2')
+            cursor.execute('SELECT berkas FROM materi WHERE id = 4')
             path = cursor.fetchone()  
             if path:
                 path = path['berkas']
@@ -355,7 +355,7 @@ def add_record_content():
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             # Menyimpan nama file yang diupload ke database
-            cursor.execute(sql, (id_mata_kuliah, id_kelas, tahun_ajaran, semester ,judul_materi, jenis, deskripsi, kategori, berkas, id_pengampu))
+            cursor.execute(sql, (id_mata_kuliah, id_kelas, tahun_ajaran, semester ,judul_materi, jenis, deskripsi, kategori, filename, id_pengampu))
             connection.commit()
         return jsonify({"message": "Record inserted successfully"}), 201
     except Exception as e:

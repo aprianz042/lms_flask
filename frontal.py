@@ -55,7 +55,7 @@ def landmark_wajah(face):
     annotated_image = face
     results = face_mesh.process(cv2.cvtColor(face, cv2.COLOR_BGR2RGB))
     if not results.multi_face_landmarks:
-        stat = 'gagal'
+        stat = None
         return annotated_image, stat
     else:
         for face_landmarks in results.multi_face_landmarks:
@@ -93,7 +93,8 @@ def correct_roll(image):
     results = face_mesh.process(img_rgb)
     if not results.multi_face_landmarks:
         print('Wajah tidak ditemukan!')
-        return image
+        detected = False
+        return image, detected
     for face_landmarks in results.multi_face_landmarks:
         left_eye = np.array([face_landmarks.landmark[33].x * w, face_landmarks.landmark[33].y * h])
         right_eye = np.array([face_landmarks.landmark[263].x * w, face_landmarks.landmark[263].y * h])
@@ -102,7 +103,8 @@ def correct_roll(image):
         center = (w // 2, h // 2)
         M = cv2.getRotationMatrix2D(center, angle, 1)
         corrected_image = cv2.warpAffine(image, M, (w, h))
-        return corrected_image
+        detected = True
+        return corrected_image, detected
 
 def compute_yaw_angle(points):
     NOSE_IDX = 1  # Landmark hidung (pusat wajah)
@@ -413,113 +415,118 @@ def half_flip(img):
         new_width = int(new_height * aspect_ratio)
         images = cv2.resize(images, (new_width, new_height))      # resize tinggi image ke ukuran baru
     
-    img_roll = correct_roll(images)                          # img_roll = headpose yang sudah di luruskan (yang diproses selanjutnya)
-    img_r = img_roll.copy()                                  # img_roll yang tidak di proses (untuk visualisasi)
-    img_rr = img_roll.copy()
-    img_rr = blurring_hand(img_rr)
-      
-    img_height, img_width, _ = img_roll.shape 
-    
-    ######################## Proses Landmarking Tangan - START ########################################################################################
-    _, list_hand = landmark_tangan(img_roll)          # proses landmarking tangan
-    sum_of_hand = len(list_hand)
-    if sum_of_hand > 0:                                    # jika tangan terdeteksi hanya 1
-        hand_masked = masking_tangan_canvas_hitam(img_roll)
-        hand_masked_ = hand_masked
-        combine_face_hand = 'True'
-    else:                                                     # jika tidak ada tangan terdeteksi, maka tidak ada proses landmarking tangan
-        combine_face_hand = False                             # tidak ada proses penggabungan dengan wajah 
-    ######################## END - Proses Landmarking Tangan ##########################################################################################
+    img_roll, face_detected = correct_roll(images)                          # img_roll = headpose yang sudah di luruskan (yang diproses selanjutnya)
+    if face_detected == True:
+        img_r = img_roll.copy()                                  # img_roll yang tidak di proses (untuk visualisasi)
+        img_rr = img_roll.copy()
+        img_rr = blurring_hand(img_rr)
+        
+        img_height, img_width, _ = img_roll.shape 
+        
+        ######################## Proses Landmarking Tangan - START ########################################################################################
+        _, list_hand = landmark_tangan(img_roll)          # proses landmarking tangan
+        sum_of_hand = len(list_hand)
+        if sum_of_hand > 0:                                    # jika tangan terdeteksi hanya 1
+            hand_masked = masking_tangan_canvas_hitam(img_roll)
+            hand_masked_ = hand_masked
+            combine_face_hand = 'True'
+        else:                                                     # jika tidak ada tangan terdeteksi, maka tidak ada proses landmarking tangan
+            combine_face_hand = False                             # tidak ada proses penggabungan dengan wajah 
+        ######################## END - Proses Landmarking Tangan ##########################################################################################
 
-    ######################## Proses Wajah - START #####################################################################################################
-    _, landmark_face = landmark_wajah(img_roll)      # proses landmarking wajah dari gambar yang sudah corect roll (img_roll)
-    if len(landmark_face) == 0:                               # jika landmark == 0 atau tidak ada wajah terdeteksi maka proses selesai
-        return images
+        ######################## Proses Wajah - START #####################################################################################################
+        _, landmark_face = landmark_wajah(img_roll)      # proses landmarking wajah dari gambar yang sudah corect roll (img_roll)
+        #if len(landmark_face) == 0:                               # jika landmark == 0 atau tidak ada wajah terdeteksi maka proses selesai
+        #    return images
+        #else:
+        if landmark_face:
+            dua_D = []                                            # proses mengkonversi koordinat landmark (x,y,z) dari 3D menjadi 2D
+            for i in range(len(landmark_face)):
+                ix = int(landmark_face[i].x * img_width)
+                iy = int(landmark_face[i].y * img_height)
+                dua_D.append([ix, iy])                            # dud_D = koordinat wajah 2D
+
+            ######################## landmarking full wajah - START #######################################################################################
+            poin_wajah_full = list_poin_wajah(dua_D)
+            wajah_full_masked = masking_img(img_roll, poin_wajah_full, 'putih')
+            #warpp_full = images_warping(img_r, poin_wajah_full, poin_wajah_full)
+            #face_ori = potong_area_(warpp_full, poin_wajah_full)
+            #face_ori = cv2.resize(face_ori, (224, 224))
+            ######################## END - landmarking full wajah #########################################################################################
+                
+            
+            ######################## landmarking wajah kiri - START #######################################################################################
+            poin_wajah_kiri = wajah_kiri(dua_D)
+            face_kiri_masked = masking_img(img_roll, poin_wajah_kiri, 'putih')
+            landmark_warp_kiri = warp_poin(poin_wajah_kiri)                # proses warping poin objek mask putih tengah wajah
+            ######################## END - landmarking wajah kiri #########################################################################################
+            
+            
+            ######################## landmarking wajah kanan - START ######################################################################################
+            poin_wajah_kanan = wajah_kanan(dua_D)
+            face_kanan_masked = masking_img(img_roll, poin_wajah_kanan, 'putih')
+            landmark_warp_kanan = warp_poin(poin_wajah_kanan)              # proses warping poin objek mask putih tengah wajah
+            ######################## END - landmarking wajah kanan ########################################################################################
+
+
+            ######################## Combine Wajah & Hand - START #########################################################################################
+            # jika ada objek tangan, maka digabung dengan wajah
+            if combine_face_hand == 'True':       
+                #target_shape = (hand_masked.shape[1], hand_masked.shape[0])   
+                #if wajah_full_masked.shape != hand_masked_[0].shape:
+                #    wajah_full_masked = cv2.resize(wajah_full_masked, target_shape)
+                
+                mask_hand_full = np.any(hand_masked != [0, 0, 0], axis=-1)
+                hasil_full = wajah_full_masked
+                hasil_full[mask_hand_full] = hand_masked[mask_hand_full]
+                
+                mask_hand_kanan = np.any(hand_masked != [0, 0, 0], axis=-1)
+                hasil_kanan = face_kanan_masked
+                hasil_kanan[mask_hand_kanan] = hand_masked[mask_hand_kanan]
+        
+                mask_hand_kiri = np.any(hand_masked != [0, 0, 0], axis=-1)    # Mask area non-hitam dari hand_masked
+                
+                hasil_kiri = face_kiri_masked                         # hasil_kanan = tangan kanan dan wajah kanan
+                hasil_kiri[mask_hand_kiri] = hand_masked[mask_hand_kiri]      # hasil_kiri = tangan kiri dan wajah kanan
+            
+            # jika tidak ada objek tangan langsung pakai gambar marking wajah kiri kanan
+            else:                              
+                hasil_kanan = face_kanan_masked                        # hasil_kiri = tangan kiri dan wajah kanan               
+                hasil_kiri = face_kiri_masked                          # hasil_kiri = tangan kiri dan wajah kanan                
+            ######################## END - Combine Wajah & Hand ###########################################################################################
+            
+            ######################## warping wajah asli kanan - START #####################################################################################                            
+            landmark_warp_kanan = warp_poin(poin_wajah_kanan)
+            warpp_kanan = images_warping(img_rr, poin_wajah_kanan, landmark_warp_kanan)
+            ######################## END - warping wajah asli kanan #######################################################################################
+            
+            ######################## warping wajah asli kiri - START ######################################################################################
+            landmark_warp_kiri = warp_poin(poin_wajah_kiri)
+            warpp_kiri = images_warping(img_rr, poin_wajah_kiri, landmark_warp_kiri)
+            ######################## END - warping wajah asli kiri ########################################################################################
+            
+            ######################## proses membandingkan luas wajah kanan dan kiri  - START ##############################################################
+            luas_kiri = luas_wajah(hasil_kiri)
+            luas_kanan = luas_wajah(hasil_kanan)
+            if luas_kiri > luas_kanan:                                        # jika lebih luas kiri maka bagian kiri wajah yang dipakai
+                half_face = warpp_kiri
+                half_face = potong_area_(half_face, landmark_warp_kiri)       # proses memotong hanya bagian wajah
+                flip_image = cv2.flip(half_face, 1)                           # flip wajah
+                combine = np.concatenate((half_face, flip_image), axis=1)     # gabungkan wajah kanan kiri            
+            else:                                                             # jika lebih luas kanan maka bagian kanan wajah yang dipakai
+                half_face = warpp_kanan
+                half_face = potong_area_(half_face, landmark_warp_kanan)      # proses memotong hanya bagian wajah
+                flip_image = cv2.flip(half_face, 1)                           # flip wajah
+                combine = np.concatenate((flip_image, half_face), axis=1)     # gabungkan wajah kanan kanan
+            ######################## END - proses membandingkan luas wajah kanan dan kiri #################################################################
+
+            ######################## proses resize & save - START #########################################################################################
+            flip_output = combine                                             # flip_output = output proses wajah
+            flip_output = cv2.resize(flip_output, (224, 224))                 # resize gambar wajah output
+            ######################## END - proses resize & save ##########################################################################################
+            return flip_output
+    ######################## END - Proses Wajah ######################################################################################################    
+        else:
+            return images    
     else:
-        dua_D = []                                            # proses mengkonversi koordinat landmark (x,y,z) dari 3D menjadi 2D
-        for i in range(len(landmark_face)):
-            ix = int(landmark_face[i].x * img_width)
-            iy = int(landmark_face[i].y * img_height)
-            dua_D.append([ix, iy])                            # dud_D = koordinat wajah 2D
-
-        ######################## landmarking full wajah - START #######################################################################################
-        poin_wajah_full = list_poin_wajah(dua_D)
-        wajah_full_masked = masking_img(img_roll, poin_wajah_full, 'putih')
-        #warpp_full = images_warping(img_r, poin_wajah_full, poin_wajah_full)
-        #face_ori = potong_area_(warpp_full, poin_wajah_full)
-        #face_ori = cv2.resize(face_ori, (224, 224))
-        ######################## END - landmarking full wajah #########################################################################################
-            
-        
-        ######################## landmarking wajah kiri - START #######################################################################################
-        poin_wajah_kiri = wajah_kiri(dua_D)
-        face_kiri_masked = masking_img(img_roll, poin_wajah_kiri, 'putih')
-        landmark_warp_kiri = warp_poin(poin_wajah_kiri)                # proses warping poin objek mask putih tengah wajah
-        ######################## END - landmarking wajah kiri #########################################################################################
-        
-        
-        ######################## landmarking wajah kanan - START ######################################################################################
-        poin_wajah_kanan = wajah_kanan(dua_D)
-        face_kanan_masked = masking_img(img_roll, poin_wajah_kanan, 'putih')
-        landmark_warp_kanan = warp_poin(poin_wajah_kanan)              # proses warping poin objek mask putih tengah wajah
-        ######################## END - landmarking wajah kanan ########################################################################################
-
-
-        ######################## Combine Wajah & Hand - START #########################################################################################
-        # jika ada objek tangan, maka digabung dengan wajah
-        if combine_face_hand == 'True':       
-            #target_shape = (hand_masked.shape[1], hand_masked.shape[0])   
-            #if wajah_full_masked.shape != hand_masked_[0].shape:
-            #    wajah_full_masked = cv2.resize(wajah_full_masked, target_shape)
-            
-            mask_hand_full = np.any(hand_masked != [0, 0, 0], axis=-1)
-            hasil_full = wajah_full_masked
-            hasil_full[mask_hand_full] = hand_masked[mask_hand_full]
-            
-            mask_hand_kanan = np.any(hand_masked != [0, 0, 0], axis=-1)
-            hasil_kanan = face_kanan_masked
-            hasil_kanan[mask_hand_kanan] = hand_masked[mask_hand_kanan]
-    
-            mask_hand_kiri = np.any(hand_masked != [0, 0, 0], axis=-1)    # Mask area non-hitam dari hand_masked
-            
-            #hasil_kiri = face_kiri_masked.copy()                          # hasil_kanan = tangan kanan dan wajah kanan
-            hasil_kiri[mask_hand_kiri] = hand_masked[mask_hand_kiri]      # hasil_kiri = tangan kiri dan wajah kanan
-        
-        # jika tidak ada objek tangan langsung pakai gambar marking wajah kiri kanan
-        else:                              
-            hasil_kanan = face_kanan_masked                        # hasil_kiri = tangan kiri dan wajah kanan               
-            hasil_kiri = face_kiri_masked                          # hasil_kiri = tangan kiri dan wajah kanan                
-        ######################## END - Combine Wajah & Hand ###########################################################################################
-        
-        ######################## warping wajah asli kanan - START #####################################################################################                            
-        landmark_warp_kanan = warp_poin(poin_wajah_kanan)
-        warpp_kanan = images_warping(img_rr, poin_wajah_kanan, landmark_warp_kanan)
-        ######################## END - warping wajah asli kanan #######################################################################################
-        
-        ######################## warping wajah asli kiri - START ######################################################################################
-        landmark_warp_kiri = warp_poin(poin_wajah_kiri)
-        warpp_kiri = images_warping(img_rr, poin_wajah_kiri, landmark_warp_kiri)
-        ######################## END - warping wajah asli kiri ########################################################################################
-        
-        ######################## proses membandingkan luas wajah kanan dan kiri  - START ##############################################################
-        luas_kiri = luas_wajah(hasil_kiri)
-        luas_kanan = luas_wajah(hasil_kanan)
-        if luas_kiri > luas_kanan:                                        # jika lebih luas kiri maka bagian kiri wajah yang dipakai
-            half_face = warpp_kiri
-            half_face = potong_area_(half_face, landmark_warp_kiri)       # proses memotong hanya bagian wajah
-            flip_image = cv2.flip(half_face, 1)                           # flip wajah
-            combine = np.concatenate((half_face, flip_image), axis=1)     # gabungkan wajah kanan kiri            
-        else:                                                             # jika lebih luas kanan maka bagian kanan wajah yang dipakai
-            half_face = warpp_kanan
-            half_face = potong_area_(half_face, landmark_warp_kanan)      # proses memotong hanya bagian wajah
-            flip_image = cv2.flip(half_face, 1)                           # flip wajah
-            combine = np.concatenate((flip_image, half_face), axis=1)     # gabungkan wajah kanan kanan
-        ######################## END - proses membandingkan luas wajah kanan dan kiri #################################################################
-
-        ######################## proses resize & save - START #########################################################################################
-        flip_output = combine                                             # flip_output = output proses wajah
-        flip_output = cv2.resize(flip_output, (224, 224))                 # resize gambar wajah output
-        ######################## END - proses resize & save ##########################################################################################
-   
-    return flip_output
-    ######################## END - Proses Wajah ######################################################################################################
+        return images
