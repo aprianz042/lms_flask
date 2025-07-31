@@ -3,6 +3,7 @@ opencv-python
 tensorflow
 tf-keras
 flask
+flask-socketio
 deepface
 pymysql
 mediapipe

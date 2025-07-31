@@ -23,7 +23,7 @@
     <div class="col-lg-3">
         <!-- Video Feed, initially hidden -->
         <img id="videoFeed" src="{{ url_for('video_feed') }}" width="100%" height="auto" style="display:none;" />
-
+        
         <!-- Progress Bar to indicate completion (hidden initially) -->
         <div id="progressWrapper" style="display:none; margin: 10px 0px 10px 0px;">
             <div id="progressBar" style="width: 100%; background-color: #f3f3f3; height: 20px; border-radius: 5px;">
@@ -54,79 +54,101 @@
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
 <script>
-    // Get the video player and buttons
-    var video = document.getElementById('videoPlayer');
-    var startBtn = document.getElementById('startBtn');
-    var pauseBtn = document.getElementById('pauseBtn');
-    var replayBtn = document.getElementById('replayBtn');
-    var progressWrapper = document.getElementById('progressWrapper');
-    var progressBar = document.getElementById('progress');
-    var videoCompleteMessage = document.getElementById('videoCompleteMessage');
-    var videoFeed = document.getElementById('videoFeed');  // Video feed element
+    window.onload = function() {
+        // Get the video player and buttons
+        var video = document.getElementById('videoPlayer');
+        var startBtn = document.getElementById('startBtn');
+        var pauseBtn = document.getElementById('pauseBtn');
+        var replayBtn = document.getElementById('replayBtn');
+        var progressWrapper = document.getElementById('progressWrapper');
+        var progressBar = document.getElementById('progress');
+        var videoCompleteMessage = document.getElementById('videoCompleteMessage');
+        var videoFeed = document.getElementById('videoFeed');  // Video feed element
 
-    // Start button functionality
-    startBtn.addEventListener('click', function() {
-        video.play();
-        startBtn.style.display = 'none'; // Hide start button when video is playing
-        pauseBtn.style.display = 'block'; // Show pause button when video is playing
-        progressWrapper.style.display = 'block'; // Show progress bar when video starts
-        progressBar.style.width = '0%'; // Reset progress bar to 0% initially
-        videoCompleteMessage.style.display = 'none'; // Hide "Video Selesai" message initially
-        videoFeed.style.display = 'block'; // Show video feed when playing
-    });
+        var status_wajah = document.getElementById('wajah');
+        var arah_mata = document.getElementById('arah_mata');
+        var arah_kepala = document.getElementById('arah_kepala');
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
 
-    // Pause button functionality
-    pauseBtn.addEventListener('click', function() {
-        video.pause();
-        startBtn.style.display = 'block'; // Show start button when video is paused
-        pauseBtn.style.display = 'none'; // Hide pause button when video is paused
-    });
+        // Debugging: Memeriksa status koneksi socket.io
+        //socket.on('connect', function() {
+        //    console.log("SocketIO Terhubung!");
+        //});
 
-    // Replay button functionality
-    replayBtn.addEventListener('click', function() {
-        video.currentTime = 0; // Reset video to the beginning
-        video.play(); // Play the video
-        startBtn.style.display = 'none'; // Hide start button when video is playing
-        pauseBtn.style.display = 'block'; // Show pause button when video is playing
-        progressWrapper.style.display = 'block'; // Show progress bar when video starts
-        progressBar.style.width = '0%'; // Reset progress bar to 0% initially
-        videoCompleteMessage.style.display = 'none'; // Hide "Video Selesai" message initially
-        replayBtn.style.display = 'none'; // Hide replay button after it's clicked
-        videoFeed.style.display = 'block'; // Show video feed when replaying
-    });
+        //socket.on('disconnect', function() {
+        //    console.log("SocketIO Terputus!");
+        //});
 
-    // Event listener to track video progress
-    video.addEventListener('timeupdate', function() {
-        var progress = (video.currentTime / video.duration) * 100; // Calculate progress percentage
-        progressBar.style.width = progress + '%'; // Update progress bar width as the video plays
-    });
+        // Mendengarkan event 'analisis_wajah' dari backend
+        socket.on('analisis_wajah', function (data) {
+            //console.log("Data yang diterima:", data); 
+            //console.log("Data wajah:", data.face_detected);
+            if (data.face_detected == true) {
+                status_wajah.textContent = "Face detected";  
+            }
+            else{
+                status_wajah.textContent = "Face not detected";  
+            }
 
-    // Check if the video has ended
-    video.addEventListener('ended', function() {
-        startBtn.style.display = 'none'; // Hide start button after video ends
-        pauseBtn.style.display = 'none'; // Hide pause button after video ends
-        replayBtn.style.display = 'block'; // Show replay button after video ends
-        progressWrapper.style.display = 'none'; // Hide progress bar after video ends
-        videoCompleteMessage.style.display = 'block'; // Show "Video Selesai" message after video ends
-        videoFeed.style.display = 'none'; // Hide video feed after video ends
-    });
+            if (data.arah_mata) {
+                arah_mata.textContent = "Arah Mata: " + data.arah_mata;  // Tampilkan arah mata
+            }
+            if (data.arah_kepala) {
+                arah_kepala.textContent = "Arah Kepala: " + data.arah_kepala;  // Tampilkan arah kepala
+            }
+        });
 
-    // Initially disable the pause button
-    pauseBtn.style.display = 'none'; // Hide pause button initially
-    replayBtn.style.display = 'none'; // Hide replay button initially
-</script>
+        // Start button functionality
+        startBtn.addEventListener('click', function() {
+            video.play();
+            startBtn.style.display = 'none'; // Hide start button when video is playing
+            pauseBtn.style.display = 'block'; // Show pause button when video is playing
+            progressWrapper.style.display = 'block'; // Show progress bar when video starts
+            progressBar.style.width = '0%'; // Reset progress bar to 0% initially
+            videoCompleteMessage.style.display = 'none'; // Hide "Video Selesai" message initially
+            videoFeed.style.display = 'block'; // Show video feed when playing
+        });
 
-<script>
-    const eventSource = new EventSource('/sse');
+        // Pause button functionality
+        pauseBtn.addEventListener('click', function() {
+            video.pause();
+            startBtn.style.display = 'block'; // Show start button when video is paused
+            pauseBtn.style.display = 'none'; // Hide pause button when video is paused
+        });
 
-    eventSource.onmessage = function(event) {
-        const data = JSON.parse(event.data);
+        // Replay button functionality
+        replayBtn.addEventListener('click', function() {
+            video.currentTime = 0; // Reset video to the beginning
+            video.play(); // Play the video
+            startBtn.style.display = 'none'; // Hide start button when video is playing
+            pauseBtn.style.display = 'block'; // Show pause button when video is playing
+            progressWrapper.style.display = 'block'; // Show progress bar when video starts
+            progressBar.style.width = '0%'; // Reset progress bar to 0% initially
+            videoCompleteMessage.style.display = 'none'; // Hide "Video Selesai" message initially
+            replayBtn.style.display = 'none'; // Hide replay button after it's clicked
+            videoFeed.style.display = 'block'; // Show video feed when replaying
+        });
 
-        // Memperbarui UI dengan arah mata dan arah kepala
-        document.getElementById("wajah").textContent = "Face Detected: " + data.face_detected;
-        document.getElementById("arah_mata").textContent = "Arah Mata: " + data.arah_mata;
-        document.getElementById("arah_kepala").textContent = "Arah Kepala: " + data.arah_kepala;
+        // Event listener to track video progress
+        video.addEventListener('timeupdate', function() {
+            var progress = (video.currentTime / video.duration) * 100; // Calculate progress percentage
+            progressBar.style.width = progress + '%'; // Update progress bar width as the video plays
+        });
+
+        // Check if the video has ended
+        video.addEventListener('ended', function() {
+            startBtn.style.display = 'none'; // Hide start button after video ends
+            pauseBtn.style.display = 'none'; // Hide pause button after video ends
+            replayBtn.style.display = 'block'; // Show replay button after video ends
+            progressWrapper.style.display = 'none'; // Hide progress bar after video ends
+            videoCompleteMessage.style.display = 'block'; // Show "Video Selesai" message after video ends
+            videoFeed.style.display = 'none'; // Hide video feed after video ends
+        });
+
+        // Initially disable the pause button
+        pauseBtn.style.display = 'none'; // Hide pause button initially
+        replayBtn.style.display = 'none'; // Hide replay button initially
     };
 </script>
-

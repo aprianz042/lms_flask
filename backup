@@ -1,0 +1,85 @@
+# Route untuk menangani video stream
+@app.route('/video_feed')
+def video_feed():
+    return Response(generate_video(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/sse')
+def sse():
+    def event_stream():
+        for data in generate_video():
+            yield data
+            time.sleep(0.1)
+    return Response(event_stream(), mimetype='text/event-stream')
+
+
+
+
+
+=================
+
+
+import cv2
+import json
+import threading
+import queue
+from function.head_data import data_wajah
+
+# Variabel global untuk menyimpan hasil analisis
+frame_queue = queue.Queue()  # Menampung frame video
+data_queue = queue.Queue()  # Menampung data wajah
+
+def video_stream(cap):
+    """Proses video dan kirimkan frame per frame."""
+
+    ret, frame = cap.read()
+
+    # Encode frame sebagai JPEG
+    _, jpeg = cv2.imencode('.jpg', frame)
+    frame_bytes = jpeg.tobytes()
+
+    # Simpan frame ke dalam queue
+    frame_queue.put(frame_bytes)
+
+def face_data_processing(cap):
+    """Proses data wajah (arah_mata, arah_kepala) per frame."""
+
+    ret, frame = cap.read()
+
+    data_ = data_wajah(frame)
+    face_detected = data_["face_detected"]
+    arah_mata = data_["arah_mata"]
+    arah_kepala = data_["arah_kepala"]
+
+    # Mengemas data menjadi JSON
+    data = json.dumps({"face_detected": face_detected, "arah_mata": arah_mata, "arah_kepala": arah_kepala})
+
+    # Simpan data ke dalam queue
+    data_queue.put(data)
+
+def generate_video():
+    cap = cv2.VideoCapture(0)  # Menggunakan kamera default
+
+    # Membuat dua thread untuk video stream dan pemrosesan data wajah
+    video_thread = threading.Thread(target=video_stream, args=(cap,))
+    data_thread = threading.Thread(target=face_data_processing, args=(cap,))
+
+    # Mulai kedua thread
+    video_thread.start()
+    data_thread.start()
+
+    # Tunggu sampai kedua thread selesai
+    video_thread.join()
+    data_thread.join()
+
+    cap.release()
+
+    # Mengirimkan video dan data secara terpisah
+    while True:
+        if not frame_queue.empty() and not data_queue.empty():
+            frame = frame_queue.get()
+            data = data_queue.get()
+
+            # Kirim video dan data dalam format yang benar
+            yield f"data: {data}\n\n"  # Mengirimkan data wajah ke SSE
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')  # Mengirimkan frame video
