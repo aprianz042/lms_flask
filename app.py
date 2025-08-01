@@ -1,48 +1,84 @@
 import os
-import pymysql
 import hashlib
 import random
 import string
-import time
-import json
-import cv2
+import base64
 
-from flask import Flask, flash, render_template, Response, request, jsonify, redirect, url_for
+from io import BytesIO
+from PIL import Image
+from flask import Flask, flash, render_template, Response, request, session, jsonify, redirect, url_for, send_file
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_socketio import SocketIO, emit
+
 from werkzeug.utils import secure_filename
 from datetime import datetime
+from deepface import DeepFace
 
+from function.koneksi import get_db_connection
 from function.frontal import half_flip
 from function.head_data import data_wajah
-from function.video_process import generate_video, frontal_video
+from function.video_process import generate_video, frontal_video, proses_img
 from function.stopCam import stop_
-
-from deepface import DeepFace
 
 app = Flask(__name__)
 socketio = SocketIO(app)
 
-host = os.getenv('DB_HOST')
-user = os.getenv('DB_USER')
-password = os.getenv('DB_PASSWORD')
-database = os.getenv('DB_DATABASE')
+app.secret_key = base64.b64encode(os.urandom(24)).decode('utf-8')
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "login"  # Atau bisa menggunakan app.config['LOGIN_VIEW'] = 'login'
+
+
+users = {'admin': {'password': 'admin123'}}
+
+# Membuat User class untuk Flask-Login
+class User(UserMixin):
+    def __init__(self, id):
+        self.id = id
 
 #global cap
 #cap = cv2.VideoCapture(0)
 #if not cap:
 #    cap.release()
 
-def get_db_connection():
-    try:
-        connection = pymysql.connect(host=host,
-                                       user=user,
-                                       password=password,
-                                       database=database,
-                                       cursorclass=pymysql.cursors.DictCursor)
-        return connection
-    except pymysql.MySQLError as e:
-        print(f"Error connecting to MySQL: {e}")
-        return None
+# Loader untuk Flask-Login
+@login_manager.user_loader
+def load_user(user_id):
+    return User(user_id)
+
+# Halaman login
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        # Verifikasi username dan password
+        if username in users and users[username]['password'] == password:
+            user = User(username)
+            login_user(user)
+            session['user_id'] = username  # Menyimpan session
+            return redirect(url_for('home'))
+        else:
+            return "Login gagal. Username atau password salah."
+
+    return render_template('login.html')
+
+
+# Halaman logout
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    session.pop('user_id', None)  # Menghapus session
+    return redirect(url_for('login'))
+
+
+# Event untuk menerima gambar dan memprosesnya
+@socketio.on('images')
+def handle_image(data):
+    proses_img(data)    
 
 @app.route('/data')
 def data():
@@ -64,6 +100,14 @@ def data():
 # Route utama untuk halaman web
 @app.route('/')
 def index():
+    if 'user_id' in session:
+        return redirect(url_for('home'))
+    else:
+        return redirect(url_for('login'))
+
+@app.route('/home')
+@login_required
+def home():
     connection = get_db_connection()
     if connection is None:
         return "Error connecting to the database.", 500
@@ -78,7 +122,8 @@ def index():
             konten = "video"       
     finally:
         connection.close() 
-    return render_template('home.html', konten=konten, video=path)
+    return render_template('home.html', konten=konten, video=path, username=current_user.id)
+
 
 # Route untuk menangani video stream
 @app.route('/video_feed')
@@ -107,9 +152,7 @@ def debug_video():
         connection.close()  # Pastikan koneksi ditutup setelah selesai
     return render_template('home.html', konten=konten, video=path)
 
-@app.route('/home')
-def home():
-    return render_template('home.html')
+
 
 @app.route('/add_user')
 def add_user():

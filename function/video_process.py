@@ -1,9 +1,9 @@
 import cv2
-import json
-import threading
-import queue
 import base64
+import numpy as np
 
+from io import BytesIO
+from PIL import Image
 from flask_socketio import SocketIO, emit
 from function.head_data import data_wajah
 from function.frontal import half_flip
@@ -64,3 +64,42 @@ def analyze_emotion(frame):
         return dominant_emotion
     except Exception as e:
         return "Error in analysis"
+    
+def proses_img(data):
+    # Data diterima dari klien dalam format base64
+    img_data = base64.b64decode(data.split(',')[1])  # Mengambil bagian base64 setelah koma
+    
+    # Membaca image menggunakan OpenCV
+    img = Image.open(BytesIO(img_data))
+    img = np.array(img)
+
+    data_ = data_wajah(img)
+    face_detected = data_["face_detected"]
+    if face_detected == True:
+        arah_mata = data_["arah_mata"]
+        arah_kepala = data_["arah_kepala"]
+        
+    else:
+        arah_mata = "Not Detected"
+        arah_kepala = "Not Detected"
+    
+    data = {
+        "face_detected": face_detected,
+        "arah_mata": arah_mata,
+        "arah_kepala": arah_kepala
+        }
+    
+    emit('analisis_wajah', data)
+
+
+def proses_video(data):
+    img_data = base64.b64decode(data.split(',')[1])  # Mengambil bagian base64 setelah koma    
+    img = Image.open(BytesIO(img_data))
+    img = np.array(img)
+    
+    gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    _, buffer = cv2.imencode('.png', gray_img)
+    gray_img_base64 = base64.b64encode(buffer).decode('utf-8')
+
+    emit('image_response', f"data:image/png;base64,{gray_img_base64}")

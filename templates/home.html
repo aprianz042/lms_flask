@@ -36,6 +36,9 @@
         {% elif konten == 'add_pengajar' %}
             {% include 'action/add_pengajar.html' %}
 
+        {% elif konten == 'debug_web' %}
+            {% include 'modules/webcam.html' %} 
+
         {% elif konten == 'debug' %}
             {% include 'modules/debug.html' %}    
         {% else %}

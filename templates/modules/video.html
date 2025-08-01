@@ -22,7 +22,8 @@
 
     <div class="col-lg-3">
         <!-- Video Feed, initially hidden -->
-        <img id="videoFeed" src="{{ url_for('video_feed') }}" width="100%" height="auto" style="display:none;" />
+        <!-- <img id="videoFeed" src="{{ url_for('video_feed') }}" width="100%" height="auto" style="display:none;" /> -->
+        <video id="videoElement" width="100%" height="auto" autoplay></video>
         
         <!-- Progress Bar to indicate completion (hidden initially) -->
         <div id="progressWrapper" style="display:none; margin: 10px 0px 10px 0px;">
@@ -50,11 +51,10 @@
         <p id="arah_mata">Arah Mata: </p>
         <p id="arah_kepala">Arah Kepala: </p>
     </div>    
-    
-
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script> -->
 <script>
     window.onload = function() {
         // Get the video player and buttons
@@ -66,39 +66,6 @@
         var progressBar = document.getElementById('progress');
         var videoCompleteMessage = document.getElementById('videoCompleteMessage');
         var videoFeed = document.getElementById('videoFeed');  // Video feed element
-
-        var status_wajah = document.getElementById('wajah');
-        var arah_mata = document.getElementById('arah_mata');
-        var arah_kepala = document.getElementById('arah_kepala');
-        var socket = io.connect('http://' + document.domain + ':' + location.port);
-
-        // Debugging: Memeriksa status koneksi socket.io
-        //socket.on('connect', function() {
-        //    console.log("SocketIO Terhubung!");
-        //});
-
-        //socket.on('disconnect', function() {
-        //    console.log("SocketIO Terputus!");
-        //});
-
-        // Mendengarkan event 'analisis_wajah' dari backend
-        socket.on('analisis_wajah', function (data) {
-            //console.log("Data yang diterima:", data); 
-            //console.log("Data wajah:", data.face_detected);
-            if (data.face_detected == true) {
-                status_wajah.textContent = "Face detected";  
-            }
-            else{
-                status_wajah.textContent = "Face not detected";  
-            }
-
-            if (data.arah_mata) {
-                arah_mata.textContent = "Arah Mata: " + data.arah_mata;  // Tampilkan arah mata
-            }
-            if (data.arah_kepala) {
-                arah_kepala.textContent = "Arah Kepala: " + data.arah_kepala;  // Tampilkan arah kepala
-            }
-        });
 
         // Start button functionality
         startBtn.addEventListener('click', function() {
@@ -151,4 +118,39 @@
         pauseBtn.style.display = 'none'; // Hide pause button initially
         replayBtn.style.display = 'none'; // Hide replay button initially
     };
+</script>
+
+ <script>
+    const socket = io(); // connect to the server
+    const videos = document.getElementById('videoElement');
+
+    // Akses webcam
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function(stream) {
+            videos.srcObject = stream;
+        })
+        .catch(function(error) {
+            console.log("Error accessing webcam: ", error);
+        });
+
+    // Mengambil gambar dari video dan mengirim ke server
+    function sendFrameToServer() {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = videos.videoWidth;
+        canvas.height = videos.videoHeight;
+        context.drawImage(videos, 0, 0, canvas.width, canvas.height);
+        const imageData = canvas.toDataURL('image/png'); // Konversi canvas ke base64
+        socket.emit('images', imageData); // Kirim gambar ke server
+    }
+
+    // Menerima data hasil analisis wajah dari server
+    socket.on('analisis_wajah', function(data) {
+        document.getElementById('wajah').innerText = 'Face Detected: ' + data.face_detected;
+        document.getElementById('arah_mata').innerText = 'Arah Mata: ' + data.arah_mata;
+        document.getElementById('arah_kepala').innerText = 'Arah Kepala: ' + data.arah_kepala;
+    });
+
+    // Kirim frame setiap 500ms
+    setInterval(sendFrameToServer, 200);
 </script>

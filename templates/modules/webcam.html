@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webcam to Flask</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>Webcam Stream to Flask</h1>
+    <video id="videoElement" width="320" height="240" style="display: none;" autoplay></video>
+    <canvas id="canvas" width="640" height="480" style="display: none;"></canvas>
+    <img id="outputImage" width="640" height="480"/>
+
+    <script>
+        const socket = io(); // connect to the server
+        const video = document.getElementById('videoElement');
+        const canvas = document.getElementById('canvas');
+        const outputImage = document.getElementById('outputImage');
+        const context = canvas.getContext('2d');
+
+        // Akses webcam
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(stream) {
+                video.srcObject = stream;
+            })
+            .catch(function(error) {
+                console.log("Error accessing webcam: ", error);
+            });
+
+        // Mengambil gambar dari video dan mengirim ke server
+        function sendFrameToServer() {
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = canvas.toDataURL('image/png'); // Konversi canvas ke base64
+            socket.emit('image', imageData); // Kirim gambar ke server
+        }
+
+        // Menerima gambar yang sudah diproses dari server
+        socket.on('image_response', function(data) {
+            outputImage.src = data; // Set gambar yang sudah diproses ke elemen img
+        });
+
+        // Kirim frame setiap 100ms
+        setInterval(sendFrameToServer, 200);
+    </script>
+</body>
+</html>
