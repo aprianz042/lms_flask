@@ -37,11 +37,6 @@ class User(UserMixin):
     def __init__(self, id):
         self.id = id
 
-#global cap
-#cap = cv2.VideoCapture(0)
-#if not cap:
-#    cap.release()
-
 # Loader untuk Flask-Login
 @login_manager.user_loader
 def load_user(user_id):
