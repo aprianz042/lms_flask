@@ -12,7 +12,6 @@ from flask_socketio import SocketIO, emit
 
 from werkzeug.utils import secure_filename
 from datetime import datetime
-from deepface import DeepFace
 
 from function.koneksi import get_db_connection
 from function.frontal import half_flip
@@ -27,48 +26,99 @@ app.secret_key = base64.b64encode(os.urandom(24)).decode('utf-8')
 
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = "login"  # Atau bisa menggunakan app.config['LOGIN_VIEW'] = 'login'
+login_manager.login_view = "login" 
 
-
-users = {'admin': {'password': 'admin123'}}
-
-# Membuat User class untuk Flask-Login
 class User(UserMixin):
-    def __init__(self, id):
+    def __init__(self, id, nama, user_id, level):
         self.id = id
+        self.nama = nama
+        self.user_id = user_id 
+        self.level = level
 
-# Loader untuk Flask-Login
 @login_manager.user_loader
-def load_user(user_id):
-    return User(user_id)
+def load_user(id_user):
+    connection = get_db_connection()
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT * FROM user WHERE id = %s', (id_user,))
+        user = cursor.fetchone()
+        connection.close()
+        if user:
+            return User(user['id'], user['nama'], user['no_id'], user['level'])
+        else:
+            cursor.execute('SELECT * FROM pengajar WHERE id_pengajar = %s', (id_user,))
+            pengajar = cursor.fetchone()
+            connection.close()
+            if pengajar:
+                return User(pengajar['id_pengajar'], pengajar['nama_pengajar'], pengajar['nip'], pengajar['kategori'])
+            else:
+                cursor.execute('SELECT * FROM mahasiswa WHERE id_mahasiswa = %s', (id_user,))
+                mhs = cursor.fetchone()
+                connection.close()
+                if mhs:
+                    return User(mhs['id_mahasiswa'], mhs['nama_mahasiswa'], mhs['nim'], "mahasiswa") 
+    return None
 
-# Halaman login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
 
-        # Verifikasi username dan password
-        if username in users and users[username]['password'] == password:
-            user = User(username)
-            login_user(user)
-            session['user_id'] = username  # Menyimpan session
-            return redirect(url_for('home'))
-        else:
-            return "Login gagal. Username atau password salah."
+        # Cek password dengan hash untuk keamanan
+        password_hash = md5_hash(password)
+
+        # Koneksi ke database untuk verifikasi username dan password
+        connection = get_db_connection()
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT * FROM user WHERE no_id = %s AND pass = %s', (username, password_hash))
+            user = cursor.fetchone()
+            connection.close()
+            if user:
+                user_obj = User(user['id'], user['nama'], user['no_id'], user['level'])
+                login_user(user_obj)
+                session['id'] = user['id']
+                session['user_id'] = user['no_id']  
+                session['nama'] = user['nama'] 
+                session['level'] = user['level'] 
+                return redirect(url_for('home'))
+            else:
+                cursor.execute('SELECT * FROM pengajar WHERE nip = %s AND password = %s', (username, password_hash))
+                pengajar = cursor.fetchone()
+                connection.close()
+                if pengajar:
+                    user_obj = User(pengajar['id_pengajar'], pengajar['nama_pengajar'], pengajar['nip'], pengajar['kategori'])
+                    login_user(user_obj)
+                    session['id'] = pengajar['id_pengajar']
+                    session['user_id'] = pengajar['nip']  
+                    session['nama'] = pengajar['nama_pengajar'] 
+                    session['level'] = pengajar['kategori'] 
+                    return redirect(url_for('home'))
+                else:
+                    cursor.execute('SELECT * FROM mahasiswa WHERE nim = %s AND password = %s', (username, password_hash))
+                    mhs = cursor.fetchone()
+                    connection.close()
+                    if mhs:
+                        user_obj = User(mhs['id_mahasiswa'], mhs['nama_mahasiswa'], mhs['nim'], "mahasiswa")
+                        login_user(user_obj)
+                        session['id'] = mhs['id_mahasiswa']
+                        session['user_id'] = mhs['nim']  
+                        session['nama'] = mhs['nama_mahasiswa'] 
+                        session['level'] = "mahasiswa" 
+                        return redirect(url_for('home'))
+                    else:
+                        return "Login gagal. Username atau password salah."
 
     return render_template('login.html')
 
-
-# Halaman logout
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
-    session.pop('user_id', None)  # Menghapus session
+    session.pop('id', None) 
+    session.pop('nama', None) 
+    session.pop('user_id', None) 
+    session.pop('level', None)   
     return redirect(url_for('login'))
-
 
 # Event untuk menerima gambar dan memprosesnya
 @socketio.on('images')
@@ -114,10 +164,10 @@ def home():
                 path = path['berkas']
             else:
                 path = None 
-            konten = "video"       
+            konten = "video"      
     finally:
         connection.close() 
-    return render_template('home.html', konten=konten, video=path, username=current_user.id)
+    return render_template('home.html', konten=konten, video=path, session=session)
 
 
 # Route untuk menangani video stream

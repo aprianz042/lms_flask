@@ -1,20 +1,41 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LMS | IPDN</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/login/style.css') }}">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+  <link rel="icon" href="{{ url_for('static', filename='images/favicon.png') }}" type="image/png">
+
 </head>
+
 <body>
-    <h2>Login</h2>
+  <div class="wrapper">
     <form action="/login" method="post">
-        <label for="username">Username:</label><br>
-        <input type="text" id="username" name="username" required><br><br>
-        
-        <label for="password">Password:</label><br>
-        <input type="password" id="password" name="password" required><br><br>
-        
-        <input type="submit" value="Login">
+      <h2>LMS IPDN</h2>
+      <div class="input-field">
+        <input type="text" id="username" name="username" required>
+        <label>ID Number / NIP</label>
+      </div>
+      <div class="input-field">
+        <input type="password" id="password" name="password" required>
+        <label>Enter your password</label>
+      </div>
+      <div class="forget">
+        <label for="remember">
+          <input type="checkbox" id="remember">
+          <p>Remember me</p>
+        </label>
+        <!-- <a href="#">Forgot password?</a> -->
+      </div>
+      <button type="submit">Log In</button>
+     <!--  <div class="register">
+        <p>Don't have an account? <a href="#">Register</a></p>
+      </div> -->
     </form>
+  </div>
 </body>
+
 </html>
