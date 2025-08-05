@@ -16,7 +16,8 @@
                 <li class="active">
                     <a href="{{ url_for('index') }}"> <i class="menu-icon fa fa-dashboard"></i>Dashboard </a>
                 </li>
-                <h3 class="menu-title">UI elements</h3><!-- /.menu-title -->
+
+                <!-- <h3 class="menu-title">UI elements</h3>
                 <li class="menu-item-has-children dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="menu-icon fa fa-laptop"></i>Components</a>
                     <ul class="sub-menu children dropdown-menu">
@@ -48,7 +49,7 @@
                     </ul>
                 </li>
 
-                <h3 class="menu-title">Icons</h3><!-- /.menu-title -->
+                <h3 class="menu-title">Icons</h3>
 
                 <li class="menu-item-has-children dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="menu-icon fa fa-tasks"></i>Icons</a>
@@ -76,7 +77,7 @@
                         <li><i class="menu-icon fa fa-street-view"></i><a href="maps-vector.html">Vector Maps</a></li>
                     </ul>
                 </li>
-                <h3 class="menu-title">Extras</h3><!-- /.menu-title -->
+                <h3 class="menu-title">Extras</h3>
                 <li class="menu-item-has-children dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="menu-icon fa fa-glass"></i>Pages</a>
                     <ul class="sub-menu children dropdown-menu">
@@ -84,17 +85,20 @@
                         <li><i class="menu-icon fa fa-sign-in"></i><a href="page-register.html">Register</a></li>
                         <li><i class="menu-icon fa fa-paper-plane"></i><a href="pages-forget.html">Forget Pass</a></li>
                     </ul>
-                </li>
+                </li> -->
 
                 <h3 class="menu-title">Menu</h3>
                 <li class="active"><a href="{{ url_for('index') }}"> <i class="menu-icon fa fa-dashboard"></i>Home </a></li>
-                <li><a href="{{ url_for('add_user') }}"> <i class="menu-icon fa fa-users"></i>User </a></li>
-                <li><a href="{{ url_for('add_content') }}"> <i class="menu-icon fa fa-book"></i>Add Content </a></li>
-                <li><a href="{{ url_for('debug_video') }}"> <i class="menu-icon fa fa-camera"></i>Debug Video </a></li>
-                <li><a href="{{ url_for('add_kelas') }}"> <i class="menu-icon fa fa-bookmark"></i>Kelas </a></li>
-                <li><a href="{{ url_for('add_pengajar') }}"> <i class="menu-icon fa fa-user"></i>Pengajar </a></li>
+                {% if session.level == 'admin' %}
+                    <li><a href="{{ url_for('operator') }}"> <i class="menu-icon fa fa-users"></i>Operator</a></li>
+                {% elif session.level == 'operator' %}
+                    <li><a href="{{ url_for('add_content') }}"> <i class="menu-icon fa fa-book"></i>Add Content </a></li>
+                    <li><a href="{{ url_for('debug_video') }}"> <i class="menu-icon fa fa-camera"></i>Debug Video </a></li>
+                    <li><a href="{{ url_for('add_kelas') }}"> <i class="menu-icon fa fa-bookmark"></i>Kelas </a></li>
+                    <li><a href="{{ url_for('add_pengajar') }}"> <i class="menu-icon fa fa-user"></i>Pengajar </a></li>
+                    
+                {% endif %}
                 <li><a href="{{ url_for('logout') }}"> <i class="menu-icon fa fa-sign-out"></i>Logout </a></li>
-
             </ul>
         </div><!-- /.navbar-collapse -->
     </nav>

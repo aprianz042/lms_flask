@@ -27,12 +27,15 @@
         {% if konten == 'video' %}
             {% include 'modules/video.html' %}
             
-        {% elif konten == 'add_user' %}
-            {% include 'action/add_user.html' %} 
+        {% elif konten == 'operator' %}
+            {% include 'action/operator.html' %} 
+
         {% elif konten == 'add_kelas' %}
             {% include 'action/add_kelas.html' %} 
+
         {% elif konten == 'add_content' %}
             {% include 'action/add_content.html' %}
+
         {% elif konten == 'add_pengajar' %}
             {% include 'action/add_pengajar.html' %}
 
@@ -40,9 +43,11 @@
             {% include 'modules/webcam.html' %} 
 
         {% elif konten == 'debug' %}
-            {% include 'modules/debug.html' %}    
+            {% include 'modules/debug.html' %}  
+
         {% else %}
             {% include 'modules/home.html' %}
+
         {% endif %}
         <!-- .content -->
     </div>
