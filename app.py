@@ -19,6 +19,8 @@ from function.video_process import generate_video, frontal_video, proses_img
 from function.stopCam import stop_
 from function.hashing import md5_hash
 
+from controller.operator import get_operators, add_operator, edit_operator, delete_operator
+
 app = Flask(__name__)
 socketio = SocketIO(app)
 app.secret_key = base64.b64encode(os.urandom(24)).decode('utf-8')
@@ -184,65 +186,31 @@ def debug_video():
 
 ################################## MODULE USER / OPERATOR ##################################
 @app.route('/operator')
+@login_required
 def operator():
     konten = "operator"
-    connection = get_db_connection()
-    if connection is None:
-        return "Error connecting to the database.", 500 
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute('SELECT * FROM user WHERE level = "operator"')
-            operator = cursor.fetchall() 
-    finally:
-        connection.close() 
+    operator, error = get_operators()
+    if error:
+        return error, 500
     return render_template('home.html', operator=operator, konten=konten)
 
 @app.route('/insert_operator', methods=['POST'])
+@login_required
 def add_record_user():
-    # Ambil data dari request JSON
     data = request.get_json()
-    
-    nama = data.get('nama')
-    no_id = data.get('no_id')
-    level = data.get('level')
-    email = data.get('email')
-    password = data.get('password')
-    hashed_password = md5_hash(password)
-        
-    # Validasi input
-    if level == 0:
-        return jsonify({"error": "Level tidak boleh kosong"}), 400
-    
-    # Insert data ke database
-    connection = get_db_connection()
-    try:
-        with connection.cursor() as cursor:
-            sql = "INSERT INTO user (nama, no_id, email, pass, level) VALUES (%s, %s, %s, %s, %s)"
-            cursor.execute(sql, (nama, no_id, email, hashed_password, level))
-            connection.commit()
-        return jsonify({"message": "Record inserted successfully"}), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    finally:
-        connection.close()
+    return add_operator(data)
 
-from flask import flash, redirect, url_for
+@app.route('/edit_operator', methods=['POST'])
+@login_required
+def edit_record_user():
+    data = request.get_json()
+    return edit_operator(data)
 
-@app.route('/hapus_operator/<int:id>', methods=['POST'])
-def hapus_operator(id):
-    connection = get_db_connection()
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute("DELETE FROM user WHERE id = %s", (id,))
-            connection.commit()
-        # Menyimpan pesan dengan flash
-        flash('Record deleted successfully', 'success')
-        return redirect(url_for('operator'))
-    except Exception as e:
-        flash(f'Error: {str(e)}', 'danger')
-        return redirect(url_for('operator'))
-    finally:
-        connection.close()
+@app.route('/hapus_operator', methods=['POST'])
+@login_required
+def hapus_operator():
+    data = request.get_json()
+    return delete_operator(data)
 ################################## END MODULE USER / OPERATOR ##################################
 
 ################################## MODULE KELAS ##################################
@@ -462,6 +430,31 @@ def hapus(id):
         connection.close()    
     return redirect(url_for('add_content'))
 ################################## END MODULE KONTEN ##################################
+
+################################## DEBUG DB ##################################
+@app.route('/debug_db')
+def debug_db():
+    konten = "debug_db"
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SHOW TABLES")
+            tables = cursor.fetchall()
+
+            # Menyiapkan list untuk menyimpan field dari setiap tabel
+            table_fields = {}
+            for table in tables:
+                # Mengambil nama kolom pertama dari hasil query (karena hasil SHOW TABLES hanya punya satu kolom)
+                table_name = list(table.values())[0]  # Menyesuaikan jika kolom hasilnya adalah nama tabel
+
+                cursor.execute(f"DESCRIBE {table_name}")  # Dapatkan field tabel
+                fields = cursor.fetchall()
+                table_fields[table_name] = fields
+            return render_template('home.html', table_fields=table_fields, konten=konten)
+    finally:
+        connection.close()
+
+################################## END DEBUG DB ##################################
 
 
 if __name__ == '__main__':

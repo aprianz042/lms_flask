@@ -1,0 +1,33 @@
+<div class="content mt-3">
+    <div class="col-lg-12">
+        <h1 style="text-align: center;">Daftar Tabel dan Field dalam Database</h1>
+        {% for table, fields in table_fields.items() %}
+            <h2>{{ table }}</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Type</th>
+                        <th>Null</th>
+                        <th>Key</th>
+                        <th>Default</th>
+                        <th>Extra</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for field in fields %}
+                        <tr>
+                            <td>{{ field.Field }}</td>
+                            <td>{{ field.Type }}</td>
+                            <td>{{ field.Null }}</td>
+                            <td>{{ field.Key }}</td>
+                            <td>{{ field.Default }}</td>
+                            <td>{{ field.Extra }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endfor %}         
+    </div>
+</div>
+
