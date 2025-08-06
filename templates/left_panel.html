@@ -87,20 +87,28 @@
                         <li><i class="menu-icon fa fa-paper-plane"></i><a href="pages-forget.html">Forget Pass</a></li>
                     </ul>
                 </li> -->
-
+                
                 <h3 class="menu-title">{{ session.level }}</h3>
-                <li class="active"><a href="{{ url_for('index') }}"> <i class="menu-icon fa fa-dashboard"></i>Home </a></li>
+                <li class="{{ 'active' if request.endpoint == 'index' or request.endpoint == 'home' else '' }}"><a href="{{ url_for('index') }}"> <i class="menu-icon fa fa-dashboard"></i>Home </a></li>
+                
                 {% if session.level == 'admin' %}
-                    <li><a href="{{ url_for('operator') }}"> <i class="menu-icon fa fa-users"></i>Operator</a></li>
+                <li class="{{ 'active' if request.endpoint == 'prodi' else '' }}"><a href="{{ url_for('prodi') }}"> <i class="menu-icon fa fa-bookmark"></i>Program Studi</a></li>
+                <li class="{{ 'active' if request.endpoint == 'operator' else '' }}"><a href="{{ url_for('operator') }}"> <i class="menu-icon fa fa-users"></i>Operator</a></li>
+    
                 {% elif session.level == 'operator' %}
-                    <li><a href="{{ url_for('add_content') }}"> <i class="menu-icon fa fa-book"></i>Add Content </a></li>
-                    <li><a href="{{ url_for('debug_video') }}"> <i class="menu-icon fa fa-camera"></i>Debug Video </a></li>
-                    <li><a href="{{ url_for('add_kelas') }}"> <i class="menu-icon fa fa-bookmark"></i>Kelas </a></li>
-                    <li><a href="{{ url_for('add_pengajar') }}"> <i class="menu-icon fa fa-user"></i>Pengajar </a></li>
-                    
+                <li class="{{ 'active' if request.endpoint == 'kelas' else '' }}"><a href="{{ url_for('kelas') }}"> <i class="menu-icon fa fa-bookmark"></i>Kelas</a></li>
+                <li class="{{ 'active' if request.endpoint == 'pengajar' else '' }}"><a href="{{ url_for('pengajar') }}"> <i class="menu-icon fa fa-user"></i>Pengajar</a></li>
+                <li><a href=""> <i class="menu-icon fa fa-users"></i>Mahasiswa</a></li>
+                <li><a href=""> <i class="menu-icon fa fa-book"></i>Mata Kuliah</a></li>
+                <li><a href=""> <i class="menu-icon fa fa-copy"></i>KRS</a></li>
+                
+                {% elif session.level == 'operator' %}
+                <li><a href="{{ url_for('add_content') }}"> <i class="menu-icon fa fa-book"></i>Add Content</a></li>
+
                 {% endif %}
                 <li><a href="{{ url_for('logout') }}"> <i class="menu-icon fa fa-sign-out"></i>Logout </a></li>
                 <li><a href="{{ url_for('debug_db') }}"> <i class="menu-icon fa fa-sign-out"></i>Debug DB </a></li>
+                <li><a href="{{ url_for('debug_video') }}"> <i class="menu-icon fa fa-camera"></i>Debug Video </a></li>
                 
             </ul>
         </div><!-- /.navbar-collapse -->

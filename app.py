@@ -19,7 +19,10 @@ from function.video_process import generate_video, frontal_video, proses_img
 from function.stopCam import stop_
 from function.hashing import md5_hash
 
-from controller.operator import get_operators, add_operator, edit_operator, delete_operator
+from controller.operator import *
+from controller.prodi import *
+from controller.kelas import *
+from controller.pengajar import *
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -213,119 +216,92 @@ def hapus_operator():
     return delete_operator(data)
 ################################## END MODULE USER / OPERATOR ##################################
 
+################################## MODULE PRODI ##################################
+@app.route('/prodi')
+@login_required
+def prodi():
+    konten = "prodi"
+    prodi, error = get_prodi()
+    if error:
+        return error, 500
+    return render_template('home.html', prodi=prodi, konten=konten)
+
+@app.route('/insert_prodi', methods=['POST'])
+@login_required
+def add_record_prodi():
+    data = request.get_json()
+    return add_prodi(data)
+
+@app.route('/edit_prodi', methods=['POST'])
+@login_required
+def edit_record_prodi():
+    data = request.get_json()
+    return edit_prodi(data)
+
+@app.route('/hapus_prodi', methods=['POST'])
+@login_required
+def hapus_prodi():
+    data = request.get_json()
+    return delete_prodi(data)
+################################## END MODULE PRODI ##################################
+
 ################################## MODULE KELAS ##################################
-@app.route('/add_kelas')
-def add_kelas():
-    konten = "add_kelas"
-    connection = get_db_connection()
-    if connection is None:
-        return "Error connecting to the database.", 500 
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute('SELECT * FROM kelas')
-            kelas = cursor.fetchall() 
-    finally:
-        connection.close() 
+@app.route('/kelas')
+@login_required
+def kelas():
+    konten = "kelas"
+    kelas, error = get_kelas()
+    if error:
+        return error, 500
     return render_template('home.html', kelas=kelas, konten=konten)
 
 @app.route('/insert_kelas', methods=['POST'])
+@login_required
 def add_record_kelas():
-    # Ambil data dari request JSON
     data = request.get_json()
-    nama_kelas = data.get('nama_kelas')
+    return add_kelas(data)
 
-    # Cek apakah nama_kelas sudah ada di database
-    connection = get_db_connection()
-    try:
-        with connection.cursor() as cursor:
-            # Cek apakah nama kelas sudah ada
-            check_sql = "SELECT COUNT(*) FROM kelas WHERE nama_kelas = %s"
-            cursor.execute(check_sql, (nama_kelas,))  # Pastikan tuple dengan koma
-            result = cursor.fetchone()
+@app.route('/edit_kelas', methods=['POST'])
+@login_required
+def edit_record_kelas():
+    data = request.get_json()
+    return edit_kelas(data)
 
-            print(result)
-            
-            # Cek hasil query, jika kelas sudah ada
-            if result["COUNT(*)"] > 0:
-                return jsonify({"error": "Nama kelas sudah ada!"}), 400
-
-            # Insert data ke database
-            insert_sql = "INSERT INTO kelas (nama_kelas) VALUES (%s)"
-            cursor.execute(insert_sql, (nama_kelas,))
-            connection.commit()
-
-        return jsonify({"message": "Kelas berhasil ditambahkan"}), 201
-    except Exception as e:
-        print(f"Error: {e}")  # Menampilkan error di console untuk debugging
-        return jsonify({"error": str(e)}), 500
-    finally:
-        connection.close()
+@app.route('/hapus_kelas', methods=['POST'])
+@login_required
+def hapus_kelas():
+    data = request.get_json()
+    return delete_kelas(data)
 ################################## END MODULE KELAS ##################################
 
+
 ################################## MODULE PENGAJAR ##################################
-@app.route('/add_pengajar')
-def add_pengajar():
-    konten = "add_pengajar"
-    connection = get_db_connection()
-    if connection is None:
-        return "Error connecting to the database.", 500 
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute('SELECT * FROM pengajar')
-            pengajar = cursor.fetchall() 
-    finally:
-        connection.close() 
+@app.route('/pengajar')
+@login_required
+def pengajar():
+    konten = "pengajar"
+    pengajar, error = get_pengajar()
+    if error:
+        return error, 500
     return render_template('home.html', pengajar=pengajar, konten=konten)
 
 @app.route('/insert_pengajar', methods=['POST'])
+@login_required
 def add_record_pengajar():
-    # Ambil data dari request JSON
     data = request.get_json()
-    
-    nama_pengajar = data.get('nama_pengajar')
-    nip = data.get('nip')
-    email = data.get('email')
-    nomor_hp = data.get('nomor_hp')
-    alamat = data.get('alamat')
-    program_studi = data.get('program_studi')
-    kategori = data.get('kategori')
-    jabatan = data.get('jabatan')
-    tanggal_lahir = data.get('tanggal_lahir')
-    pendidikan_terakhir = data.get('pendidikan_terakhir')
-    status = data.get('status')
+    return add_pengajar(data)
 
-    password = data.get('password')
-    hashed_password = md5_hash(password)
+@app.route('/edit_pengajar', methods=['POST'])
+@login_required
+def edit_record_pengajar():
+    data = request.get_json()
+    return edit_pengajar(data)
 
-    connection = get_db_connection()
-    try:
-        with connection.cursor() as cursor:
-            check_sql = """
-                SELECT COUNT(*) 
-                FROM pengajar 
-                WHERE nip = %s OR email = %s OR nomor_hp = %s
-            """
-            cursor.execute(check_sql, (nip, email, nomor_hp))  # Pastikan tuple dengan koma
-            result = cursor.fetchone()
-
-            print(result)
-            
-            if result["COUNT(*)"] > 0:
-                return jsonify({"error": "NIP, email, atau nomor HP sudah ada!"}), 400
-
-            insert_sql = """
-                INSERT INTO pengajar (nama_pengajar, nip, email, nomor_hp, alamat, program_studi, kategori, jabatan, tanggal_lahir, pendidikan_terakhir, password, status) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s %s, %s, %s)
-            """
-            cursor.execute(insert_sql, (nama_pengajar, nip, email, nomor_hp, alamat, program_studi, kategori, jabatan, tanggal_lahir, pendidikan_terakhir, hashed_password, status))
-            connection.commit()
-
-        return jsonify({"message": "Pengajar berhasil ditambahkan"}), 201
-    except Exception as e:
-        print(f"Error: {e}") 
-        return jsonify({"error": str(e)}), 500
-    finally:
-        connection.close()
+@app.route('/hapus_pengajar', methods=['POST'])
+@login_required
+def hapus_pengajar():
+    data = request.get_json()
+    return delete_pengajar(data)
 ################################## END MODULE PENGAJAR ##################################
 
 ################################## MODULE KONTEN ##################################

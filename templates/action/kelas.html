@@ -9,36 +9,32 @@
     
         <div class="card">
             <div class="card-header">
-                <strong>Operator</strong>
+                <strong>Kelas</strong>
             </div>
             <div class="card-body card-block">
-                <button type="button" class="btn btn-success mb-1" data-toggle="modal" data-target="#add_operator">
-                    Tambah Operator
+                <button type="button" class="btn btn-success mb-1" data-toggle="modal" data-target="#add_kelas">
+                    Tambah Kelas
                 </button>
 
-                <table id="bootstrap-data-table-export" class="table table-striped table-bordered">
+                <table id="bootstrap-data-table-export" class="table table-striped">
                     <thead>
                         <tr>
                             <th class="w-10">No.</th>
-                            <th class="w-30">Nama</th>
-                            <th class="w-25">NIP</th>             
-                            <th class="w-25">Email</th> 
+                            <th class="w-80">Nama Kelas</th>          
                             <th class="w-10">Aksi</th>                   
                         </tr>
                     </thead>
                     <tbody>
-                        {% for op in operator %}
+                        {% for op in kelas %}
                         <tr>
-                            <td>{{ loop.index }}</td>
-                            <td>{{ op.nama }}</td>
-                            <td>{{ op.no_id }}</td>
-                            <td>{{ op.email }}</td>
+                            <td>{{ loop.index }}</td>  <!-- loop.index0 memberikan indeks mulai dari 0 -->
+                            <td>{{ op.nama_kelas }}</td>
                             <td>
-                                <a href="#" class="btn btn-primary btn-sm btn-block" data-toggle="modal" data-target="#modalEdit{{ op.id }}">
+                                <a href="#" class="btn btn-primary btn-sm btn-block" data-toggle="modal" data-target="#modalEdit{{ op.id_kelas }}">
                                     <i class="fa fa-edit"></i> Edit
                                 </a>
                             
-                                <a href="#" class="btn btn-danger btn-sm btn-block" data-toggle="modal" data-target="#modalHapus{{ op.id }}">
+                                <a href="#" class="btn btn-danger btn-sm btn-block" data-toggle="modal" data-target="#modalHapus{{ op.id_kelas }}">
                                     <i class="fa fa-trash-o"></i> Hapus
                                 </a>
                             </td>
@@ -52,11 +48,11 @@
     </div>
 </div>
 
-<div class="modal fade" id="add_operator" tabindex="-1" role="dialog" aria-labelledby="mediumModalLabel" aria-hidden="true">
+<div class="modal fade" id="add_kelas" tabindex="-1" role="dialog" aria-labelledby="mediumModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <strong>Tambah Operator</strong>
+                <strong>Tambah Kelas</strong>
             </div>
             
             <div class="modal-body">
@@ -67,41 +63,11 @@
                     </button>
                 </div>
                 
-                <form id="dataForm" class="form-horizontal">
+                <form id="dataForm" class="form-horizontal">                 
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="nama" class=" form-control-label">Nama</label></div>
+                        <div class="col col-md-3"><label for="nama_kelas" class=" form-control-label">Nama Kelas</label></div>
                         <div class="col-12 col-md-9">
-                            <input type="text" id="nama" name="nama" placeholder="Masukan Nama ..." class="form-control" required>
-                        </div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="no_id" class=" form-control-label">No. Identitas</label></div>
-                        <div class="col-12 col-md-9">
-                            <input type="text" id="no_id" name="no_id" placeholder="NIP..." class="form-control" required>
-                        </div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="level" class=" form-control-label">Level</label></div>
-                        <div class="col-12 col-md-9">
-                            <select name="level" id="level" class="form-control" required>
-                                <option value="operator">Operator</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="email" class=" form-control-label">Email</label></div>
-                        <div class="col-12 col-md-9">
-                            <input type="email" id="email" name="email" placeholder="Email..." class="form-control" required>
-                        </div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="password" class=" form-control-label">Password</label></div>
-                        <div class="col-12 col-md-9">
-                            <input type="password" id="password" name="password" placeholder="Password..." class="form-control" required>
+                            <input type="text" id="nama_kelas" name="nama_kelas" placeholder="Masukan nama kelas..." class="form-control" required>
                         </div>
                     </div>
                 </form>
@@ -122,60 +88,39 @@
     </div>
 </div>
 
-{% for edit in operator %}
-<div class="modal fade" id="modalEdit{{ edit.id }}" tabindex="-1" role="dialog" aria-labelledby="modalEdit" aria-hidden="true">
+
+{% for edit in kelas %}
+<div class="modal fade" id="modalEdit{{ edit.id_kelas }}" tabindex="-1" role="dialog" aria-labelledby="modalEdit" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalEdit">Edit Data Operator</h5>
+                <h5 class="modal-title" id="modalEdit">Edit Data kelas</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <form id="dataFormEdit{{ edit.id }}" class="form-horizontal">
-                    <input type="text" id="id" name="id" value="{{ edit.id }}" class="form-control" hidden>
+                <form id="dataFormEdit{{ edit.id_kelas }}" class="form-horizontal">
+                    <input type="text" id="id_kelas" name="id_kelas" value="{{ edit.id_kelas }}" class="form-control" hidden>
 
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="nama" class="form-control-label">Nama</label></div>
+                        <div class="col col-md-3"><label for="nama_kelas" class="form-control-label">Nama Kelas</label></div>
                         <div class="col-12 col-md-9">
-                            <input type="text" id="nama" name="nama" value="{{ edit.nama }}" class="form-control" required>
-                        </div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="no_id" class="form-control-label">No. Identitas</label></div>
-                        <div class="col-12 col-md-9">
-                            <input type="text" id="no_id" name="no_id" value="{{ edit.no_id }}" class="form-control" required>
-                        </div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="level" class="form-control-label">Level</label></div>
-                        <div class="col-12 col-md-9">
-                            <select name="level" id="level" class="form-control" required>
-                                <option value="operator" {% if edit.level == 'operator' %}selected{% endif %}>Operator</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="email" class="form-control-label">Email</label></div>
-                        <div class="col-12 col-md-9">
-                            <input type="email" id="email" name="email" value="{{ edit.email }}" class="form-control" required>
+                            <input type="text" id="nama_kelas" name="nama_kelas" value="{{ edit.nama_kelas }}" class="form-control" required>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                <button type="submit" form="dataFormEdit{{ edit.id }}" class="btn btn-primary" onclick="updateOperator(event, '{{ edit.id }}')">Simpan Perubahan</button>
+                <button type="submit" form="dataFormEdit{{ edit.id_kelas }}" class="btn btn-primary" onclick="updateKelas(event, '{{ edit.id_kelas }}')">Simpan Perubahan</button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="modalHapus{{ edit.id }}" tabindex="-1" role="dialog" aria-labelledby="modalHapus" aria-hidden="true">
+<!-- Modal Konfirmasi Hapus -->
+<div class="modal fade" id="modalHapus{{ edit.id_kelas }}" tabindex="-1" role="dialog" aria-labelledby="modalHapus" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -185,11 +130,12 @@
                 </button>
             </div>
             <div class="modal-body">
-                Apakah kamu yakin ingin menghapus operator a.n. {{edit.nama}}?
+                Apakah kamu yakin ingin menghapus kelas {{edit.nama_kelas}}?
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-danger" onclick="deleteOperator(event, '{{ edit.id }}')">
+                <!-- Form untuk menghapus data -->
+                <button type="button" class="btn btn-danger" onclick="deleteKelas(event, '{{ edit.id_kelas }}')">
                     <i class="fa fa-trash-o"></i> Hapus
                 </button>
             </div>
@@ -201,8 +147,8 @@
 <script>
     function resetForm() {
         const form = document.getElementById('dataForm');
-        form.reset();
-        responseMessage.style.display = 'none';
+        form.reset(); 
+        responseMessage.style.display = 'none'; 
         responseMessageModal.style.display = 'none';
     }
 
@@ -213,59 +159,52 @@
     const responseTextModal = document.getElementById('responseTextModal');
 
     form.addEventListener('submit', function(event) {
-        event.preventDefault();
+        event.preventDefault();  
 
-        const nama = document.getElementById('nama').value;
-        const no_id = document.getElementById('no_id').value;
-        const level = document.getElementById('level').value;
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
+        const nama_kelas = document.getElementById('nama_kelas').value;
 
-        responseMessage.style.display = 'none';
+        responseMessage.style.display = 'none'; 
         responseMessageModal.style.display = 'none';
 
-        fetch('http://127.0.0.1:5000/insert_operator', {
+        fetch('http://127.0.0.1:5000/insert_kelas', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ nama: nama, no_id: no_id, level: level, email: email, password: password })
+            body: JSON.stringify({ nama_kelas: nama_kelas })
         })
         .then(response => response.json())
         .then(data => {
             if (data.message) {
                 sessionStorage.setItem("responseMessage", "success");
                 sessionStorage.setItem("responseText", data.message);
-                form.reset();
-                window.location.reload();
+                form.reset(); 
+                window.location.reload(); 
             } else if (data.error) {
                 sessionStorage.setItem("responseMessage", "error");
                 sessionStorage.setItem("responseText", data.error);
-                window.location.reload();
+                window.location.reload(); 
             }
         })
         .catch(error => {
+            
             sessionStorage.setItem("responseMessage", "error");
             sessionStorage.setItem("responseText", error.message);
-            window.location.reload();
+            window.location.reload(); 
         });
     });
 
-    function updateOperator(event, operatorId) {
-        event.preventDefault();
-
-        const form = document.getElementById('dataFormEdit' + operatorId);
+    function updateKelas(event, prodiId) {
+        event.preventDefault();  
+        const form = document.getElementById('dataFormEdit' + prodiId);
         if (!form) {
-            console.error("Form with ID dataFormEdit" + operatorId + " not found!");
+            console.error("Form with ID dataFormEdit" + prodiId + " not found!");
             return;
         }
 
-        const nama = form['nama'].value;
-        const no_id = form['no_id'].value;
-        const level = form['level'].value;
-        const email = form['email'].value;
+        const nama_kelas = form['nama_kelas'].value;
 
-        if (!nama || !no_id || !level || !email) {
+        if (!nama_kelas) {
             alert("Harap lengkapi semua field.");
             return;
         }
@@ -275,17 +214,14 @@
         responseMessage.style.display = 'none';
         responseMessageModal.style.display = 'none';
 
-        fetch('http://127.0.0.1:5000/edit_operator', {
-            method: 'POST',
+        fetch('http://127.0.0.1:5000/edit_kelas', {
+            method: 'POST',  
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                id: operatorId,
-                nama: nama,
-                no_id: no_id,
-                level: level,
-                email: email
+                id_kelas: prodiId,
+                nama_kelas: nama_kelas
             })
         })
         .then(response => {
@@ -298,55 +234,55 @@
             if (data.message) {
                 sessionStorage.setItem("responseMessage", "success");
                 sessionStorage.setItem("responseText", data.message);
-                window.location.reload();
+                window.location.reload();  
             } else if (data.error) {
                 sessionStorage.setItem("responseMessage", "error");
                 sessionStorage.setItem("responseText", data.error);
-                window.location.reload();
+                window.location.reload();  
             }
         })
         .catch(error => {
             sessionStorage.setItem("responseMessage", "error");
             sessionStorage.setItem("responseText", error.message);
-            window.location.reload();
+            window.location.reload();  
         });
     }
 
-    function deleteOperator(event, operatorId) {
-        event.preventDefault();
-
+    function deleteKelas(event, prodiId) {
+        event.preventDefault();  
         const responseMessage = document.getElementById('responseMessage');
         const responseText = document.getElementById('responseText');
         responseMessage.style.display = 'block';
 
-        fetch('http://127.0.0.1:5000/hapus_operator', {
-            method: 'POST',
+        // Kirim permintaan delete menggunakan fetch()
+        fetch('http://127.0.0.1:5000/hapus_kelas', {
+            method: 'POST',  
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ id: operatorId })
+            body: JSON.stringify({ id_kelas: prodiId })
         })
         .then(response => {
             if (!response.ok) {
                 return response.text().then(text => { throw new Error(text) });
             }
-            return response.json();
+            return response.json();  
         })
         .then(data => {
             if (data.message) {
                 sessionStorage.setItem("responseMessage", "success");
                 sessionStorage.setItem("responseText", data.message);
-                window.location.reload();
+                window.location.reload();  
             } else if (data.error) {
                 sessionStorage.setItem("responseMessage", "error");
                 sessionStorage.setItem("responseText", data.error);
-                window.location.reload();
+                window.location.reload(); 
             }
         })
         .catch(error => {
             sessionStorage.setItem("responseMessage", "error");
             sessionStorage.setItem("responseText", error.message);
-            window.location.reload();
+            window.location.reload();  
         });
     }
 
@@ -359,19 +295,20 @@
 
         if (storedMessage && storedText) {
             if (storedMessage === "success") {
-                responseText.textContent = storedText;
+                responseText.textContent = storedText;  
                 responseMessage.classList.remove('alert-danger');
                 responseMessage.classList.add('alert-success');
-                responseMessage.style.display = 'block';
+                responseMessage.style.display = 'block'; 
             } else if (storedMessage === "error") {
-                responseText.textContent = storedText;
+                responseText.textContent = storedText;  
                 responseMessage.classList.remove('alert-success');
                 responseMessage.classList.add('alert-danger');
-                responseMessage.style.display = 'block';
+                responseMessage.style.display = 'block';  
             }
 
             sessionStorage.removeItem("responseMessage");
             sessionStorage.removeItem("responseText");
         }
     };
+
 </script>
