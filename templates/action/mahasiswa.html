@@ -9,54 +9,56 @@
     
         <div class="card">
             <div class="card-header">
-                <strong>Operator</strong>
+                <strong>Mahasiswa</strong>
             </div>
             <div class="card-body card-block">
-                <button type="button" class="btn btn-success mb-1" data-toggle="modal" data-target="#add_operator">
-                    Tambah Operator
+                <button type="button" class="btn btn-success mb-1" data-toggle="modal" data-target="#add_mahasiswa">
+                    Tambah Mahasiswa
                 </button>
 
                 <table id="bootstrap-data-table-export" class="table table-striped table-bordered">
                     <thead>
                         <tr>
                             <th class="w-10">No.</th>
-                            <th class="w-30">Nama</th>
-                            <th class="w-25">NIP</th>             
-                            <th class="w-25">Email</th> 
-                            <th class="w-10">Aksi</th>                   
+                            <th class="w-25">Nama</th>
+                            <th class="w-10">NIM</th>
+                            <th class="w-25">Program Studi</th>
+                            <th class="w-10">Kelas</th>
+                            <th class="w-10">Jenis Kelamin</th>
+                            <th class="w-10">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for op in operator %}
+                        {% for op in mahasiswa %}
                         <tr>
                             <td>{{ loop.index }}</td>
-                            <td>{{ op.nama }}</td>
-                            <td>{{ op.no_id }}</td>
-                            <td>{{ op.email }}</td>
+                            <td>{{ op.nama_mahasiswa }}</td>
+                            <td>{{ op.nim }}</td>
+                            <td>{{ op.program_studi }}</td>
+                            <td>{{ op.kelas }}</td>
+                            <td>{{ op.jenis_kelamin }}</td>
                             <td>
-                                <a href="#" class="btn btn-primary btn-sm btn-block" data-toggle="modal" data-target="#modalEdit{{ op.id }}">
+                                <a href="#" class="btn btn-primary btn-sm btn-block" data-toggle="modal" data-target="#modalEdit{{ op.id_mahasiswa }}">
                                     <i class="fa fa-edit"></i> Edit
                                 </a>
-                            
-                                <a href="#" class="btn btn-danger btn-sm btn-block" data-toggle="modal" data-target="#modalHapus{{ op.id }}">
+                                <a href="#" class="btn btn-danger btn-sm btn-block" data-toggle="modal" data-target="#modalHapus{{ op.id_mahasiswa }}">
                                     <i class="fa fa-trash-o"></i> Hapus
                                 </a>
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
-
                 </table>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="add_operator" tabindex="-1" role="dialog" aria-labelledby="mediumModalLabel" aria-hidden="true">
+<div class="modal fade" id="add_mahasiswa" tabindex="-1" role="dialog" aria-labelledby="mediumModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <strong>Tambah Operator</strong>
+                <strong>Tambah Mata Kuliah</strong>
             </div>
             
             <div class="modal-body">
@@ -68,42 +70,97 @@
                 </div>
                 
                 <form id="dataForm" class="form-horizontal">
+
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="nama" class=" form-control-label">Nama</label></div>
+                        <div class="col col-md-3"><label for="nama_mahasiswa" class="form-control-label">Nama Mahasiswa</label></div>
                         <div class="col-12 col-md-9">
-                            <input type="text" id="nama" name="nama" placeholder="Masukan Nama ..." class="form-control" required>
+                            <input type="text" id="nama_mahasiswa" name="nama_mahasiswa" placeholder="Masukkan nama mahasiswa..." class="form-control" required>
                         </div>
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="no_id" class=" form-control-label">No. Identitas</label></div>
+                        <div class="col col-md-3"><label for="nim" class="form-control-label">NIM</label></div>
                         <div class="col-12 col-md-9">
-                            <input type="text" id="no_id" name="no_id" placeholder="NIP..." class="form-control" required>
+                            <input type="text" id="nim" name="nim" placeholder="Masukkan NIM..." class="form-control" required>
                         </div>
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="level" class=" form-control-label">Level</label></div>
+                        <div class="col col-md-3"><label for="email" class="form-control-label">Email</label></div>
                         <div class="col-12 col-md-9">
-                            <select name="level" id="level" class="form-control" required>
-                                <option value="operator">Operator</option>
+                            <input type="email" id="email" name="email" placeholder="Masukkan email mahasiswa..." class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="asdaf" class=" form-control-label">Asal Pendaftaran</label></div>
+                        <div class="col-12 col-md-9">
+                            <select name="asdaf" id="asdaf" class="form-control" required>
+                                {% for asd in asdaf %}
+                                <option value="{{ asd.id_provinsi }}">{{ asd.nama_provinsi }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="email" class=" form-control-label">Email</label></div>
+                        <div class="col col-md-3"><label for="nomor_telepon" class="form-control-label">Nomor Telepon</label></div>
                         <div class="col-12 col-md-9">
-                            <input type="email" id="email" name="email" placeholder="Email..." class="form-control" required>
+                            <input type="text" id="nomor_telepon" name="nomor_telepon" placeholder="Masukkan nomor telepon..." class="form-control" required>
                         </div>
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="password" class=" form-control-label">Password</label></div>
+                        <div class="col col-md-3"><label for="program_studi" class=" form-control-label">Program Studi</label></div>
                         <div class="col-12 col-md-9">
-                            <input type="password" id="password" name="password" placeholder="Password..." class="form-control" required>
+                            <select name="program_studi" id="program_studi" class="form-control" required>
+                                {% for daftar in daftar_prodi %}
+                                <option value="{{ daftar.kode_prodi }}">{{ daftar.nama_prodi }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="kelas" class="form-control-label">Kelas</label></div>
+                        <div class="col-12 col-md-9">
+                            <input type="text" id="kelas" name="kelas" placeholder="Masukkan kelas mahasiswa..." class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="password" class="form-control-label">Password</label></div>
+                        <div class="col-12 col-md-9">
+                            <input type="password" id="password" name="password" placeholder="Masukkan password..." class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="tahun_angkatan" class="form-control-label">Tahun Angkatan</label></div>
+                        <div class="col-12 col-md-9">
+                            <input type="number" id="tahun_angkatan" name="tahun_angkatan" placeholder="Contoh: 2022" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="tanggal_lahir" class="form-control-label">Tanggal Lahir</label></div>
+                        <div class="col-12 col-md-9">
+                            <input type="date" id="tanggal_lahir" name="tanggal_lahir" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="jenis_kelamin" class="form-control-label">Jenis Kelamin</label></div>
+                        <div class="col-12 col-md-9">
+                            <select name="jenis_kelamin" id="jenis_kelamin" class="form-control" required>
+                                <option value="">-- Pilih --</option>
+                                <option value="Laki-laki">Laki-laki</option>
+                                <option value="Perempuan">Perempuan</option>
+                            </select>
+                        </div>
+                    </div>
+
+
                 </form>
             </div>
 
@@ -122,60 +179,72 @@
     </div>
 </div>
 
-{% for edit in operator %}
-<div class="modal fade" id="modalEdit{{ edit.id }}" tabindex="-1" role="dialog" aria-labelledby="modalEdit" aria-hidden="true">
+{% for edit in matkul %}
+<div class="modal fade" id="modalEdit{{ edit.id_mata_kuliah }}" tabindex="-1" role="dialog" aria-labelledby="modalEdit" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalEdit">Edit Data Operator</h5>
+                <h5 class="modal-title" id="modalEdit">Edit Data Mata Kuliah</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <form id="dataFormEdit{{ edit.id }}" class="form-horizontal">
-                    <input type="text" id="id" name="id" value="{{ edit.id }}" class="form-control" hidden>
+                <form id="dataFormEdit{{ edit.id_mata_kuliah }}" class="form-horizontal">
+                    <input type="text" id="id_mata_kuliah" name="id_mata_kuliah" value="{{ edit.id_mata_kuliah }}" class="form-control" hidden>
 
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="nama" class="form-control-label">Nama</label></div>
+                        <div class="col col-md-3"><label for="id_prodi" class=" form-control-label">Program Studi</label></div>
                         <div class="col-12 col-md-9">
-                            <input type="text" id="nama" name="nama" value="{{ edit.nama }}" class="form-control" required>
-                        </div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="no_id" class="form-control-label">No. Identitas</label></div>
-                        <div class="col-12 col-md-9">
-                            <input type="text" id="no_id" name="no_id" value="{{ edit.no_id }}" class="form-control" required>
-                        </div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="level" class="form-control-label">Level</label></div>
-                        <div class="col-12 col-md-9">
-                            <select name="level" id="level" class="form-control" required>
-                                <option value="operator" {% if edit.level == 'operator' %}selected{% endif %}>Operator</option>
+                            <select name="id_prodi" id="id_prodi" class="form-control" required>
+                                {% for daftar in daftar_prodi %}
+                                <option value="{{ daftar.kode_prodi }}" {% if daftar.kode_prodi == edit.kode_prodi %}selected{% endif %}>{{ daftar.nama_prodi }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="email" class="form-control-label">Email</label></div>
+                        <div class="col col-md-3"><label for="kode_mata_kuliah" class=" form-control-label">Kode Mata Kuliah</label></div>
                         <div class="col-12 col-md-9">
-                            <input type="email" id="email" name="email" value="{{ edit.email }}" class="form-control" required>
+                            <input type="text" id="kode_mata_kuliah" name="kode_mata_kuliah" value="{{ edit.kode_mata_kuliah }}" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="nama_mata_kuliah" class=" form-control-label">Nama Mata Kuliah</label></div>
+                        <div class="col-12 col-md-9">
+                            <input type="text" id="nama_mata_kuliah" name="nama_mata_kuliah" value="{{ edit.nama_mata_kuliah }}" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="semester" class=" form-control-label">Semester</label></div>
+                        <div class="col-12 col-md-9">
+                            <select name="semester" id="semester" class="form-control" required>
+                                <option value="ganjil" {% if edit.semester == 'ganjil' %}selected{% endif %}>Ganjil</option>
+                                <option value="genap" {% if edit.semester == 'genap' %}selected{% endif %}>Genap</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="sks" class=" form-control-label">SKS</label></div>
+                        <div class="col-12 col-md-9">
+                            <input type="number" id="sks" name="sks" value="{{ edit.sks }}" class="form-control" required>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                <button type="submit" form="dataFormEdit{{ edit.id }}" class="btn btn-primary" onclick="updateOperator(event, '{{ edit.id }}')">Simpan Perubahan</button>
+                <button type="submit" form="dataFormEdit{{ edit.id_mata_kuliah }}" class="btn btn-primary" onclick="updateMatkul(event, '{{ edit.id_mata_kuliah }}')">Simpan Perubahan</button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="modalHapus{{ edit.id }}" tabindex="-1" role="dialog" aria-labelledby="modalHapus" aria-hidden="true">
+<div class="modal fade" id="modalHapus{{ edit.id_mata_kuliah }}" tabindex="-1" role="dialog" aria-labelledby="modalHapus" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -185,11 +254,11 @@
                 </button>
             </div>
             <div class="modal-body">
-                Apakah kamu yakin ingin menghapus operator a.n. {{edit.nama}}?
+                Apakah kamu yakin ingin menghapus mata kuliah {{edit.nama_mata_kuliah}}?
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-danger" onclick="deleteOperator(event, '{{ edit.id }}')">
+                <button type="button" class="btn btn-danger" onclick="deleteMatkul(event, '{{ edit.id_mata_kuliah }}')">
                     <i class="fa fa-trash-o"></i> Hapus
                 </button>
             </div>
@@ -215,21 +284,26 @@
     form.addEventListener('submit', function(event) {
         event.preventDefault();
 
-        const nama = document.getElementById('nama').value;
-        const no_id = document.getElementById('no_id').value;
-        const level = document.getElementById('level').value;
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-
+        const kode_prodi = document.getElementById('id_prodi').value;
+        const nama_mata_kuliah = document.getElementById('nama_mata_kuliah').value;
+        const kode_mata_kuliah = document.getElementById('kode_mata_kuliah').value;
+        const semester = document.getElementById('semester').value;
+        const sks = document.getElementById('sks').value;
+        
         responseMessage.style.display = 'none';
         responseMessageModal.style.display = 'none';
 
-        fetch('http://127.0.0.1:5000/insert_operator', {
+        fetch('http://127.0.0.1:5000/insert_matkul', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ nama: nama, no_id: no_id, level: level, email: email, password: password })
+            body: JSON.stringify({ 
+                kode_prodi: kode_prodi,
+                nama_mata_kuliah: nama_mata_kuliah, 
+                kode_mata_kuliah: kode_mata_kuliah, 
+                semester: semester, 
+                sks: sks })
         })
         .then(response => response.json())
         .then(data => {
@@ -251,21 +325,22 @@
         });
     });
 
-    function updateOperator(event, operatorId) {
+    function updateMatkul(event, matkulId) {
         event.preventDefault();
 
-        const form = document.getElementById('dataFormEdit' + operatorId);
+        const form = document.getElementById('dataFormEdit' + matkulId);
         if (!form) {
-            console.error("Form with ID dataFormEdit" + operatorId + " not found!");
+            console.error("Form with ID dataFormEdit" + matkulId + " not found!");
             return;
         }
 
-        const nama = form['nama'].value;
-        const no_id = form['no_id'].value;
-        const level = form['level'].value;
-        const email = form['email'].value;
+        const kode_prodi = form['id_prodi'].value;
+        const nama_mata_kuliah = form['nama_mata_kuliah'].value;
+        const kode_mata_kuliah = form['kode_mata_kuliah'].value;
+        const semester = form['semester'].value;
+        const sks = form['sks'].value;
 
-        if (!nama || !no_id || !level || !email) {
+        if (!nama_mata_kuliah || !kode_mata_kuliah || !semester || !sks) {
             alert("Harap lengkapi semua field.");
             return;
         }
@@ -275,17 +350,18 @@
         responseMessage.style.display = 'none';
         responseMessageModal.style.display = 'none';
 
-        fetch('http://127.0.0.1:5000/edit_operator', {
+        fetch('http://127.0.0.1:5000/edit_matkul', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                id: operatorId,
-                nama: nama,
-                no_id: no_id,
-                level: level,
-                email: email
+                id_mata_kuliah: matkulId,
+                kode_prodi: kode_prodi,
+                nama_mata_kuliah: nama_mata_kuliah,
+                kode_mata_kuliah: kode_mata_kuliah,
+                semester: semester,
+                sks: sks
             })
         })
         .then(response => {
@@ -312,19 +388,19 @@
         });
     }
 
-    function deleteOperator(event, operatorId) {
+    function deleteMatkul(event, matkulId) {
         event.preventDefault();
 
         const responseMessage = document.getElementById('responseMessage');
         const responseText = document.getElementById('responseText');
         responseMessage.style.display = 'block';
 
-        fetch('http://127.0.0.1:5000/hapus_operator', {
+        fetch('http://127.0.0.1:5000/hapus_matkul', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ id: operatorId })
+            body: JSON.stringify({ id_mata_kuliah: matkulId })
         })
         .then(response => {
             if (!response.ok) {

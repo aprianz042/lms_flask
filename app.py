@@ -23,6 +23,9 @@ from controller.operator import *
 from controller.prodi import *
 from controller.kelas import *
 from controller.pengajar import *
+from controller.matkul import *
+from controller.mahasiswa import *
+
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -303,6 +306,68 @@ def hapus_pengajar():
     data = request.get_json()
     return delete_pengajar(data)
 ################################## END MODULE PENGAJAR ##################################
+
+
+################################## MODULE MATAKULIAH ##################################
+@app.route('/matkul')
+@login_required
+def matkul():
+    konten = "matkul"
+    matkul, daftar_prodi, error = get_matkul()
+    if error:
+        return error, 500
+    return render_template('home.html', matkul=matkul, daftar_prodi=daftar_prodi, konten=konten)
+
+@app.route('/insert_matkul', methods=['POST'])
+@login_required
+def add_record_matkul():
+    data = request.get_json()
+    return add_matkul(data)
+
+@app.route('/edit_matkul', methods=['POST'])
+@login_required
+def edit_record_matkul():
+    data = request.get_json()
+    return edit_matkul(data)
+
+@app.route('/hapus_matkul', methods=['POST'])
+@login_required
+def hapus_matkul():
+    data = request.get_json()
+    return delete_matkul(data)
+################################## END MODULE MATAKULIAH ##################################
+
+
+################################## MODULE MAHASISWA ##################################
+@app.route('/mahasiswa')
+@login_required
+def mahasiswa():
+    konten = "mahasiswa"
+    mahasiswa, daftar_prodi, error = get_mahasiswa()
+    if error:
+        return error, 500
+    return render_template('home.html', mahasiswa=mahasiswa, daftar_prodi=daftar_prodi, konten=konten)
+
+@app.route('/insert_mahasiswa', methods=['POST'])
+@login_required
+def add_record_mahasiswa():
+    data = request.get_json()
+    return add_mahasiswa(data)
+
+@app.route('/edit_mahasiswa', methods=['POST'])
+@login_required
+def edit_record_mahasiswa():
+    data = request.get_json()
+    return edit_mahasiswa(data)
+
+@app.route('/hapus_mahasiswa', methods=['POST'])
+@login_required
+def hapus_mahasiswa():
+    data = request.get_json()
+    return delete_mahasiswa(data)
+################################## END MODULE MAHASISWA ##################################
+
+
 
 ################################## MODULE KONTEN ##################################
 @app.route('/add_content')
