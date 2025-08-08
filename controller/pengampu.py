@@ -12,6 +12,10 @@ def get_pengampu():
                 """
                 SELECT 
                     p.id_pengampu,
+                    p.id_prodi,
+                    p.id_pengajar,
+                    p.id_mata_kuliah,
+                    p.id_kelas,
                     p.tahun_ajaran,
                     p.semester,
                     pr.nama_prodi,
@@ -68,7 +72,7 @@ def add_pengampu(data):
                 id_kelas, 
                 tahun_ajaran, 
                 semester)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s)
             """
             cursor.execute(insert_sql, (
                 id_prodi,

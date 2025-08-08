@@ -65,6 +65,13 @@
             </div>
             
             <div class="modal-body">
+                <div id="responseMessageModal" class="alert alert-dismissible fade show" role="alert" style="display: none;">
+                    <span id="responseTextModal"></span>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
                 <form id="dataForm" class="form-horizontal">
 
                     <div class="row form-group">
@@ -72,7 +79,7 @@
                         <div class="col-12 col-md-9">
                             <select name="id_prodi" id="id_prodi" class="form-control" required>
                                 {% for daftar in daftar_prodi %}
-                                <option value="{{ daftar.kode_prodi }}">{{ daftar.nama_prodi }}</option>
+                                <option value="{{ daftar.id_prodi }}">{{ daftar.nama_prodi }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -164,30 +171,42 @@
                         <div class="col-12 col-md-9">
                             <select name="id_prodi" id="id_prodi" class="form-control" required>
                                 {% for daftar in daftar_prodi %}
-                                <option value="{{ daftar.kode_prodi }}" {% if edit.id_prodi == daftar.kode_prodi %}selected{% endif %}>{{ daftar.nama_prodi }}</option>
+                                <option value="{{ daftar.id_prodi }}" {% if edit.id_prodi == daftar.id_prodi %}selected{% endif %}>{{ daftar.nama_prodi }}</option>
                                 {% endfor %}
                             </select>
                         </div>
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_pengajar" class="form-control-label">ID Pengajar</label></div>
+                        <div class="col col-md-3"><label for="id_pengajar" class="form-control-label">Pengajar</label></div>
                         <div class="col-12 col-md-9">
-                            <input type="text" id="id_pengajar" name="id_pengajar" value="{{ edit.id_pengajar }}" class="form-control" required>
+                            <select name="id_pengajar" id="id_pengajar" class="form-control" required>
+                                {% for d in pengajar %}
+                                <option value="{{ d.id_pengajar }}" {% if edit.id_pengajar == d.id_pengajar %}selected{% endif %}>{{ d.nama_pengajar }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_mata_kuliah" class="form-control-label">ID Mata Kuliah</label></div>
+                        <div class="col col-md-3"><label for="id_mata_kuliah" class="form-control-label">Mata Kuliah</label></div>
                         <div class="col-12 col-md-9">
-                            <input type="text" id="id_mata_kuliah" name="id_mata_kuliah" value="{{ edit.id_mata_kuliah }}" class="form-control" required>
+                            <select name="id_mata_kuliah" id="id_mata_kuliah" class="form-control" required>
+                                {% for e in matkul %}
+                                <option value="{{ e.id_mata_kuliah }}" {% if edit.id_mata_kuliah == e.id_mata_kuliah %}selected{% endif %}>{{ e.nama_mata_kuliah }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_kelas" class="form-control-label">ID Kelas</label></div>
+                        <div class="col col-md-3"><label for="id_kelas" class="form-control-label">Kelas</label></div>
                         <div class="col-12 col-md-9">
-                            <input type="text" id="id_kelas" name="id_kelas" value="{{ edit.id_kelas }}" class="form-control" required>
+                            <select name="id_kelas" id="id_kelas" class="form-control" required>
+                                {% for f in kelas %}
+                                <option value="{{ f.id_kelas }}" {% if edit.id_kelas == f.id_kelas %}selected{% endif %}>{{ f.nama_kelas }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
 
@@ -201,7 +220,10 @@
                     <div class="row form-group">
                         <div class="col col-md-3"><label for="semester" class="form-control-label">Semester</label></div>
                         <div class="col-12 col-md-9">
-                            <input type="text" id="semester" name="semester" value="{{ edit.semester }}" class="form-control" required>
+                            <select name="semester" id="semester" class="form-control" required>
+                                <option value="ganjil"  {% if edit.semester == "ganjil" %}selected{% endif %}>Ganjil</option>
+                                <option value="genap"  {% if edit.semester == "genap" %}selected{% endif %}>Genap</option>
+                            </select>
                         </div>
                     </div>
 
@@ -226,7 +248,9 @@
                 </button>
             </div>
             <div class="modal-body">
-                Apakah kamu yakin ingin menghapus pengampu a.n. {{edit.id_pengampu}} dengan mata kuliah {{edit.id_mata_kuliah}} pada kelas {{edit.id_kelas}} ?
+                Apakah kamu yakin ingin menghapus pengampu a.n. <b>{{edit.nama_pengajar}}</b> 
+                dengan mata kuliah <b>{{edit.nama_mata_kuliah}}</b> 
+                pada kelas <b>{{edit.nama_kelas}}</b> ?
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
