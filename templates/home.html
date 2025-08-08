@@ -18,48 +18,30 @@
     <!-- Right Panel -->
     <div id="right-panel" class="right-panel">
         <!-- Header-->
+
         {% include 'top_header.html' %}
         <!-- Header-->
         
         {% include 'breadcrumbs.html' %}
 
-        <!-- .content -->
-        {% if konten == 'video' %}
-            {% include 'modules/video.html' %}
-            
-        {% elif konten == 'operator' %}
-            {% include 'action/operator.html' %} 
+        <!-- .content -->        
+        {% set content_map = {
+            'video': 'modules/video.html',
+            'operator': 'modules/operator.html',
+            'prodi': 'modules/prodi.html',
+            'kelas': 'modules/kelas.html',
+            'pengajar': 'modules/pengajar.html',
+            'matkul': 'modules/matkul.html',
+            'mahasiswa': 'modules/mahasiswa.html',
+            'add_content': 'modules/add_content.html',
+            'debug_web': 'modules/webcam.html',
+            'debug_db': 'modules/debug_db.html'
+        } %}
 
-        {% elif konten == 'prodi' %}
-            {% include 'action/prodi.html' %} 
+        {% set template = content_map[konten] if konten in content_map else 'modules/home.html' %}
 
-        {% elif konten == 'kelas' %}
-            {% include 'action/kelas.html' %} 
+        {% include template %}
 
-        {% elif konten == 'pengajar' %}
-            {% include 'action/pengajar.html' %}
-
-        {% elif konten == 'matkul' %}
-            {% include 'action/matkul.html' %}
-
-        {% elif konten == 'mahasiswa' %}
-            {% include 'action/mahasiswa.html' %}
-
-
-        {% elif konten == 'add_content' %}
-            {% include 'action/add_content.html' %}
-
-
-        {% elif konten == 'debug_web' %}
-            {% include 'modules/webcam.html' %} 
-
-        {% elif konten == 'debug_db' %}
-            {% include 'modules/debug_db.html' %}  
-
-        {% else %}
-            {% include 'modules/home.html' %}
-
-        {% endif %}
         <!-- .content -->
     </div>
     <!-- Right Panel -->

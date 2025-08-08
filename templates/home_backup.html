@@ -1,0 +1,73 @@
+<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang=""> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang=""> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9" lang=""> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+
+<head>
+    {% include 'header.html' %}
+</head>
+
+<body>
+    <!-- Left Panel -->
+    {% include 'left_panel.html' %}
+    <!-- Left Panel -->
+
+    <!-- Right Panel -->
+    <div id="right-panel" class="right-panel">
+        <!-- Header-->
+
+        {% include 'top_header.html' %}
+        <!-- Header-->
+        
+        {% include 'breadcrumbs.html' %}
+
+        <!-- .content -->        
+        
+        {% if konten == 'video' %}
+            {% include 'modules/video.html' %}
+            
+        {% elif konten == 'operator' %}
+            {% include 'action/operator.html' %} 
+
+        {% elif konten == 'prodi' %}
+            {% include 'action/prodi.html' %} 
+
+        {% elif konten == 'kelas' %}
+            {% include 'action/kelas.html' %} 
+
+        {% elif konten == 'pengajar' %}
+            {% include 'action/pengajar.html' %}
+
+        {% elif konten == 'matkul' %}
+            {% include 'action/matkul.html' %}
+
+        {% elif konten == 'mahasiswa' %}
+            {% include 'action/mahasiswa.html' %}
+
+
+        {% elif konten == 'add_content' %}
+            {% include 'action/add_content.html' %}
+
+
+        {% elif konten == 'debug_web' %}
+            {% include 'modules/webcam.html' %} 
+
+        {% elif konten == 'debug_db' %}
+            {% include 'modules/debug_db.html' %}  
+
+        {% else %}
+            {% include 'modules/home.html' %}
+
+        {% endif %}
+        <!-- .content -->
+    </div>
+    <!-- Right Panel -->
+
+    {% include 'footer.html' %}
+
+</body>
+
+</html>

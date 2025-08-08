@@ -343,10 +343,15 @@ def hapus_matkul():
 @login_required
 def mahasiswa():
     konten = "mahasiswa"
-    mahasiswa, daftar_prodi, error = get_mahasiswa()
+    mahasiswa, daftar_prodi, prov, kelas, error = get_mahasiswa()
     if error:
         return error, 500
-    return render_template('home.html', mahasiswa=mahasiswa, daftar_prodi=daftar_prodi, konten=konten)
+    return render_template('home.html', 
+                           mahasiswa=mahasiswa, 
+                           daftar_prodi=daftar_prodi, 
+                           prov=prov, 
+                           kelas=kelas, 
+                           konten=konten)
 
 @app.route('/insert_mahasiswa', methods=['POST'])
 @login_required

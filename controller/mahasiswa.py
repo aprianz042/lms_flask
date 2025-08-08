@@ -11,11 +11,17 @@ def get_mahasiswa():
     try:
         with connection.cursor() as cursor:
             cursor.execute('SELECT * FROM mahasiswa')
-            pengajar = cursor.fetchall() 
+            mahasiswa = cursor.fetchall() 
 
             cursor.execute('SELECT * FROM prodi')
             prodi = cursor.fetchall() 
-        return pengajar, prodi, None
+
+            cursor.execute('SELECT * FROM provinsi')
+            provinsi = cursor.fetchall() 
+
+            cursor.execute('SELECT * FROM kelas')
+            kelas = cursor.fetchall() 
+        return mahasiswa, prodi, provinsi, kelas, None
     finally:
         connection.close()
 
@@ -76,7 +82,7 @@ def add_mahasiswa(data):
             ))
             connection.commit()
 
-        return jsonify({"message": "Mahasiswa menambahkan pengajar"}), 201
+        return jsonify({"message": "Berhasil menambahkan mahasiswa"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
@@ -129,7 +135,7 @@ def edit_mahasiswa(data):
             ))
             connection.commit()
 
-        return jsonify({"message": "Berhasil mengubah pengajar"}), 200
+        return jsonify({"message": "Berhasil mengubah mahasiswa"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
@@ -139,7 +145,7 @@ def delete_mahasiswa(data):
     id_mahasiswa = data.get('id_mahasiswa')
     
     if not id_mahasiswa:
-        return jsonify({"error": "Pengajar tidak ditemukan"}), 400
+        return jsonify({"error": "Mahasiswa tidak ditemukan"}), 400
     
     connection = get_db_connection()
     try:
