@@ -38,7 +38,59 @@ def get_krs():
                     p.id_kelas ASC, mk.nama_mata_kuliah ASC;
                 """)
             data = cursor.fetchall()
-        return data, None
+
+            cursor.execute(
+                """
+                SELECT 
+                    kr.id_krs,
+                    kr.id_mahasiswa,
+                    kr.id_mata_kuliah,
+                    kr.id_kelas,
+                    kr.id_pengampu,
+                    kr.nilai,
+                    kr.tahun_ajaran,
+                    kr.semester,
+                    kr.status,
+                    mhs.nama_mahasiswa,
+                    mk.nama_mata_kuliah,
+                    kls.nama_kelas,
+                    pg.nama_pengajar
+                FROM 
+                    krs kr
+                JOIN 
+                    mahasiswa mhs ON kr.id_mahasiswa = mhs.id_mahasiswa
+                JOIN
+                    mata_kuliah mk ON kr.id_mata_kuliah = mk.id_mata_kuliah
+                JOIN
+                    kelas kls ON kr.id_kelas = kls.id_kelas
+                JOIN 
+                    pengajar pg ON kr.id_pengampu = pg.id_pengajar                 
+                ORDER BY 
+                    kr.id_kelas ASC, mk.nama_mata_kuliah ASC;
+                """)
+            krs = cursor.fetchall()
+
+            mahasiswa_mata_kuliah = {}
+            for row in krs:
+                mahasiswa_id = row['id_mahasiswa']
+                mata_kuliah_pengajar = f"{row['nama_mata_kuliah']} - {row['nama_pengajar']}" 
+                if mahasiswa_id not in mahasiswa_mata_kuliah:
+                    mahasiswa_mata_kuliah[mahasiswa_id] = {
+                        'nama_mahasiswa': row['nama_mahasiswa'],
+                        'mata_kuliah': [],  
+                        'nama_kelas': row['nama_kelas']
+                    }
+                mahasiswa_mata_kuliah[mahasiswa_id]['mata_kuliah'].append(mata_kuliah_pengajar)
+
+            d_krs = []
+            for mahasiswa_id, data in mahasiswa_mata_kuliah.items():
+                d_krs.append({
+                    'nama_mahasiswa': data['nama_mahasiswa'],
+                    'mata_kuliah': data['mata_kuliah'],  
+                    'nama_kelas': data['nama_kelas'],
+                })
+
+        return data, d_krs, None
     finally:
         connection.close()
 
@@ -79,14 +131,43 @@ def add_krs(data):
                 ORDER BY 
                     p.id_kelas ASC, mk.nama_mata_kuliah ASC;
                 """
-            cursor.execute(sql_data, (id_ampuan))
-            krs = cursor.fetchall() 
-        return jsonify({"message": str(krs)}), 201
-        #return jsonify({"message": "Berhasil menambahkan pengampu"}), 201
+            cursor.execute(sql_data, (id_ampuan,))  
+            krs = cursor.fetchall()
+
+            sql_mhs = "SELECT * FROM mahasiswa WHERE id_kelas = %s"
+            mahasiswa_data = [] 
+            for kelas_data in krs:
+                cursor.execute(sql_mhs, (kelas_data['id_kelas'],))  
+                mahasiswa_data.extend(cursor.fetchall())  
+
+            data_to_insert = []
+            for mahasiswa in mahasiswa_data:
+                data = (
+                    mahasiswa['id_mahasiswa'],  
+                    krs[0]['id_mata_kuliah'],  
+                    krs[0]['id_kelas'],        
+                    krs[0]['id_pengampu'],     
+                    '',                        
+                    krs[0]['tahun_ajaran'],
+                    krs[0]['semester'],
+                    'on_going'                 
+                )
+                data_to_insert.append(data)
+
+            sql_insert = """
+            INSERT INTO krs (id_mahasiswa, id_mata_kuliah, id_kelas, id_pengampu, nilai, tahun_ajaran, semester, status)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """
+
+            cursor.executemany(sql_insert, data_to_insert)
+            connection.commit()
+
+        return jsonify({"message": "Berhasil menambahkan pengampu"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
         connection.close()
+
 
 
 def edit_krs(data):

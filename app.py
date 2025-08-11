@@ -19,6 +19,7 @@ from function.video_process import generate_video, frontal_video, proses_img
 from function.stopCam import stop_
 from function.hashing import md5_hash
 
+from controller.home import *
 from controller.operator import *
 from controller.prodi import *
 from controller.kelas import *
@@ -82,8 +83,8 @@ def login():
         with connection.cursor() as cursor:
             cursor.execute('SELECT * FROM user WHERE no_id = %s AND pass = %s', (username, password_hash))
             user = cursor.fetchone()
-            connection.close()
             if user:
+                connection.close()
                 user_obj = User(user['id'], user['nama'], user['no_id'], user['level'])
                 login_user(user_obj)
                 session['id'] = user['id']
@@ -94,8 +95,8 @@ def login():
             else:
                 cursor.execute('SELECT * FROM pengajar WHERE nip = %s AND password = %s', (username, password_hash))
                 pengajar = cursor.fetchone()
-                connection.close()
                 if pengajar:
+                    connection.close()
                     user_obj = User(pengajar['id_pengajar'], pengajar['nama_pengajar'], pengajar['nip'], pengajar['kategori'])
                     login_user(user_obj)
                     session['id'] = pengajar['id_pengajar']
@@ -106,8 +107,8 @@ def login():
                 else:
                     cursor.execute('SELECT * FROM mahasiswa WHERE nim = %s AND password = %s', (username, password_hash))
                     mhs = cursor.fetchone()
-                    connection.close()
                     if mhs:
+                        connection.close()
                         user_obj = User(mhs['id_mahasiswa'], mhs['nama_mahasiswa'], mhs['nim'], "mahasiswa")
                         login_user(user_obj)
                         session['id'] = mhs['id_mahasiswa']
@@ -131,35 +132,6 @@ def logout():
     return redirect(url_for('login'))
 ################################## Login / Logout / Session ##################################
 
-################################## Index ##################################
-@app.route('/')
-def index():
-    if 'user_id' in session:
-        return redirect(url_for('home'))
-    else:
-        return redirect(url_for('login'))
-
-@app.route('/home')
-@login_required
-def home():
-    connection = get_db_connection()
-    if connection is None:
-        return "Error connecting to the database.", 500
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute('SELECT berkas FROM materi WHERE id = 7')
-            path = cursor.fetchone()  
-            if path:
-                path = path['berkas']
-            else:
-                path = None 
-            konten = "video"      
-    finally:
-        connection.close() 
-    return render_template('home.html', konten=konten, video=path, session=session)
-################################## Index ##################################
-
-
 ################################## Fungsi Webcam / Video ##################################
 @socketio.on('images')
 def handle_image(data):
@@ -175,22 +147,41 @@ def video_frontal():
 
 @app.route('/debug_video')
 def debug_video():
+    konten = "debug_video"
     connection = get_db_connection()
     if connection is None:
         return "Error connecting to the database.", 500
     try:
         with connection.cursor() as cursor:
-            cursor.execute('SELECT berkas FROM materi WHERE id = 1')
+            cursor.execute('SELECT berkas FROM materi WHERE id = 7')
             path = cursor.fetchone()  
             if path:
                 path = path['berkas']
             else:
-                path = None 
-            konten = "debug"       
+                path = None        
     finally:
         connection.close()  # Pastikan koneksi ditutup setelah selesai
-    return render_template('home.html', konten=konten, video=path)
+    return render_template('home.html', konten=konten, video=path, session=session)
 ################################## Fungsi Webcam / Video ##################################
+
+################################## Index / HOME ##################################
+@app.route('/')
+def index():
+    if 'user_id' in session:
+        return redirect(url_for('home'))
+    else:
+        return redirect(url_for('login'))
+
+@app.route('/home')
+@login_required
+def home():
+    konten = "home" 
+    data_home, error = get_data_home()
+    if error:
+        return error, 500
+    return render_template('home.html', data_home=data_home, konten=konten, session=session)
+################################## Index / HOME ##################################
+
 
 ################################## MODULE USER / OPERATOR ##################################
 @app.route('/operator')
@@ -415,11 +406,12 @@ def hapus_pengampu():
 @login_required
 def krs():
     konten = "krs"
-    data, error = get_krs()
+    data, d_krs, error = get_krs()
     if error:
         return error, 500
     return render_template('home.html', 
                            data=data, 
+                           d_krs=d_krs,
                            konten=konten)
 
 @app.route('/insert_krs', methods=['POST'])

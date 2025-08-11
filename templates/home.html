@@ -11,21 +11,14 @@
 </head>
 
 <body>
-    <!-- Left Panel -->
     {% include 'left_panel.html' %}
-    <!-- Left Panel -->
-
-    <!-- Right Panel -->
     <div id="right-panel" class="right-panel">
-        <!-- Header-->
 
         {% include 'top_header.html' %}
-        <!-- Header-->
-        
         {% include 'breadcrumbs.html' %}
 
-        <!-- .content -->        
         {% set content_map = {
+            'home': 'modules/home.html',
             'video': 'modules/video.html',
             'operator': 'modules/operator.html',
             'prodi': 'modules/prodi.html',
@@ -34,7 +27,7 @@
             'matkul': 'modules/matkul.html',
             'mahasiswa': 'modules/mahasiswa.html',
             'add_content': 'modules/add_content.html',
-            'debug_web': 'modules/webcam.html',
+            'debug_video': 'modules/video.html',
             'debug_db': 'modules/debug_db.html',
             'pengampu': 'modules/pengampu.html',
             'krs': 'modules/krs.html'
@@ -44,9 +37,7 @@
 
         {% include template %}
 
-        <!-- .content -->
     </div>
-    <!-- Right Panel -->
 
     {% include 'footer.html' %}
 
