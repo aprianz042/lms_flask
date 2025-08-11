@@ -101,7 +101,7 @@
                 <li class="{{ 'active' if request.endpoint == 'matkul' else '' }}"><a href="{{ url_for('matkul') }}"> <i class="menu-icon fa fa-book"></i>Mata Kuliah</a></li>
                 <li class="{{ 'active' if request.endpoint == 'mahasiswa' else '' }}"><a href="{{ url_for('mahasiswa') }}"> <i class="menu-icon fa fa-users"></i>Mahasiswa</a></li>
                 <li class="{{ 'active' if request.endpoint == 'pengampu' else '' }}"><a href="{{ url_for('pengampu') }}"> <i class="menu-icon fa fa-suitcase"></i>Pengampu</a></li>
-                <li><a href=""> <i class="menu-icon fa fa-copy"></i>KRS</a></li>
+                <li class="{{ 'active' if request.endpoint == 'krs' else '' }}"><a href="{{ url_for('krs') }}"> <i class="menu-icon fa fa-copy"></i>KRS</a></li>
                 
                 {% elif session.level == 'operator' %}
                 <li><a href="{{ url_for('add_content') }}"> <i class="menu-icon fa fa-book"></i>Add Content</a></li>

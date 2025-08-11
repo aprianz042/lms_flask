@@ -26,6 +26,7 @@ from controller.pengajar import *
 from controller.matkul import *
 from controller.mahasiswa import *
 from controller.pengampu import *
+from controller.krs import *
 
 
 app = Flask(__name__)
@@ -408,6 +409,37 @@ def hapus_pengampu():
     data = request.get_json()
     return delete_pengampu(data)
 ################################## END MODULE PENGAMPU ##################################
+
+################################## MODULE KRS ##################################
+@app.route('/krs')
+@login_required
+def krs():
+    konten = "krs"
+    data, error = get_krs()
+    if error:
+        return error, 500
+    return render_template('home.html', 
+                           data=data, 
+                           konten=konten)
+
+@app.route('/insert_krs', methods=['POST'])
+@login_required
+def add_record_krs():
+    data = request.get_json()
+    return add_krs(data)
+
+@app.route('/edit_krs', methods=['POST'])
+@login_required
+def edit_record_krs():
+    data = request.get_json()
+    return edit_krs(data)
+
+@app.route('/hapus_krs', methods=['POST'])
+@login_required
+def hapus_krs():
+    data = request.get_json()
+    return delete_krs(data)
+################################## END MODULE KRS ##################################
 
 
 ################################## MODULE KONTEN ##################################
