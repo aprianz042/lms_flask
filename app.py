@@ -1,6 +1,4 @@
 import os
-import random
-import string
 import base64
 
 from io import BytesIO
@@ -9,15 +7,13 @@ from flask import Flask, flash, render_template, Response, request, session, jso
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_socketio import SocketIO, emit
 
-from werkzeug.utils import secure_filename
-from datetime import datetime
-
 from function.koneksi import get_db_connection
-from function.frontal import half_flip
-from function.head_data import data_wajah
-from function.video_process import generate_video, frontal_video, proses_img
-from function.stopCam import stop_
-from function.hashing import md5_hash
+from function.frontal import *
+from function.head_data import *
+from function.video_process import *
+from function.stopCam import *
+from function.hashing import *
+from function.generate_file import *
 
 from controller.home import *
 from controller.operator import *
@@ -29,6 +25,7 @@ from controller.mahasiswa import *
 from controller.pengampu import *
 from controller.krs import *
 from controller.pengajaran import *
+from controller.materi import *
 
 
 app = Flask(__name__)
@@ -450,16 +447,6 @@ def pengajaran():
                            kelas=kelas, 
                            konten=konten)
 
-@app.route('/pelajaran/<int:id>')
-@login_required
-def pelajaran(id):
-    konten = "pelajaran"
-    materi, error = get_isimateri(id)
-    if error:
-        return error, 500
-    return render_template('home.html', konten=konten, materi=materi)
-
-
 @app.route('/insert_pengajaran', methods=['POST'])
 @login_required
 def add_record_pengajaran():
@@ -479,108 +466,34 @@ def hapus_pengajaran():
     return delete_pengajaran(data)
 ################################## END MODULE PENGAJARAN ##################################
 
-################################## MODULE KONTEN ##################################
-@app.route('/add_content')
-def add_content():
-    konten = "add_content"
-    connection = get_db_connection()
-    if connection is None:
-        return "Error connecting to the database.", 500 
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute('SELECT * FROM materi')
-            materi = cursor.fetchall() 
+################################## MODULE PELAJARAN ##################################
+@app.route('/materi/<int:id>')
+@login_required
+def materi(id):
+    konten = "materi"
+    materi, matkul, error = get_materi(id)
+    if error:
+        return error, 500
+    return render_template('home.html', konten=konten, materi=materi, matkul=matkul)
 
-            cursor.execute('SELECT * FROM mata_kuliah')
-            matkul = cursor.fetchall() 
+@app.route('/insert_materi', methods=['POST'])
+@login_required
+def add_record_materi():
+    data = request.get_json()
+    return add_materi(data)
 
-            cursor.execute('SELECT * FROM pengajar WHERE kategori = "dosen" ')
-            pengajar = cursor.fetchall()
+@app.route('/edit_materi', methods=['POST'])
+@login_required
+def edit_record_materi():
+    data = request.get_json()
+    return edit_materi(data)
 
-            cursor.execute('SELECT * FROM kelas')
-            kelas = cursor.fetchall() 
-    finally:
-        connection.close() 
-    return render_template('home.html', materi=materi, konten=konten, matkul=matkul, pengajar=pengajar, kelas=kelas)
-
-ALLOWED_EXTENSIONS = {'pdf', 'mp4', 'docx', 'xlsx', 'rar', 'zip'}  # Daftar ekstensi yang diizinkan
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-def generate_filename(extension):
-    random_string = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
-    now = datetime.now()
-    timestamp = now.strftime("%d%m%Y_%H%M%S")  # Format: tanggal_bulan_tahun_jam_menit_detik
-    filename = f"IPDN_{random_string}_{timestamp}.{extension}"
-    return filename
-
-@app.route('/insert_content', methods=['POST'])
-def add_record_content():
-    data = request.form  # Mengambil data form, bukan JSON karena ada file
-    
-    id_mata_kuliah = data.get('mata_kuliah')
-    id_kelas =  data.get('kelas')
-    tahun_ajaran = data.get('tahun_ajaran')
-    semester = data.get('semester')
-    judul_materi = data.get('judul')
-    jenis = data.get('jenis')
-    deskripsi = data.get('deskripsi')
-    kategori = data.get('kategori')
-    id_pengampu = data.get('id_pengampu')
-    berkas = request.files['berkas'] 
-
-    if jenis == "0" or kategori == "0" or id_pengampu == "0" or id_mata_kuliah == "0":
-        return jsonify({"error": "Jenis dan Kategori tidak boleh kosong"}), 400
-    if not berkas:
-        return jsonify({"error": "Berkas tidak boleh kosong"}), 400
-    if not allowed_file(berkas.filename):
-        return jsonify({"error": "Tipe file tidak diizinkan. Hanya file PDF, video, dan audio yang diperbolehkan."}), 400
-    extension = berkas.filename.rsplit('.', 1)[1].lower()
-    filename = generate_filename(extension)
-    upload_folder = os.path.join('static', 'materi')  
-    if not os.path.exists(upload_folder):
-        os.makedirs(upload_folder)  
-    file_path = os.path.join(upload_folder, filename)
-    berkas.save(file_path) 
-    connection = get_db_connection()
-    try:
-        with connection.cursor() as cursor:
-            sql = """
-                INSERT INTO materi (id_mata_kuliah, id_kelas, tahun_ajaran, semester, judul_materi, jenis, deskripsi, kategori, berkas, id_pengampu)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """
-            cursor.execute(sql, (id_mata_kuliah, id_kelas, tahun_ajaran, semester ,judul_materi, jenis, deskripsi, kategori, filename, id_pengampu))
-            connection.commit()
-        return jsonify({"message": "Record inserted successfully"}), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    finally:
-        connection.close()
-
-@app.route('/hapus/<int:id>', methods=['POST'])
-def hapus(id):
-    connection = get_db_connection()
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT berkas FROM materi WHERE id = %s", (id,))
-            result = cursor.fetchone()
-            
-            if result:
-                berkas = result["berkas"] 
-                berkas_path = os.path.join('static', 'materi', berkas)  
-                
-                if os.path.exists(berkas_path):
-                    os.remove(berkas_path) 
-                
-                cursor.execute("DELETE FROM materi WHERE id = %s", (id,))
-                connection.commit()
-                return jsonify({"message": "Record deleted successfully"}), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    finally:
-        connection.close()    
-    return redirect(url_for('add_content'))
-################################## END MODULE KONTEN ##################################
+@app.route('/hapus_materi', methods=['POST'])
+@login_required
+def hapus_materi():
+    data = request.get_json()
+    return delete_materi(data)
+################################## END MODULE PELAJARAN ##################################
 
 ################################## DEBUG DB ##################################
 @app.route('/debug_db')

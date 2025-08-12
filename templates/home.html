@@ -26,13 +26,12 @@
             'pengajar': 'modules/pengajar.html',
             'matkul': 'modules/matkul.html',
             'mahasiswa': 'modules/mahasiswa.html',
-            'add_content': 'modules/add_content.html',
             'debug_video': 'modules/video.html',
             'debug_db': 'modules/debug_db.html',
             'pengampu': 'modules/pengampu.html',
             'krs': 'modules/krs.html',
             'pengajaran': 'modules/pengajaran.html',
-            'pelajaran': 'modules/konten.html'
+            'materi': 'modules/materi.html'
         } %}
 
         {% set template = content_map[konten] if konten in content_map else 'modules/home.html' %}

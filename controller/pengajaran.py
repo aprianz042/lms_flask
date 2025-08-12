@@ -1,19 +1,6 @@
 from flask import jsonify
 from function.koneksi import get_db_connection
 
-def get_isimateri(id):
-    connection = get_db_connection()
-    if connection is None:
-        return None, "Error connecting to the database."
-    try:
-        with connection.cursor() as cursor:
-            sql_select = "SELECT * FROM materi WHERE id_pengampu = %s;"
-            cursor.execute(sql_select, (id))
-            materi = cursor.fetchall() 
-        return materi, None
-    finally:
-        connection.close()
-
 def get_pengajaran(id_pengajar):
     connection = get_db_connection()
     if connection is None:

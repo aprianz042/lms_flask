@@ -10,20 +10,18 @@
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <strong class="card-title">Data Materi {% if materi %}{{ materi[0].id_mata_kuliah }}{% endif %}</strong>
+                        Mata Kuliah <strong class="card-title">{% if materi %}{{ materi[0].nama_mata_kuliah }}{% endif %}</strong>, Pengampu <strong>{% if materi %}{{ materi[0].nama_pengajar }}{% endif %}</strong>
                     </div>
                     <div class="card-body">
                         <button type="button" class="btn btn-success mb-1" data-toggle="modal" data-target="#add_materi">
-                            Tambah Konten
+                            Tambah Materi
                         </button>
                         <table id="bootstrap-data-table-export" class="table table-striped table-bordered">
                             <thead>
                                 <tr>
-                                    <th>Id</th>
-                                    <th>Mata Kuliah</th>
+                                    <th>No</th>
                                     <th>Judul Materi</th>                                 
                                     <th>Kategori</th>
-                                    <th>Pengampu</th>
                                     <th>Tipe</th>
                                     <th>Berkas</th>
                                     <th>Deskripsi</th>
@@ -34,20 +32,17 @@
                             <tbody>
                                 {% for materi in materi %}
                                 <tr>
-                                    <td>{{ materi.id }}</td>
-                                    <td>{{ materi.id_mata_kuliah }}</td>
+                                    <td>{{ loop.index }}</td>
                                     <td>{{ materi.judul_materi }}</td>
                                     <td>{{ materi.kategori }}</td>
-                                    <td>{{ materi.id_pengampu }}</td>
                                     <td>{{ materi.jenis }}</td>
                                     <td>{{ materi.berkas }}</td>
                                     <td>{{ materi.deskripsi }}</td>
                                     <td>
-                                        <button type="submit" class="btn btn-primary btn-sm btn-block">
+                                        <a href="#" class="btn btn-primary btn-sm btn-block" data-toggle="modal" data-target="#modalEdit{{ materi.id }}">
                                             <i class="fa fa-edit"></i> Edit
-                                        </button>
-                                    
-                                        <a href="#" class="btn btn-danger btn-sm btn-block" data-toggle="modal" data-target="#konfirmasiModal{{ materi.id }}">
+                                        </a>
+                                        <a href="#" class="btn btn-danger btn-sm btn-block" data-toggle="modal" data-target="#modalHapus{{ materi.id }}">
                                             <i class="fa fa-trash-o"></i> Hapus
                                         </a>
                                     </td>
@@ -64,25 +59,23 @@
 </div><!-- .content -->
 
 {% for edit in materi %}
-<!-- Modal Konfirmasi Hapus -->
-<div class="modal fade" id="konfirmasiModal{{ edit.id }}" tabindex="-1" role="dialog" aria-labelledby="konfirmasiModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+<div class="modal fade" id="modalHapus{{ edit.id }}" tabindex="-1" role="dialog" aria-labelledby="modalHapus" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="konfirmasiModalLabel">Konfirmasi Penghapusan</h5>
+                <h5 class="modal-title" id="modalHapus">Konfirmasi Penghapusan</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                Apakah kamu yakin ingin menghapus materi {{edit.judul}}?
+                Apakah kamu yakin ingin menghapus materi {{edit.judul_materi}}?
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                <!-- Form untuk menghapus data -->
-                <form action="{{ url_for('pengajaran', id=edit.id) }}" method="POST">
-                    <button type="submit" class="btn btn-danger">Hapus</button>
-                </form>
+                <button type="button" class="btn btn-danger" onclick="deleteMatkul(event, '{{ edit.id }}')">
+                    <i class="fa fa-trash-o"></i> Hapus
+                </button>
             </div>
         </div>
     </div>

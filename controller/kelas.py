@@ -5,12 +5,11 @@ def get_kelas():
     connection = get_db_connection()
     if connection is None:
         return None, "Error connecting to the database."
-    
     try:
         with connection.cursor() as cursor:
             cursor.execute('SELECT * FROM kelas')
-            operator = cursor.fetchall()
-        return operator, None
+            kelas = cursor.fetchall()
+        return kelas, None
     finally:
         connection.close()
 

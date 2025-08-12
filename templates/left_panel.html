@@ -105,8 +105,6 @@
                 
                 {% elif session.level == 'dosen' or session.level == 'pelatih' %}
                 <li class="{{ 'active' if request.endpoint == 'pengajaran' else '' }}"><a href="{{ url_for('pengajaran') }}"> <i class="menu-icon fa fa-copy"></i>Pengajaran</a></li>
-                <li><a href="{{ url_for('add_content') }}"> <i class="menu-icon fa fa-book"></i>Add Content</a></li>
-
                 {% endif %}
 
                 <h3 class="menu-title">Debug</h3>
