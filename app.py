@@ -28,6 +28,7 @@ from controller.matkul import *
 from controller.mahasiswa import *
 from controller.pengampu import *
 from controller.krs import *
+from controller.pengajaran import *
 
 
 app = Flask(__name__)
@@ -433,6 +434,50 @@ def hapus_krs():
     return delete_krs(data)
 ################################## END MODULE KRS ##################################
 
+################################## MODULE PENGAJARAN ##################################
+@app.route('/pengajaran')
+@login_required
+def pengajaran():
+    konten = "pengajaran"
+    ampuan, daftar_prodi, pengajar, matkul, kelas, error = get_pengajaran(session['id'])
+    if error:
+        return error, 500
+    return render_template('home.html', 
+                           ampuan=ampuan, 
+                           daftar_prodi=daftar_prodi, 
+                           pengajar=pengajar,
+                           matkul=matkul, 
+                           kelas=kelas, 
+                           konten=konten)
+
+@app.route('/pelajaran/<int:id>')
+@login_required
+def pelajaran(id):
+    konten = "pelajaran"
+    materi, error = get_isimateri(id)
+    if error:
+        return error, 500
+    return render_template('home.html', konten=konten, materi=materi)
+
+
+@app.route('/insert_pengajaran', methods=['POST'])
+@login_required
+def add_record_pengajaran():
+    data = request.get_json()
+    return add_pengajaran(data)
+
+@app.route('/edit_pengajaran', methods=['POST'])
+@login_required
+def edit_record_pengajaran():
+    data = request.get_json()
+    return edit_pengajaran(data)
+
+@app.route('/hapus_pengajaran', methods=['POST'])
+@login_required
+def hapus_pengajaran():
+    data = request.get_json()
+    return delete_pengajaran(data)
+################################## END MODULE PENGAJARAN ##################################
 
 ################################## MODULE KONTEN ##################################
 @app.route('/add_content')

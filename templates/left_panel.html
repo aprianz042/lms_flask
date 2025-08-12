@@ -103,7 +103,8 @@
                 <li class="{{ 'active' if request.endpoint == 'pengampu' else '' }}"><a href="{{ url_for('pengampu') }}"> <i class="menu-icon fa fa-suitcase"></i>Pengampu</a></li>
                 <li class="{{ 'active' if request.endpoint == 'krs' else '' }}"><a href="{{ url_for('krs') }}"> <i class="menu-icon fa fa-copy"></i>KRS</a></li>
                 
-                {% elif session.level == 'operator' %}
+                {% elif session.level == 'dosen' or session.level == 'pelatih' %}
+                <li class="{{ 'active' if request.endpoint == 'pengajaran' else '' }}"><a href="{{ url_for('pengajaran') }}"> <i class="menu-icon fa fa-copy"></i>Pengajaran</a></li>
                 <li><a href="{{ url_for('add_content') }}"> <i class="menu-icon fa fa-book"></i>Add Content</a></li>
 
                 {% endif %}

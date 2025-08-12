@@ -10,7 +10,7 @@
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <strong class="card-title">Data Materi</strong>
+                        <strong class="card-title">Data Materi {% if materi %}{{ materi[0].id_mata_kuliah }}{% endif %}</strong>
                     </div>
                     <div class="card-body">
                         <button type="button" class="btn btn-success mb-1" data-toggle="modal" data-target="#add_materi">
@@ -80,7 +80,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
                 <!-- Form untuk menghapus data -->
-                <form action="{{ url_for('hapus', id=edit.id) }}" method="POST">
+                <form action="{{ url_for('pengajaran', id=edit.id) }}" method="POST">
                     <button type="submit" class="btn btn-danger">Hapus</button>
                 </form>
             </div>
