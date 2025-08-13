@@ -34,23 +34,53 @@ def get_materi(id):
             cursor.execute(sql_select, (id))
             materi = cursor.fetchall() 
 
+            sql_pengampu = """
+                SELECT 
+                    p.id_pengampu,
+                    p.id_prodi,
+                    p.id_pengajar,
+                    p.id_mata_kuliah,
+                    p.id_kelas,
+                    p.tahun_ajaran,
+                    p.semester,
+                    pr.nama_prodi,
+                    pr.kode_prodi,
+                    pg.nama_pengajar,
+                    mk.nama_mata_kuliah,
+                    mk.kode_mata_kuliah,
+                    k.nama_kelas
+                FROM 
+                    pengampu p
+                JOIN 
+                    prodi pr ON p.id_prodi = pr.id_prodi
+                JOIN 
+                    pengajar pg ON p.id_pengajar = pg.id_pengajar
+                JOIN 
+                    mata_kuliah mk ON p.id_mata_kuliah = mk.id_mata_kuliah
+                JOIN 
+                    kelas k ON p.id_kelas = k.id_kelas
+                WHERE 
+                    p.id_pengampu = %s;
+                """
+            cursor.execute(sql_pengampu, (id))
+            pengampu = cursor.fetchone()
+
             cursor.execute('SELECT * FROM mata_kuliah')
             mata_kuliah = cursor.fetchall()
-        return materi, mata_kuliah, None
+        return materi, mata_kuliah, pengampu, None
     finally:
         connection.close()
 
-def add_materi(data):
-    id_mata_kuliah = data.get('mata_kuliah')
-    id_kelas =  data.get('kelas')
+def add_materi(data, berkas):
+    id_mata_kuliah = data.get('matkul')
+    id_kelas =  data.get('id_kelas')
     tahun_ajaran = data.get('tahun_ajaran')
     semester = data.get('semester')
-    judul_materi = data.get('judul')
+    judul_materi = data.get('materi')
     jenis = data.get('jenis')
     deskripsi = data.get('deskripsi')
     kategori = data.get('kategori')
-    id_pengampu = data.get('id_pengampu')
-    berkas = request.files['berkas'] 
+    id_pengampu = data.get('id_pengampu') 
 
     if jenis == "0" or kategori == "0" or id_pengampu == "0" or id_mata_kuliah == "0":
         return jsonify({"error": "Jenis dan Kategori tidak boleh kosong"}), 400
@@ -58,6 +88,7 @@ def add_materi(data):
         return jsonify({"error": "Berkas tidak boleh kosong"}), 400
     if not allowed_file(berkas.filename):
         return jsonify({"error": "Tipe file tidak diizinkan. Hanya file PDF, video, dan audio yang diperbolehkan."}), 400
+    
     extension = berkas.filename.rsplit('.', 1)[1].lower()
     filename = generate_filename(extension)
     upload_folder = os.path.join('static', 'materi')  
@@ -76,7 +107,8 @@ def add_materi(data):
             connection.commit()
         return jsonify({"message": "Berhasil tambah materi"}), 201
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        #return jsonify({"error": str(e)}), 500
+        return jsonify({"error": str(data)}), 201
     finally:
         connection.close()
 
@@ -136,18 +168,28 @@ def edit_materi(data):
 
 def delete_materi(data):
     id_materi = data.get('id_materi')
-    
     if not id_materi:
-        return jsonify({"error": "Kelas tidak ditemukan"}), 400
-    
+        return jsonify({"error": "Materi tidak ditemukan"}), 400
     connection = get_db_connection()
     try:
         with connection.cursor() as cursor:
-            sql = "DELETE FROM materi WHERE id_materi = %s"
+            cursor.execute('SELECT berkas FROM materi WHERE id = %s', (id_materi,))
+            result = cursor.fetchall()
+            if not result:
+                return jsonify({"error": "Materi tidak ditemukan"}), 400
+            for data in result:  
+                berkas = data['berkas']
+                file_path = os.path.join('static', 'materi', berkas)
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+
+            sql = "DELETE FROM materi WHERE id = %s"
             cursor.execute(sql, (id_materi,))
             connection.commit()
-            return jsonify({"message": "Kelas berhasil dihapus"}), 200
+
+            return jsonify({"message": "Materi dan berkas berhasil dihapus"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
         connection.close()
+

@@ -10,7 +10,7 @@
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        Mata Kuliah <strong class="card-title">{% if materi %}{{ materi[0].nama_mata_kuliah }}{% endif %}</strong>, Pengampu <strong>{% if materi %}{{ materi[0].nama_pengajar }}{% endif %}</strong>
+                        Mata Kuliah <strong class="card-title">{{ pengampu.nama_mata_kuliah }}</strong>, Pengampu <strong>{{ pengampu.nama_pengajar }}</strong>
                     </div>
                     <div class="card-body">
                         <button type="button" class="btn btn-success mb-1" data-toggle="modal" data-target="#add_materi">
@@ -58,36 +58,11 @@
     </div><!-- .animated -->
 </div><!-- .content -->
 
-{% for edit in materi %}
-<div class="modal fade" id="modalHapus{{ edit.id }}" tabindex="-1" role="dialog" aria-labelledby="modalHapus" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalHapus">Konfirmasi Penghapusan</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                Apakah kamu yakin ingin menghapus materi {{edit.judul_materi}}?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-danger" onclick="deleteMatkul(event, '{{ edit.id }}')">
-                    <i class="fa fa-trash-o"></i> Hapus
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-{% endfor %}
-
-
 <div class="modal fade" id="add_materi" tabindex="-1" role="dialog" aria-labelledby="mediumModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <strong>Tambah Materi</strong>
+                <strong>Tambah Materi {{ pengampu.nama_mata_kuliah }}</strong>
             </div>
             
             <div class="modal-body">
@@ -99,50 +74,43 @@
                 </div>
                 
                 <form id="dataForm" class="form-horizontal" enctype="multipart/form-data">
+                    <input type="text" id="id_pengampu" name="id_pengampu" value="{{ pengampu.id_pengampu }}" class="form-control" hidden>
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="matkul" class=" form-control-label">Mata Kuliah</label></div>
+                        <div class="col col-md-3"><label class="form-control-label">Pengampu</label></div>
                         <div class="col-12 col-md-9">
-                            <select name="matkul" id="matkul" class="form-control" required>
-                                <option value="0">Pilih Mata Kuliah ...</option>
-                                {% for matkul in matkul %}
-                                <option value="{{ matkul.id_mata_kuliah }}">{{ matkul.nama_mata_kuliah }}</option>
-                                {% endfor %}
-                            </select>
+                            <input type="text" class="form-control" value="{{ pengampu.nama_pengajar }}" disabled>
                         </div>
                     </div>
 
+                    <input type="text" id="matkul" name="matkul" value="{{ pengampu.id_mata_kuliah }}" class="form-control" hidden>
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_kelas" class=" form-control-label">Mata Kuliah</label></div>
+                        <div class="col col-md-3"><label class="form-control-label">Mata Kuliah</label></div>
                         <div class="col-12 col-md-9">
-                            <select name="id_kelas" id="id_kelas" class="form-control" required>
-                                <option value="0">Pilih Kelas ...</option>
-                                {% for kelas in kelas %}
-                                <option value="{{ kelas.id_kelas }}">{{ kelas.nama_kelas }}</option>
-                                {% endfor %}
-                            </select>
+                            <input type="text" class="form-control" value="{{ pengampu.nama_mata_kuliah }}" disabled>
                         </div>
                     </div>
 
+                    <input type="text" id="id_kelas" name="id_kelas" value="{{ pengampu.id_kelas }}" class="form-control" hidden>
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="tahun_ajaran" class=" form-control-label">Tahun Ajaran</label></div>
+                        <div class="col col-md-3"><label class="form-control-label">Kelas</label></div>
                         <div class="col-12 col-md-9">
-                            <select name="tahun_ajaran" id="tahun_ajaran" class="form-control" required>
-                                <option value="0">Pilih Tahun Ajaran ...</option>
-                                <option value="2024/2025" default>2024/2025</option>
-                                <option value="2025/2026">2025/2026</option>
-                                <option value="2026/2027">2026/2027</option>
-                            </select>
+                            <input type="text" class="form-control" value="{{ pengampu.nama_kelas }}" disabled>
                         </div>
                     </div>
 
+                    <input type="text" id="tahun_ajaran" name="tahun_ajaran" value="{{ pengampu.tahun_ajaran }}" class="form-control" hidden>
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="semester" class=" form-control-label">Semester</label></div>
+                        <div class="col col-md-3"><label class="form-control-label">Tahun Ajaran</label></div>
                         <div class="col-12 col-md-9">
-                            <select name="semester" id="semester" class="form-control" required>
-                                <option value="0">Pilih Tahun Ajaran ...</option>
-                                <option value="ganjil">Ganjil</option>
-                                <option value="genap">Genap</option>
-                            </select>
+                            <input type="text" class="form-control" value="{{ pengampu.tahun_ajaran }}" disabled>
+                        </div>
+                    </div>
+
+                    <input type="text" id="semester" name="semester" value="{{ pengampu.semester }}" class="form-control" hidden>
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label class="form-control-label">Semester</label></div>
+                        <div class="col-12 col-md-9">
+                            <input type="text" class="form-control" value="{{ pengampu.semester }}" disabled>
                         </div>
                     </div>
 
@@ -171,33 +139,28 @@
                         </div>
                     </div>
 
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="kategori" class=" form-control-label">Kategori</label></div>
-                        <div class="col-12 col-md-9">
-                            <select name="kategori" id="kategori" class="form-control" required>
-                                <option value="0">Please select</option>
-                                <option value="pengajaran">Pengajaran</option>
-                                <option value="pelatihan">Pelatihan</option>
-                            </select>
+                    {% if session.level == 'dosen' %}
+                        <input type="text" id="kategori" name="kategori" value="pengajaran" class="form-control" hidden>
+                        <div class="row form-group">
+                            <div class="col col-md-3"><label class="form-control-label">Kategori</label></div>
+                            <div class="col-12 col-md-9">
+                                <input type="text" class="form-control" value="Pengajaran" disabled>
+                            </div>
                         </div>
-                    </div>
+                    {% else %}
+                        <input type="text" id="kategori" name="kategori" value="pelatihan" class="form-control" hidden>
+                        <div class="row form-group">
+                            <div class="col col-md-3"><label class="form-control-label">Kategori</label></div>
+                            <div class="col-12 col-md-9">
+                                <input type="text" class="form-control" value="Pelatihan" disabled>
+                            </div>
+                        </div>
+                    {% endif %}
 
                     <div class="row form-group">
                         <div class="col col-md-3"><label for="berkas" class=" form-control-label">Berkas</label></div>
                         <div class="col-12 col-md-9">
                             <input type="file" id="berkas" name="berkas" class="form-control-file">
-                        </div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_pengampu" class=" form-control-label">Pengampu</label></div>
-                        <div class="col-12 col-md-9">
-                            <select name="id_pengampu" id="id_pengampu" class="form-control" required>
-                                <option value="0">Pilih Pengampu ...</option>
-                                {% for pengajar in pengajar %}
-                                <option value="{{ pengajar.id_pengajar }}">{{ pengajar.nama_pengajar }}</option>
-                                {% endfor %}
-                            </select>
                         </div>
                     </div>
                 </form>
@@ -218,16 +181,149 @@
     </div>
 </div>
 
+{% for edit in materi %}
+<div class="modal fade" id="modalEdit{{ edit.id }}" tabindex="-1" role="dialog" aria-labelledby="modalEdit" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                Edit Materi <strong>{{ edit.judul_materi }}</strong>
+            </div>
+            
+            <div class="modal-body">
+                <div id="responseMessageModal" class="alert alert-dismissible fade show" role="alert" style="display: none;">
+                    <span id="responseTextModal"></span>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                
+                <form id="dataFormEdit{{ edit.id }}" class="form-horizontal">
+                    <input type="text" id="id_pengampu" name="id_pengampu" value="{{ pengampu.id_pengampu }}" class="form-control" hidden>
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label class="form-control-label">Pengampu</label></div>
+                        <div class="col-12 col-md-9">
+                            <input type="text" class="form-control" value="{{ pengampu.nama_pengajar }}" disabled>
+                        </div>
+                    </div>
+
+                    <input type="text" id="matkul" name="matkul" value="{{ pengampu.id_mata_kuliah }}" class="form-control" hidden>
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label class="form-control-label">Mata Kuliah</label></div>
+                        <div class="col-12 col-md-9">
+                            <input type="text" class="form-control" value="{{ pengampu.nama_mata_kuliah }}" disabled>
+                        </div>
+                    </div>
+
+                    <input type="text" id="id_kelas" name="id_kelas" value="{{ pengampu.id_kelas }}" class="form-control" hidden>
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label class="form-control-label">Kelas</label></div>
+                        <div class="col-12 col-md-9">
+                            <input type="text" class="form-control" value="{{ pengampu.nama_kelas }}" disabled>
+                        </div>
+                    </div>
+
+                    <input type="text" id="tahun_ajaran" name="tahun_ajaran" value="{{ pengampu.tahun_ajaran }}" class="form-control" hidden>
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label class="form-control-label">Tahun Ajaran</label></div>
+                        <div class="col-12 col-md-9">
+                            <input type="text" class="form-control" value="{{ pengampu.tahun_ajaran }}" disabled>
+                        </div>
+                    </div>
+
+                    <input type="text" id="semester" name="semester" value="{{ pengampu.semester }}" class="form-control" hidden>
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label class="form-control-label">Semester</label></div>
+                        <div class="col-12 col-md-9">
+                            <input type="text" class="form-control" value="{{ pengampu.semester }}" disabled>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="materi" class=" form-control-label">Judul Materi</label></div>
+                        <div class="col-12 col-md-9">
+                            <input type="text" id="materi" name="materi" value="{{ edit.judul_materi }}" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="jenis" class=" form-control-label">Jenis</label></div>
+                        <div class="col-12 col-md-9">
+                            <select name="jenis" id="jenis" class="form-control" required>
+                                <option value="dokumen" {% if edit.jenis == "dokumen" %}selected{% endif %}>Dokumen</option>
+                                <option value="video" {% if edit.jenis == "video" %}selected{% endif %}>Video</option>
+                            </select>
+                        </div>
+                    </div>
+
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="deskripsi" class=" form-control-label">Deskripsi</label></div>
+                        <div class="col-12 col-md-9">
+                            <textarea name="deskripsi" id="deskripsi" rows="9" placeholder="Deskripsi / Arahan / Perintah ..." class="form-control">{{ edit.deskripsi }}</textarea>
+                        </div>
+                    </div>
+
+                    <input type="text" id="kategori" name="kategori" value="{{ edit.kategori }}" class="form-control" hidden>
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label class="form-control-label">Kategori</label></div>
+                        <div class="col-12 col-md-9">
+                            <input type="text" class="form-control" value="{{ edit.kategori }}" disabled>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="berkas" class=" form-control-label">Berkas</label></div>
+                        <div class="col-12 col-md-9">
+                            <input type="file" id="berkas" name="berkas" class="form-control-file">
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <button type="submit" form="dataFormEdit{{ edit.id }}" class="btn btn-primary" onclick="updateMateri(event, '{{ edit.id }}')">Simpan Perubahan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal fade" id="modalHapus{{ edit.id }}" tabindex="-1" role="dialog" aria-labelledby="modalHapus" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalHapus">Konfirmasi Penghapusan</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Apakah kamu yakin ingin menghapus materi {{edit.judul_materi}}?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-danger" onclick="deleteMateri(event, '{{ edit.id }}')">
+                    <i class="fa fa-trash-o"></i> Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+
 <script>
-    // Fungsi untuk mereset formulir
     function resetForm() {
         const form = document.getElementById('dataForm');
-        form.reset(); // Mereset semua input ke nilai defaultnya
-        responseMessage.style.display = 'none'; // Menyembunyikan alert
+        form.reset();
+        responseMessage.style.display = 'none';
         responseMessageModal.style.display = 'none';
     }
 
-    // Mengambil elemen formulir dan response message
     const form = document.getElementById('dataForm');
     const responseMessage = document.getElementById('responseMessage');
     const responseText = document.getElementById('responseText');
@@ -235,85 +331,191 @@
     const responseTextModal = document.getElementById('responseTextModal');
 
     form.addEventListener('submit', function(event) {
-        event.preventDefault();  // Mencegah form agar tidak mengarah ke halaman lain
+        event.preventDefault();
 
-        // Ambil data dari formulir
-        const id_mata_kuliah = document.getElementById('matkul').value;
-        const id_kelas = document.getElementById('id_kelas').value;
-        const tahun_ajaran = document.getElementById('tahun_ajaran').value;
-        const semester = document.getElementById('semester').value;
-        const judul_materi = document.getElementById('materi').value;
-        const jenis = document.getElementById('jenis').value;
-        const deskripsi = document.getElementById('deskripsi').value;
-        const kategori = document.getElementById('kategori').value;
-        const berkas = document.getElementById('berkas').files[0]; // Ambil file yang diupload
-        const id_pengampu = document.getElementById('id_pengampu').value;
+        const formData = new FormData();
+        formData.append("id_pengampu", document.getElementById('id_pengampu').value);
+        formData.append("matkul", document.getElementById('matkul').value);
+        formData.append("id_kelas", document.getElementById('id_kelas').value);
+        formData.append("tahun_ajaran", document.getElementById('tahun_ajaran').value);
+        formData.append("semester", document.getElementById('semester').value);
+        formData.append("materi", document.getElementById('materi').value);
+        formData.append("jenis", document.getElementById('jenis').value);
+        formData.append("deskripsi", document.getElementById('deskripsi').value);
+        formData.append("kategori", document.getElementById('kategori').value);
+        formData.append("berkas", document.getElementById('berkas').files[0]);
 
-        // Reset alert sebelum validasi
-        responseMessage.style.display = 'none'; // Menyembunyikan alert jika ada pesan sebelumnya
+        // Menyembunyikan pesan error
+        responseMessage.style.display = 'none';
         responseMessageModal.style.display = 'none';
 
-        // Validasi level (tidak boleh 0)
+        // Validasi jika jenis atau kategori kosong
         if (jenis == "0" || kategori == "0") {
             responseTextModal.textContent = "Jenis or Kategori is required and cannot be 'Please select'.";
             responseMessageModal.classList.remove('alert-success');
             responseMessageModal.classList.add('alert-danger');
-            responseMessageModal.style.display = 'block';  // Menampilkan alert
-            return; // Hentikan proses jika validasi gagal
+            responseMessageModal.style.display = 'block';
+            return; 
         }
 
-        if (!berkas || berkas.length === 0) {
+        // Validasi file berkas
+        if (!berkas) {
             responseTextModal.textContent = "Berkas is required and cannot be 'Empty'.";
             responseMessageModal.classList.remove('alert-success');
             responseMessageModal.classList.add('alert-danger');
-            responseMessageModal.style.display = 'block';  // Menampilkan alert
-            return; // Hentikan proses jika validasi gagal
+            responseMessageModal.style.display = 'block';
+            return; 
         }
 
-
-        // Buat FormData untuk mengirim data termasuk file
-        let formData = new FormData();
-        formData.append("mata_kuliah", id_mata_kuliah);
-        formData.append("kelas", id_kelas);
-        formData.append("tahun_ajaran", tahun_ajaran);
-        formData.append("semester", semester);
-        formData.append("judul", judul_materi);
-        formData.append("jenis", jenis);
-        formData.append("deskripsi", deskripsi);
-        formData.append("kategori", kategori);
-        formData.append("berkas", berkas);  // Menambahkan file
-        formData.append("id_pengampu", id_pengampu);
-
-        // Kirim data menggunakan fetch() ke API Flask
-        fetch('http://127.0.0.1:5000/insert_content', {
+        // Kirim data ke backend menggunakan fetch
+        fetch('http://127.0.0.1:5000/insert_materi', {
             method: 'POST',
-            body: formData
+            body: formData // Kirim menggunakan FormData
         })
         .then(response => response.json())
         .then(data => {
-            // Tampilkan respons dari Flask
             if (data.message) {
-                // Menyimpan pesan sukses di sessionStorage
                 sessionStorage.setItem("responseMessage", "success");
                 sessionStorage.setItem("responseText", data.message);
-                form.reset(); // Reset form setelah berhasil
-                window.location.reload();  // Reload halaman untuk memuat ulang data
+                form.reset();
+                window.location.reload();
             } else if (data.error) {
-                // Menyimpan pesan error di sessionStorage
                 sessionStorage.setItem("responseMessage", "error");
                 sessionStorage.setItem("responseText", data.error);
-                window.location.reload();  // Reload halaman untuk memuat ulang data
+                window.location.reload();
             }
         })
         .catch(error => {
-            // Menyimpan pesan error di sessionStorage
             sessionStorage.setItem("responseMessage", "error");
             sessionStorage.setItem("responseText", error.message);
-            window.location.reload();  // Reload halaman untuk memuat ulang data
+            window.location.reload();
         });
     });
 
-    // Fungsi untuk menampilkan pesan setelah halaman di-reload
+
+    function updateMateri(event, materiId) {
+        event.preventDefault();
+
+        const form = document.getElementById('dataFormEdit' + materiId);
+        if (!form) {
+            console.error("Form with ID dataFormEdit" + materiId + " not found!");
+            return;
+        }
+
+        const id_matero = form['id_materi'].value;
+        const id_pengampu = form['id_pengampu'].value;
+        const id_mata_kuliah = form['matkul'].value;
+        const id_kelas = form['id_kelas'].value;
+        const tahun_ajaran = form['tahun_ajaran'].value;
+        const semester = form['semester'].value;
+        const judul = form['materi'].value;
+        const jenis = form['jenis'].value;
+        const deskripsi = form['deskripsi'].value;
+        const kategori = form['kategori'].value;
+        const berkas = form['berkas'].files[0];
+
+        if (
+            !id_mata_kuliah ||
+            !id_kelas ||
+            !tahun_ajaran ||
+            !semester ||
+            !judul ||
+            !jenis ||
+            !deskripsi ||
+            !kategori ||
+            !berkas ||
+            !id_pengampu
+        ) {
+            alert("Harap lengkapi semua field.");
+            return;
+        }
+
+        const responseMessage = document.getElementById('responseMessage');
+        const responseMessageModal = document.getElementById('responseMessageModal');
+        responseMessage.style.display = 'none';
+        responseMessageModal.style.display = 'none';
+
+        fetch('http://127.0.0.1:5000/edit_materi', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id_materi: id_materi,
+                mata_kuliah: id_mata_kuliah,
+                kelas: id_kelas,
+                tahun_ajaran: tahun_ajaran,
+                semester: semester,
+                judul: judul_materi,
+                jenis: jenis,
+                deskripsi: deskripsi,
+                kategori: kategori,
+                berkas: berkas,  
+                id_pengampu: id_pengampu
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => { throw new Error(text) });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.message) {
+                sessionStorage.setItem("responseMessage", "success");
+                sessionStorage.setItem("responseText", data.message);
+                window.location.reload();
+            } else if (data.error) {
+                sessionStorage.setItem("responseMessage", "error");
+                sessionStorage.setItem("responseText", data.error);
+                window.location.reload();
+            }
+        })
+        .catch(error => {
+            sessionStorage.setItem("responseMessage", "error");
+            sessionStorage.setItem("responseText", error.message);
+            window.location.reload();
+        });
+    }
+
+    function deleteMateri(event, materiId) {
+        event.preventDefault();
+
+        const responseMessage = document.getElementById('responseMessage');
+        const responseText = document.getElementById('responseText');
+        responseMessage.style.display = 'block';
+
+        fetch('http://127.0.0.1:5000/hapus_materi', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id_materi: materiId })
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => { throw new Error(text) });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.message) {
+                sessionStorage.setItem("responseMessage", "success");
+                sessionStorage.setItem("responseText", data.message);
+                window.location.reload();
+            } else if (data.error) {
+                sessionStorage.setItem("responseMessage", "error");
+                sessionStorage.setItem("responseText", data.error);
+                window.location.reload();
+            }
+        })
+        .catch(error => {
+            sessionStorage.setItem("responseMessage", "error");
+            sessionStorage.setItem("responseText", error.message);
+            window.location.reload();
+        });
+    }
+
     window.onload = function() {
         const responseMessage = document.getElementById('responseMessage');
         const responseText = document.getElementById('responseText');
@@ -323,21 +525,19 @@
 
         if (storedMessage && storedText) {
             if (storedMessage === "success") {
-                responseText.textContent = storedText;  // Menampilkan pesan sukses
+                responseText.textContent = storedText;
                 responseMessage.classList.remove('alert-danger');
                 responseMessage.classList.add('alert-success');
-                responseMessage.style.display = 'block';  // Menampilkan alert sukses
+                responseMessage.style.display = 'block';
             } else if (storedMessage === "error") {
-                responseText.textContent = storedText;  // Menampilkan pesan error
+                responseText.textContent = storedText;
                 responseMessage.classList.remove('alert-success');
                 responseMessage.classList.add('alert-danger');
-                responseMessage.style.display = 'block';  // Menampilkan alert error
+                responseMessage.style.display = 'block';
             }
 
-            // Menghapus data dari sessionStorage setelah ditampilkan
             sessionStorage.removeItem("responseMessage");
             sessionStorage.removeItem("responseText");
         }
     };
-
 </script>

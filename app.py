@@ -471,16 +471,17 @@ def hapus_pengajaran():
 @login_required
 def materi(id):
     konten = "materi"
-    materi, matkul, error = get_materi(id)
+    materi, matkul, pengampu, error = get_materi(id)
     if error:
         return error, 500
-    return render_template('home.html', konten=konten, materi=materi, matkul=matkul)
+    return render_template('home.html', konten=konten, materi=materi, matkul=matkul, pengampu=pengampu, session=session)
 
 @app.route('/insert_materi', methods=['POST'])
 @login_required
 def add_record_materi():
-    data = request.get_json()
-    return add_materi(data)
+    data = request.form
+    berkas = request.files.get('berkas')
+    return add_materi(data, berkas)
 
 @app.route('/edit_materi', methods=['POST'])
 @login_required
