@@ -1,0 +1,49 @@
+<div class="content mt-3">
+    <div class="animated fadeIn">
+        <div class="row">
+            <div class="col-md-12">
+                <div id="responseMessage" class="alert alert-dismissible fade show" role="alert" style="display: none;">
+                    <span id="responseText"></span>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        Mata Kuliah <strong class="card-title">{{ pengampu.nama_mata_kuliah }}</strong></br>
+                        Kelas <strong>{{ pengampu.nama_kelas }}</strong></br>
+                        Pengampu <strong>{{ pengampu.nama_pengajar }}</strong></br>
+                    </div>
+                    <div class="card-body">
+                        <table id="bootstrap-data-table-export" class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Judul Materi</th>                                 
+                                    <th>Kategori</th>
+                                    <th>Tipe</th>
+                                    <th>Berkas</th>
+                                    <th>Deskripsi</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for materi in materi %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ materi.judul_materi }}</td>
+                                    <td>{{ materi.kategori }}</td>
+                                    <td>{{ materi.jenis }}</td>
+                                    <td>{{ materi.berkas }}</td>
+                                    <td>{{ materi.deskripsi }}</td>
+                                </tr>
+
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!-- .animated -->
+</div><!-- .content -->

@@ -26,6 +26,8 @@ from controller.pengampu import *
 from controller.krs import *
 from controller.pengajaran import *
 from controller.materi import *
+from controller.daftarMatkul import *
+from controller.materiKuliah import *
 
 
 app = Flask(__name__)
@@ -50,21 +52,21 @@ def load_user(id_user):
     with connection.cursor() as cursor:
         cursor.execute('SELECT * FROM user WHERE id = %s', (id_user,))
         user = cursor.fetchone()
-        connection.close()
         if user:
+            connection.close()
             return User(user['id'], user['nama'], user['no_id'], user['level'])
         else:
             cursor.execute('SELECT * FROM pengajar WHERE id_pengajar = %s', (id_user,))
-            pengajar = cursor.fetchone()
-            connection.close()
+            pengajar = cursor.fetchone()         
             if pengajar:
+                connection.close()
                 return User(pengajar['id_pengajar'], pengajar['nama_pengajar'], pengajar['nip'], pengajar['kategori'])
             else:
-                cursor.execute('SELECT * FROM mahasiswa WHERE id_mahasiswa = %s', (id_user,))
-                mhs = cursor.fetchone()
-                connection.close()
+                cursor.execute('SELECT * FROM mahasiswa WHERE nim = %s', (id_user,))
+                mhs = cursor.fetchone()                
                 if mhs:
-                    return User(mhs['id_mahasiswa'], mhs['nama_mahasiswa'], mhs['nim'], "mahasiswa") 
+                    connection.close()
+                    return User(mhs['id_mahasiswa'], mhs['nama_mahasiswa'], mhs['nim'], 'mahasiswa') 
     return None
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -506,6 +508,34 @@ def hapus_materi():
     data = request.get_json()
     return delete_materi(data)
 ################################## END MODULE PELAJARAN ##################################
+
+
+################################## MODULE MAHASISWA ##################################
+@app.route('/daftarMatkul')
+@login_required
+def daftarMatkul():
+    konten = "daftarMatkul"
+    dMatkul, error = get_daftarMatkul(session['id'])
+    if error:
+        return error, 500
+    return render_template('home.html', dMatkul=dMatkul, konten=konten)
+################################## END MODULE MAHASISWA ##################################
+
+################################## MODULE ENROLLMENT ##################################
+@app.route('/materiKuliah/<int:id>')
+@login_required
+def materiKuliah(id):
+    konten = "materiKuliah"
+    materi, pengampu, error = get_materiKuliah(id)
+    if error:
+        return error, 500
+    return render_template('home.html', 
+                           konten=konten, 
+                           materi=materi, 
+                           pengampu=pengampu,
+                           session=session)
+################################## END MODULE ENROLLMENT ##################################
+
 
 ################################## DEBUG DB ##################################
 @app.route('/debug_db')
