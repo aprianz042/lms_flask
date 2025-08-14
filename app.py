@@ -472,9 +472,16 @@ def hapus_pengajaran():
 def materi(id):
     konten = "materi"
     materi, matkul, pengampu, error = get_materi(id)
+    peserta = get_peserta_kelas(pengampu['id_kelas'], id)
     if error:
         return error, 500
-    return render_template('home.html', konten=konten, materi=materi, matkul=matkul, pengampu=pengampu, session=session)
+    return render_template('home.html', 
+                           konten=konten, 
+                           materi=materi, 
+                           matkul=matkul, 
+                           pengampu=pengampu,
+                           peserta=peserta,
+                           session=session)
 
 @app.route('/insert_materi', methods=['POST'])
 @login_required
@@ -486,8 +493,12 @@ def add_record_materi():
 @app.route('/edit_materi', methods=['POST'])
 @login_required
 def edit_record_materi():
-    data = request.get_json()
-    return edit_materi(data)
+    data = request.form
+    berkas = request.files.get('berkas')
+    if berkas:
+        return edit_materi(data, berkas)
+    else:
+        return edit_materi(data, None)
 
 @app.route('/hapus_materi', methods=['POST'])
 @login_required

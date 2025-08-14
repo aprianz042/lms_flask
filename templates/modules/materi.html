@@ -10,7 +10,9 @@
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        Mata Kuliah <strong class="card-title">{{ pengampu.nama_mata_kuliah }}</strong>, Pengampu <strong>{{ pengampu.nama_pengajar }}</strong>
+                        Mata Kuliah <strong class="card-title">{{ pengampu.nama_mata_kuliah }}</strong></br>
+                        Kelas <strong>{{ pengampu.nama_kelas }}</strong></br>
+                        Pengampu <strong>{{ pengampu.nama_pengajar }}</strong></br>
                     </div>
                     <div class="card-body">
                         <button type="button" class="btn btn-success mb-1" data-toggle="modal" data-target="#add_materi">
@@ -52,6 +54,35 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <div class="card-header">
+                        <strong>Daftar Peserta Kelas</strong></br>
+                    </div>
+                    <div class="card-body">
+                        <table id="bootstrap-data-table-export" class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>NIM</th>                                 
+                                    <th>Nama Mahasiswa</th>
+                                    <th>Mail</th>
+                                    <th>Phone</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for m in peserta %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ m.nim }}</td>
+                                    <td>{{ m.nama_mahasiswa }}</td>
+                                    <td>{{ m.email }}</td>
+                                    <td>{{ m.nomor_telepon }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -198,6 +229,8 @@
                 </div>
                 
                 <form id="dataFormEdit{{ edit.id }}" class="form-horizontal">
+                    <input type="text" id="id_materi" name="id_materi" value="{{ edit.id }}" class="form-control" hidden>
+
                     <input type="text" id="id_pengampu" name="id_pengampu" value="{{ pengampu.id_pengampu }}" class="form-control" hidden>
                     <div class="row form-group">
                         <div class="col col-md-3"><label class="form-control-label">Pengampu</label></div>
@@ -392,7 +425,6 @@
         });
     });
 
-
     function updateMateri(event, materiId) {
         event.preventDefault();
 
@@ -402,7 +434,7 @@
             return;
         }
 
-        const id_matero = form['id_materi'].value;
+        const id_materi = form['id_materi'].value;  // Pastikan id_materi ada di input field
         const id_pengampu = form['id_pengampu'].value;
         const id_mata_kuliah = form['matkul'].value;
         const id_kelas = form['id_kelas'].value;
@@ -412,54 +444,32 @@
         const jenis = form['jenis'].value;
         const deskripsi = form['deskripsi'].value;
         const kategori = form['kategori'].value;
-        const berkas = form['berkas'].files[0];
+        const berkas = form['berkas'].files[0]; // Jika ada berkas yang diubah, pastikan diambil dengan benar
 
-        if (
-            !id_mata_kuliah ||
-            !id_kelas ||
-            !tahun_ajaran ||
-            !semester ||
-            !judul ||
-            !jenis ||
-            !deskripsi ||
-            !kategori ||
-            !berkas ||
-            !id_pengampu
-        ) {
-            alert("Harap lengkapi semua field.");
-            return;
-        }
 
         const responseMessage = document.getElementById('responseMessage');
         const responseMessageModal = document.getElementById('responseMessageModal');
         responseMessage.style.display = 'none';
         responseMessageModal.style.display = 'none';
 
+        const formData = new FormData();
+        formData.append("id_materi", id_materi);
+        formData.append("id_pengampu", id_pengampu);
+        formData.append("matkul", id_mata_kuliah);
+        formData.append("id_kelas", id_kelas);
+        formData.append("tahun_ajaran", tahun_ajaran);
+        formData.append("semester", semester);
+        formData.append("materi", judul);
+        formData.append("jenis", jenis);
+        formData.append("deskripsi", deskripsi);
+        formData.append("kategori", kategori);
+        formData.append("berkas", berkas);
+
         fetch('http://127.0.0.1:5000/edit_materi', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                id_materi: id_materi,
-                mata_kuliah: id_mata_kuliah,
-                kelas: id_kelas,
-                tahun_ajaran: tahun_ajaran,
-                semester: semester,
-                judul: judul_materi,
-                jenis: jenis,
-                deskripsi: deskripsi,
-                kategori: kategori,
-                berkas: berkas,  
-                id_pengampu: id_pengampu
-            })
+            body: formData 
         })
-        .then(response => {
-            if (!response.ok) {
-                return response.text().then(text => { throw new Error(text) });
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             if (data.message) {
                 sessionStorage.setItem("responseMessage", "success");
@@ -477,6 +487,7 @@
             window.location.reload();
         });
     }
+
 
     function deleteMateri(event, materiId) {
         event.preventDefault();

@@ -112,59 +112,86 @@ def add_materi(data, berkas):
     finally:
         connection.close()
 
-def edit_materi(data):
+def edit_materi(data, berkas):
     id_materi = data.get('id_materi')
-    id_mata_kuliah = data.get('mata_kuliah')
-    id_kelas =  data.get('kelas')
+    id_mata_kuliah = data.get('matkul')
+    id_kelas =  data.get('id_kelas')
     tahun_ajaran = data.get('tahun_ajaran')
     semester = data.get('semester')
-    judul_materi = data.get('judul')
+    judul_materi = data.get('materi')
     jenis = data.get('jenis')
     deskripsi = data.get('deskripsi')
     kategori = data.get('kategori')
     id_pengampu = data.get('id_pengampu')
-    berkas = request.files['berkas'] 
 
+    # Validasi input
     if jenis == "0" or kategori == "0" or id_pengampu == "0" or id_mata_kuliah == "0":
-        return jsonify({"error": "Jenis dan Kategori tidak boleh kosong"}), 400
-    if not berkas:
-        return jsonify({"error": "Berkas tidak boleh kosong"}), 400
-    if not allowed_file(berkas.filename):
-        return jsonify({"error": "Tipe file tidak diizinkan. Hanya file PDF, video, dan audio yang diperbolehkan."}), 400
-    extension = berkas.filename.rsplit('.', 1)[1].lower()
-    filename = generate_filename(extension)
-    upload_folder = os.path.join('static', 'materi')  
-    if not os.path.exists(upload_folder):
-        os.makedirs(upload_folder)  
-    file_path = os.path.join(upload_folder, filename)
-    berkas.save(file_path) 
-    connection = get_db_connection()
-    try:
-        with connection.cursor() as cursor:
-            sql = """
-                UPDATE 
-                    materi 
-                SET 
-                    id_mata_kuliah = %s, 
-                    id_kelas = %s, 
-                    tahun_ajaran = %s, 
-                    semester = %s, 
-                    judul_materi = %s, 
-                    jenis = %s, 
-                    deskripsi = %s, 
-                    kategori = %s, 
-                    berkas = %s, 
-                    id_pengampu = %s
-                WHERE 
-                    id_materi = %s
-            """
-            cursor.execute(sql, (id_mata_kuliah, id_kelas, tahun_ajaran, semester ,judul_materi, jenis, deskripsi, kategori, filename, id_pengampu, id_materi))
-            connection.commit()
-        return jsonify({"message": "Berhasil ubah materi"}), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    finally:
-        connection.close()
+        return jsonify({"error": "Jenis, Kategori, Pengampu, dan Mata Kuliah tidak boleh kosong"}), 400
+
+    # Cek apakah berkas diupload
+    if berkas:
+        if not allowed_file(berkas.filename):
+            return jsonify({"error": "Tipe file tidak diizinkan. Hanya file PDF, DOCX, dan MP4."}), 400
+        
+        extension = berkas.filename.rsplit('.', 1)[1].lower()
+        filename = generate_filename(extension)
+        upload_folder = os.path.join('static', 'materi')  
+
+        if not os.path.exists(upload_folder):
+            os.makedirs(upload_folder)
+        
+        file_path = os.path.join(upload_folder, filename)
+        berkas.save(file_path) 
+
+        connection = get_db_connection()
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute('SELECT berkas FROM materi WHERE id = %s', (id_materi,))
+                result = cursor.fetchall()
+                if not result:
+                    return jsonify({"error": "Materi tidak ditemukan"}), 400
+                for data in result:  
+                    berkas = data['berkas']
+                    file_path = os.path.join('static', 'materi', berkas)
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+
+                sql = """
+                    UPDATE materi
+                    SET id_mata_kuliah = %s, id_kelas = %s, tahun_ajaran = %s, semester = %s, judul_materi = %s,
+                        jenis = %s, deskripsi = %s, kategori = %s, berkas = %s, id_pengampu = %s
+                    WHERE id = %s
+                """
+                cursor.execute(sql, (id_mata_kuliah, id_kelas, tahun_ajaran, semester, judul_materi, jenis,
+                                    deskripsi, kategori, filename, id_pengampu, id_materi))
+                connection.commit()
+            
+            return jsonify({"message": "Berhasil memperbarui materi dan berkas"}), 200
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+        finally:
+            connection.close()
+
+    else:
+        connection = get_db_connection()
+        try:
+            with connection.cursor() as cursor:
+                sql = """
+                    UPDATE materi
+                    SET id_mata_kuliah = %s, id_kelas = %s, tahun_ajaran = %s, semester = %s, judul_materi = %s,
+                        jenis = %s, deskripsi = %s, kategori = %s, id_pengampu = %s
+                    WHERE id = %s
+                """
+                cursor.execute(sql, (id_mata_kuliah, id_kelas, tahun_ajaran, semester, judul_materi, jenis,
+                                    deskripsi, kategori, id_pengampu, id_materi))
+                connection.commit()
+            
+            return jsonify({"message": "Berhasil memperbarui data materi"}), 200
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+        finally:
+            connection.close()
+
 
 def delete_materi(data):
     id_materi = data.get('id_materi')
@@ -193,3 +220,33 @@ def delete_materi(data):
     finally:
         connection.close()
 
+
+def get_peserta_kelas(kelas, pengampu):
+    connection = get_db_connection()
+    if connection is None:
+        return None, "Error connecting to the database."
+    try:
+        with connection.cursor() as cursor:
+            sql_pengampu = """
+                SELECT 
+                    k.id_krs,
+                    k.id_mahasiswa,
+                    k.id_mata_kuliah,
+                    k.nilai,
+                    mhs.nama_mahasiswa,
+                    mhs.nim,
+                    mhs.id_kelas,
+                    mhs.email,
+                    mhs.nomor_telepon
+                FROM 
+                    krs k
+                JOIN
+                    mahasiswa mhs ON k.id_mahasiswa = mhs.id_mahasiswa
+                WHERE
+                    k.id_kelas = %s AND k.id_pengampu = %s;
+                """
+            cursor.execute(sql_pengampu, (kelas, pengampu))
+            peserta = cursor.fetchall()
+        return peserta
+    finally:
+        connection.close()
