@@ -518,7 +518,18 @@ def daftarMatkul():
     dMatkul, error = get_daftarMatkul(session['id'])
     if error:
         return error, 500
-    return render_template('home.html', dMatkul=dMatkul, konten=konten)
+    
+    daftar_materi = []
+    for mata_kuliah in dMatkul:
+        materi, pengampu, error = get_materiKuliah(mata_kuliah['id_pengampu'])  # filter materi berdasarkan id_pengampu
+        if error:
+            return error, 500
+        daftar_materi.append({'materi': materi})
+    return render_template('home.html', 
+                           dMatkul=dMatkul, 
+                           konten=konten, 
+                           daftar_materi=daftar_materi)   
+    #return render_template('home.html', dMatkul=dMatkul, konten=konten)
 ################################## END MODULE MAHASISWA ##################################
 
 ################################## MODULE ENROLLMENT ##################################

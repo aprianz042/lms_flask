@@ -1,18 +1,61 @@
-<div class="content mt-3">
+<div class="content mt-4">
     {% for data in dMatkul %}
-    <div class="col-lg-3">
+    <div class="col-lg-4">
         <div class="card border-0 shadow-sm">
             <div class="card-body text-center py-4">
-                <div class="mb-3">
+                <div class="mb-4">
                     <i class="fa fa-book fa-3x text-primary"></i>
                 </div>
-                <h5 class="card-title">{{data.nama_mata_kuliah}}</h5>
-                <p class="text-muted small mb-3">Pengampu : <b>{{data.nama_pengajar}}</b></p>
-                <a href="{{ url_for('materiKuliah', id=data.id_pengampu) }}" class="btn btn-sm btn-primary">
-                    <i class="fa fa-link"></i> Materi
-                 </a>
+                <h5 class="card-title">{{ data.nama_mata_kuliah }}</h5>
+                <p class="text-muted small mb-3">Pengampu : <b>{{ data.nama_pengajar }}</b></p>
+                 <a href="#" class="btn btn-primary btn-sm btn-block" data-toggle="modal" data-target="#showMateri{{ data.id_pengampu }}">
+                    <i class="fa fa-eye"></i> Buka Materi
+                </a>
             </div>
         </div>
     </div>
     {% endfor %}
 </div>
+
+{% for x in dMatkul %}
+<div class="modal fade" id="showMateri{{ x.id_pengampu }}" tabindex="-1" role="dialog" aria-labelledby="showMateri" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="showMateri">{{x.nama_mata_kuliah}}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+            {% for d in daftar_materi %}
+                {% for c in d.materi %}
+                    {% if c is none %}
+                        <div class="alert alert-danger" role="alert">
+                            Belum ada materi yang diunggah
+                        </div>
+                    {% else %}
+                        {% if c.id_pengampu == x.id_pengampu %}
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">{{loop.index}}. {{c.judul_materi}}</h5>
+                                <small class="text-muted">Uploaded By : <code>{{ c.nama_pengajar }}</code></small>
+                            </div>
+                            <div class="card-body">
+                                <a href="#" class="btn btn-sm btn-primary">
+                                    <i class="fa fa-eye"></i> Buka Materi
+                                </a>
+                            </div>            
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
