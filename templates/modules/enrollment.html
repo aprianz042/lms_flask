@@ -8,11 +8,10 @@
             </button>
         </div>
     </div>
-
     <div class="col-lg-9">    
         <video id="videoPlayer" width="100%" height="100%" style="max-height: 600px; height: 100%;">
-            {% if video %}
-                <source src="{{ url_for('static', filename='materi/' + video) }}" type="video/mp4">
+            {% if materi %}
+                <source src="{{ url_for('static', filename='materi/' + materi.berkas) }}" type="video/mp4">
             {% else %}
                 <p>No video found.</p>
             {% endif %}

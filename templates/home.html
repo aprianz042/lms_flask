@@ -19,7 +19,6 @@
 
         {% set content_map = {
             'home': 'modules/home.html',
-            'video': 'modules/video.html',
             'operator': 'modules/operator.html',
             'prodi': 'modules/prodi.html',
             'kelas': 'modules/kelas.html',
@@ -33,7 +32,8 @@
             'pengajaran': 'modules/pengajaran.html',
             'materi': 'modules/materi.html',
             'daftarMatkul': 'modules/daftarMatkul.html',
-            'materiKuliah': 'modules/materiKuliah.html'
+            'materiKuliah': 'modules/materiKuliah.html',
+            'enrollment': 'modules/enrollment.html'
         } %}
 
         {% set template = content_map[konten] if konten in content_map else 'modules/home.html' %}

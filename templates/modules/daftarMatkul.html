@@ -28,29 +28,25 @@
                 </button>
             </div>
             <div class="modal-body">
+
             {% for d in daftar_materi %}
                 {% for c in d.materi %}
-                    {% if c is none %}
-                        <div class="alert alert-danger" role="alert">
-                            Belum ada materi yang diunggah
-                        </div>
-                    {% else %}
-                        {% if c.id_pengampu == x.id_pengampu %}
+                    {% if c.id_pengampu == x.id_pengampu %}
                         <div class="card mb-4">
                             <div class="card-header">
                                 <h5 class="card-title mb-0">{{loop.index}}. {{c.judul_materi}}</h5>
                                 <small class="text-muted">Uploaded By : <code>{{ c.nama_pengajar }}</code></small>
                             </div>
                             <div class="card-body">
-                                <a href="#" class="btn btn-sm btn-primary">
-                                    <i class="fa fa-eye"></i> Buka Materi
+                                <a href="{{ url_for('enrollment', id=c.id) }}" class="btn btn-sm btn-primary">
+                                    <i class="fa fa-link"></i> Buka Materi
                                 </a>
                             </div>            
                         </div>
-                        {% endif %}
                     {% endif %}
-                {% endfor %}
+                {% endfor %}                
             {% endfor %}
+            
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>

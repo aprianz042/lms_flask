@@ -2,40 +2,81 @@
 <html>
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LMS | IPDN</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='assets/login/style.css') }}">
-  <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
-  <link rel="icon" href="{{ url_for('static', filename='images/favicon.png') }}" type="image/png">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LMS | IPDN</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/login/style.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.png') }}" type="image/png">
 </head>
 
 <body>
-  <div class="wrapper">
-    <form action="/login" method="post">
-      <h2>LMS IPDN</h2>
-      <div class="input-field">
-        <input type="text" id="username" name="username" required>
-        <label>ID Number / NIP</label>
-      </div>
-      <div class="input-field">
-        <input type="password" id="password" name="password" required>
-        <label>Enter your password</label>
-      </div>
-      <div class="forget">
-        <label for="remember">
-          <input type="checkbox" id="remember">
-          <p>Remember me</p>
-        </label>
-        <!-- <a href="#">Forgot password?</a> -->
-      </div>
-      <button type="submit">Log In</button>
-     <!--  <div class="register">
-        <p>Don't have an account? <a href="#">Register</a></p>
-      </div> -->
-    </form>
-  </div>
+    <div class="wrapper">
+        <form id="loginForm">
+            <h2>LMS IPDN</h2>
+            <div class="input-field">
+                <input type="text" id="username" name="username" required>
+                <label>ID Number / NIP</label>
+            </div>
+            <div class="input-field">
+                <input type="password" id="password" name="password" required>
+                <label>Enter your password</label>
+            </div>
+            <div class="forget">
+                <label for="remember">
+                <input type="checkbox" id="remember">
+                <p>Remember me</p>
+                </label>
+            </div>
+            <button type="submit">Log In</button>
+        </form>
+
+        <div id="responseMessage" class="alert alert-dismissible fade show" role="alert" style="display: none;">
+            <span id="responseText"></span>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    </div>
 </body>
+
+<script>
+    document.getElementById("loginForm").addEventListener("submit", function(event) {
+        event.preventDefault(); // Mencegah reload halaman
+
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        // Kirim form menggunakan fetch API
+        fetch("/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: `username=${username}&password=${password}`
+        })
+        .then(response => {
+            if (response.ok) {
+                // Redirect ke home jika login sukses
+                window.location.href = "/home";
+            } else {
+                return response.json(); // Jika error, parsing JSON error message
+            }
+        })
+        .then(data => {
+            if (data.error) {
+                const responseMessage = document.getElementById('responseMessage');
+                const responseText = document.getElementById('responseText');
+                responseText.textContent = data.error;  
+                responseMessage.classList.remove('alert-success');
+                responseMessage.classList.add('alert-danger');
+                responseMessage.style.display = 'block';  
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+        });
+    });
+</script>
 
 </html>

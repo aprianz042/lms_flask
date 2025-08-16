@@ -14,6 +14,7 @@ from function.video_process import *
 from function.stopCam import *
 from function.hashing import *
 from function.generate_file import *
+from function.login_process import*
 
 from controller.home import *
 from controller.operator import *
@@ -28,6 +29,7 @@ from controller.pengajaran import *
 from controller.materi import *
 from controller.daftarMatkul import *
 from controller.materiKuliah import *
+from controller.enrollment import *
 
 
 app = Flask(__name__)
@@ -48,26 +50,8 @@ class User(UserMixin):
 
 @login_manager.user_loader
 def load_user(id_user):
-    connection = get_db_connection()
-    with connection.cursor() as cursor:
-        cursor.execute('SELECT * FROM user WHERE id = %s', (id_user,))
-        user = cursor.fetchone()
-        if user:
-            connection.close()
-            return User(user['id'], user['nama'], user['no_id'], user['level'])
-        else:
-            cursor.execute('SELECT * FROM pengajar WHERE id_pengajar = %s', (id_user,))
-            pengajar = cursor.fetchone()         
-            if pengajar:
-                connection.close()
-                return User(pengajar['id_pengajar'], pengajar['nama_pengajar'], pengajar['nip'], pengajar['kategori'])
-            else:
-                cursor.execute('SELECT * FROM mahasiswa WHERE nim = %s', (id_user,))
-                mhs = cursor.fetchone()                
-                if mhs:
-                    connection.close()
-                    return User(mhs['id_mahasiswa'], mhs['nama_mahasiswa'], mhs['nim'], 'mahasiswa') 
-    return None
+    id, nama, no_id, level = proses_login(id_user)
+    return User(id, nama, no_id, level) 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -117,8 +101,7 @@ def login():
                         session['level'] = "mahasiswa" 
                         return redirect(url_for('home'))
                     else:
-                        return "Login gagal. Username atau password salah."
-
+                        return jsonify({"error": "Username / Password Salah !!!"}), 400
     return render_template('login.html')
 
 @app.route('/logout')
@@ -530,9 +513,7 @@ def daftarMatkul():
                            konten=konten, 
                            daftar_materi=daftar_materi)   
     #return render_template('home.html', dMatkul=dMatkul, konten=konten)
-################################## END MODULE MAHASISWA ##################################
 
-################################## MODULE ENROLLMENT ##################################
 @app.route('/materiKuliah/<int:id>')
 @login_required
 def materiKuliah(id):
@@ -545,6 +526,18 @@ def materiKuliah(id):
                            materi=materi, 
                            pengampu=pengampu,
                            session=session)
+################################## END MODULE MAHASISWA ##################################
+
+
+################################## MODULE ENROLLMENT ##################################
+@app.route('/enrollment/<int:id>')
+@login_required
+def enrollment(id):
+    konten = "enrollment"
+    materi, error = get_enrollment(id)
+    if error:
+        return error, 500
+    return render_template('home.html', konten=konten, materi=materi, session=session)
 ################################## END MODULE ENROLLMENT ##################################
 
 
