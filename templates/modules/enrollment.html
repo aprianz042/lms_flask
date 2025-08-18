@@ -1,55 +1,70 @@
 <div class="content mt-3">
 
     <div class="col-sm-12">
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <span class="badge badge-pill badge-success">Camera Access Required</span> Facial Expression Recognition.
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">{{ materi.judul_materi }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>{{ materi.deskripsi }}</p>
+                    </div>           
+                </div>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <span class="badge badge-pill badge-success">Camera Access Required</span> Facial Expression Recognition.
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div> 
+            </div>
+            <div class="modal-footer">
+                <div class="col-lg-9">    
+                    <video id="videoPlayer" width="100%" height="100%" style="max-height: 600px; height: 100%;">
+                        {% if materi %}
+                            <source src="{{ url_for('static', filename='materi/' + materi.berkas) }}" type="video/mp4">
+                        {% else %}
+                            <p>No video found.</p>
+                        {% endif %}
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+
+                <div class="col-lg-3">
+                    <!-- Video Feed, initially hidden -->
+                    <!-- <img id="videoFeed" src="{{ url_for('video_feed') }}" width="100%" height="auto" style="display:none;" /> -->
+                    <video id="videoElement" width="100%" height="auto" autoplay></video>
+                    
+                    <!-- Progress Bar to indicate completion (hidden initially) -->
+                    <div id="progressWrapper" style="display:none; margin: 10px 0px 10px 0px;">
+                        <div id="progressBar" style="width: 100%; background-color: #f3f3f3; height: 20px; border-radius: 5px;">
+                            <div id="progress" style="width: 0%; height: 100%; background-color: green; border-radius: 5px;"></div>
+                        </div>
+                    </div>
+                
+                    <!-- Video selesai message -->
+                    <div id="videoCompleteMessage" style="display:none; margin: 10px 0px 10px 0px;">
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <span class="badge badge-pill badge-success">Video Selesai</span>
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Start, Pause, and Replay buttons -->
+                    <button id="startBtn" class="btn btn-primary">Start</button>
+                    <button id="pauseBtn" class="btn btn-warning" style="display:none;">Pause</button>
+                    <button id="replayBtn" class="btn btn-success" style="display:none;">Replay</button>
+
+                    <p id="wajah"> </p>
+                    <p id="arah_mata">Arah Mata: </p>
+                    <p id="arah_kepala">Arah Kepala: </p>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="col-lg-9">    
-        <video id="videoPlayer" width="100%" height="100%" style="max-height: 600px; height: 100%;">
-            {% if materi %}
-                <source src="{{ url_for('static', filename='materi/' + materi.berkas) }}" type="video/mp4">
-            {% else %}
-                <p>No video found.</p>
-            {% endif %}
-            Your browser does not support the video tag.
-        </video>
-    </div>
-
-    <div class="col-lg-3">
-        <!-- Video Feed, initially hidden -->
-        <!-- <img id="videoFeed" src="{{ url_for('video_feed') }}" width="100%" height="auto" style="display:none;" /> -->
-        <video id="videoElement" width="100%" height="auto" autoplay></video>
         
-        <!-- Progress Bar to indicate completion (hidden initially) -->
-        <div id="progressWrapper" style="display:none; margin: 10px 0px 10px 0px;">
-            <div id="progressBar" style="width: 100%; background-color: #f3f3f3; height: 20px; border-radius: 5px;">
-                <div id="progress" style="width: 0%; height: 100%; background-color: green; border-radius: 5px;"></div>
-            </div>
-        </div>
-    
-        <!-- Video selesai message -->
-        <div id="videoCompleteMessage" style="display:none; margin: 10px 0px 10px 0px;">
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <span class="badge badge-pill badge-success">Video Selesai</span>
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- Start, Pause, and Replay buttons -->
-        <button id="startBtn" class="btn btn-primary">Start</button>
-        <button id="pauseBtn" class="btn btn-warning" style="display:none;">Pause</button>
-        <button id="replayBtn" class="btn btn-success" style="display:none;">Replay</button>
-
-        <p id="wajah"> </p>
-        <p id="arah_mata">Arah Mata: </p>
-        <p id="arah_kepala">Arah Kepala: </p>
-    </div>    
 </div>
 
 <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>

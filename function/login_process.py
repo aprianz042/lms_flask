@@ -21,3 +21,40 @@ def proses_login(id_user):
                     connection.close()
                     return mhs['id_mahasiswa'], mhs['nama_mahasiswa'], mhs['nim'], 'mahasiswa'
     return None
+
+def get_session_user(username, password_hash):
+    connection = get_db_connection()
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT * FROM user WHERE no_id = %s AND pass = %s', (username, password_hash))
+        user = cursor.fetchone()
+        if user:
+            connection.close()
+            user_ = user['id']
+            no_id_ = user['no_id']
+            nama_ = user['nama']
+            level_ = user['level']
+        else:
+            cursor.execute('SELECT * FROM pengajar WHERE nip = %s AND password = %s', (username, password_hash))
+            pengajar = cursor.fetchone()
+            if pengajar:
+                connection.close()
+                user_ = pengajar['id_pengajar'] 
+                no_id_ = pengajar['nip']  
+                nama_ = pengajar['nama_pengajar']
+                level_ = pengajar['kategori'] 
+            else:
+                cursor.execute('SELECT * FROM mahasiswa WHERE nim = %s AND password = %s', (username, password_hash))
+                mhs = cursor.fetchone()
+                if mhs:
+                    connection.close()
+                    user_ = mhs['id_mahasiswa']
+                    no_id_ = mhs['nim']  
+                    nama_ = mhs['nama_mahasiswa'] 
+                    level_ = "mahasiswa" 
+                else:
+                    user_ = None
+                    no_id_ = None
+                    nama_ = None 
+                    level_ = None
+        return user_, no_id_, nama_, level_
+

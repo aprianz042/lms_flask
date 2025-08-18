@@ -58,50 +58,18 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-
-        # Cek password dengan hash untuk keamanan
         password_hash = md5_hash(password)
-
-        # Koneksi ke database untuk verifikasi username dan password
-        connection = get_db_connection()
-        with connection.cursor() as cursor:
-            cursor.execute('SELECT * FROM user WHERE no_id = %s AND pass = %s', (username, password_hash))
-            user = cursor.fetchone()
-            if user:
-                connection.close()
-                user_obj = User(user['id'], user['nama'], user['no_id'], user['level'])
-                login_user(user_obj)
-                session['id'] = user['id']
-                session['user_id'] = user['no_id']  
-                session['nama'] = user['nama'] 
-                session['level'] = user['level'] 
-                return redirect(url_for('home'))
-            else:
-                cursor.execute('SELECT * FROM pengajar WHERE nip = %s AND password = %s', (username, password_hash))
-                pengajar = cursor.fetchone()
-                if pengajar:
-                    connection.close()
-                    user_obj = User(pengajar['id_pengajar'], pengajar['nama_pengajar'], pengajar['nip'], pengajar['kategori'])
-                    login_user(user_obj)
-                    session['id'] = pengajar['id_pengajar']
-                    session['user_id'] = pengajar['nip']  
-                    session['nama'] = pengajar['nama_pengajar'] 
-                    session['level'] = pengajar['kategori'] 
-                    return redirect(url_for('home'))
-                else:
-                    cursor.execute('SELECT * FROM mahasiswa WHERE nim = %s AND password = %s', (username, password_hash))
-                    mhs = cursor.fetchone()
-                    if mhs:
-                        connection.close()
-                        user_obj = User(mhs['id_mahasiswa'], mhs['nama_mahasiswa'], mhs['nim'], "mahasiswa")
-                        login_user(user_obj)
-                        session['id'] = mhs['id_mahasiswa']
-                        session['user_id'] = mhs['nim']  
-                        session['nama'] = mhs['nama_mahasiswa'] 
-                        session['level'] = "mahasiswa" 
-                        return redirect(url_for('home'))
-                    else:
-                        return jsonify({"error": "Username / Password Salah !!!"}), 400
+        id, no_id, nama, level = get_session_user(username, password_hash)
+        if id:
+            user_obj = User(id, nama, no_id, level)
+            login_user(user_obj)
+            session['id'] = id
+            session['user_id'] = no_id
+            session['nama'] = nama
+            session['level'] = level
+            return redirect(url_for('home'))
+        else:
+            return jsonify({"error": "Username / Password Salah !!!"}), 400
     return render_template('login.html')
 
 @app.route('/logout')
