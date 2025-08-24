@@ -8,7 +8,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from flask_socketio import SocketIO, emit
 
 from function.koneksi import get_db_connection
-from function.frontal import *
+from function.frontalization import *
 from function.head_data import *
 from function.video_process import *
 from function.stopCam import *

@@ -6,7 +6,7 @@ from io import BytesIO
 from PIL import Image
 from flask_socketio import SocketIO, emit
 from function.head_data import data_wajah
-from function.frontal import half_flip
+from function.frontalization import half_flip
 from deepface import DeepFace
 
 def generate_video(socketio):
