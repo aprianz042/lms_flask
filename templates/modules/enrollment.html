@@ -60,6 +60,8 @@
                     <p id="wajah"> </p>
                     <p id="arah_mata">Arah Mata: </p>
                     <p id="arah_kepala">Arah Kepala: </p>
+                    <p id="fokus">Fokus: </p>
+                    <p id="emosi">Emosi: </p>
                 </div>
             </div>
         </div>
@@ -163,8 +165,10 @@
         document.getElementById('wajah').innerText = 'Face Detected: ' + data.face_detected;
         document.getElementById('arah_mata').innerText = 'Arah Mata: ' + data.arah_mata;
         document.getElementById('arah_kepala').innerText = 'Arah Kepala: ' + data.arah_kepala;
+        document.getElementById('fokus').innerText = 'Fokus: ' + data.fokus;
+        document.getElementById('emosi').innerText = 'Emosi: ' + data.emosi;
     });
 
     // Kirim frame setiap 500ms
-    setInterval(sendFrameToServer, 200);
+    setInterval(sendFrameToServer, 1000);
 </script>
