@@ -765,14 +765,6 @@ def half_flip(img):
     #images = img
     img_h, img_w, _ = images.shape 
     output_list = []                                          # variabel list OUTPUT
-   
-    if img_h < 500:
-        new_height = 500                                          # ukuran tinggi image (sesuaikan)
-        (h, w) = images.shape[:2]
-        aspect_ratio = w / h
-        new_width = int(new_height * aspect_ratio)
-        images = cv2.resize(images, (new_width, new_height))      # resize tinggi image ke ukuran baru
-
     img_ori = images.copy()                                   # img_ori = gambar asli    
     
     try:
