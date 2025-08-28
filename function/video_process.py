@@ -6,8 +6,10 @@ from io import BytesIO
 from PIL import Image
 from flask_socketio import SocketIO, emit
 from function.head_data import data_wajah
-#from function.frontal import half_flip
-from function.frontalization import half_flip
+
+from function.frontal import half_flip
+#from function.frontalization import half_flip
+
 from deepface import DeepFace
 
 from keras.models import model_from_json
@@ -38,16 +40,19 @@ def proses_img(data):
     if face_detected == True:
         arah_mata = data_["arah_mata"]
         arah_kepala = data_["arah_kepala"]
-        emosi = analyze_emotion(img)
         if (arah_kepala == "kiri" and arah_mata == "kanan") or (arah_kepala == "kanan" and arah_mata == "kiri") or (arah_kepala == "tengah" and arah_mata == "tengah"):
             fokus = "fokus"
+
+            img = half_flip(img)
+            emosi = analyze_emotion(img)
         else:
             fokus = "tidak fokus"
+            emosi = "Bad Processed"
 
     else:
         arah_mata = "Not Detected"
         arah_kepala = "Not Detected"
-        emosi = "Not Detected"
+        emosi = "Not Processed"
         fokus = "Not Detected"
     
     data = {

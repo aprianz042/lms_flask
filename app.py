@@ -1,14 +1,11 @@
 import os
 import base64
 
-from io import BytesIO
-from PIL import Image
 from flask import Flask, flash, render_template, Response, request, session, jsonify, redirect, url_for, send_file
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_socketio import SocketIO, emit
 
 from function.koneksi import get_db_connection
-from function.frontal import *
 from function.head_data import *
 from function.video_process import *
 from function.stopCam import *
