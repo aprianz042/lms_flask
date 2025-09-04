@@ -65,6 +65,43 @@ def proses_img(data):
     
     emit('analisis_wajah', data)
 
+def analyze_emotion(frame):
+    try:
+        analysis = DeepFace.analyze(frame, actions=['emotion'], enforce_detection=False)
+        dominant_emotion = analysis[0]['dominant_emotion']
+        return dominant_emotion
+    except Exception as e:
+        return "Error in analysis"
+
+def frontal_video():
+    cap = cv2.VideoCapture(0)  
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        frontal = half_flip(frame)
+        _, jpeg = cv2.imencode('.jpg', frontal)
+        frame_bytes = jpeg.tobytes()
+
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n\r\n')
+    cap.release()
+
+
+#########################################################################################################
+
+def proses_video(data):
+    img_data = base64.b64decode(data.split(',')[1])  # Mengambil bagian base64 setelah koma    
+    img = Image.open(BytesIO(img_data))
+    img = np.array(img)
+    
+    gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    _, buffer = cv2.imencode('.png', gray_img)
+    gray_img_base64 = base64.b64encode(buffer).decode('utf-8')
+
+    emit('image_response', f"data:image/png;base64,{gray_img_base64}")
 
 def generate_video(socketio):
     cap = cv2.VideoCapture(0)  
@@ -99,38 +136,3 @@ def generate_video(socketio):
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n\r\n')
     cap.release()
-
-def frontal_video():
-    cap = cv2.VideoCapture(0)  
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
-
-        frontal = half_flip(frame)
-        _, jpeg = cv2.imencode('.jpg', frontal)
-        frame_bytes = jpeg.tobytes()
-
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n\r\n')
-    cap.release()
-
-def analyze_emotion(frame):
-    try:
-        analysis = DeepFace.analyze(frame, actions=['emotion'], enforce_detection=False)
-        dominant_emotion = analysis[0]['dominant_emotion']
-        return dominant_emotion
-    except Exception as e:
-        return "Error in analysis"
-
-def proses_video(data):
-    img_data = base64.b64decode(data.split(',')[1])  # Mengambil bagian base64 setelah koma    
-    img = Image.open(BytesIO(img_data))
-    img = np.array(img)
-    
-    gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-    _, buffer = cv2.imencode('.png', gray_img)
-    gray_img_base64 = base64.b64encode(buffer).decode('utf-8')
-
-    emit('image_response', f"data:image/png;base64,{gray_img_base64}")
