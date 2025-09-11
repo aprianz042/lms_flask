@@ -44,6 +44,8 @@ def proses_img(data):
             fokus = "fokus"
 
             img = half_flip(img)
+            if img is not None:
+                print("proses half2d")
             emosi = analyze_emotion(img)
         else:
             fokus = "tidak fokus"

@@ -205,7 +205,7 @@ def data_wajah(img):
             ######################################## Head pose ######################################        
             # Hitung headpose horizontal
             headpose = ratio_horizontal(poin_atas_hidung[0], poin_batas_mata_kanan_right[0], poin_batas_mata_kiri_left[0])
-            print(headpose)
+            #print(headpose)
 
             if headpose < 0.4:
                 arah_kepala = "kanan"

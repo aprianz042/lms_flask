@@ -31,8 +31,6 @@
                 </div>
 
                 <div class="col-lg-3">
-                    <!-- Video Feed, initially hidden -->
-                    <!-- <img id="videoFeed" src="{{ url_for('video_feed') }}" width="100%" height="auto" style="display:none;" /> -->
                     <video id="videoElement" width="100%" height="auto" autoplay></video>
                     
                     <!-- Progress Bar to indicate completion (hidden initially) -->
@@ -201,7 +199,22 @@
             console.log('Emotion:', emotionData); 
         }
         else if(collectEmotionData == "selesai"){
+            fetch('/save-emotion-data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ emotionData: emotionData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Data successfully saved:', data);
+            })
+            .catch(error => {
+                console.error('Error saving data:', error);
+            });
             emotionData = []
+            collectEmotionData = "stop"
         }
         else{} 
     });

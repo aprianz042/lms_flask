@@ -1,5 +1,8 @@
 import os
 import base64
+import json
+import random
+import string
 
 from flask import Flask, flash, render_template, Response, request, session, jsonify, redirect, url_for, send_file
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
@@ -85,9 +88,9 @@ def logout():
 def handle_image(data):
     proses_img(data)    
 
-@app.route('/video_feed')
-def video_feed():
-    return Response(generate_video(socketio), mimetype='multipart/x-mixed-replace; boundary=frame')
+#@app.route('/video_feed')
+#def video_feed():
+#    return Response(generate_video(socketio), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/video_frontal')
 def video_frontal():
@@ -530,6 +533,22 @@ def debug_db():
         connection.close()
 
 ################################## END DEBUG DB ##################################
+
+@app.route('/save-emotion-data', methods=['POST'])
+def save_emotion_data():
+    data = request.get_json()
+    emotion_data = data.get('emotionData')
+    if emotion_data:
+        random_filename = ''.join(random.choices(string.ascii_letters + string.digits, k=10)) + '.json'
+        file_path = os.path.join('emo_data', random_filename)
+        try:
+            with open(file_path, 'w') as f:
+                json.dump(emotion_data, f, indent=2)
+            return jsonify({'status': 'success', 'filename': random_filename}), 200
+        except Exception as e:
+            return jsonify({'status': 'error', 'message': str(e)}), 500
+    else:
+        return jsonify({'status': 'error', 'message': 'No emotion data received'}), 400
 
 
 if __name__ == '__main__':
