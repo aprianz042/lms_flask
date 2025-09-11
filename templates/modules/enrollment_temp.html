@@ -72,11 +72,8 @@
 <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script> -->
 <script>
-    
-    let emotionData = [];
-    let collectEmotionData = "stop";
-    
     window.onload = function() {
+        // Get the video player and buttons
         var video = document.getElementById('videoPlayer');
         var startBtn = document.getElementById('startBtn');
         var pauseBtn = document.getElementById('pauseBtn');
@@ -85,39 +82,30 @@
         var progressBar = document.getElementById('progress');
         var videoCompleteMessage = document.getElementById('videoCompleteMessage');
         var videoFeed = document.getElementById('videoFeed');  // Video feed element
+        let emotionData = [];
 
         // Start button functionality
         startBtn.addEventListener('click', function() {
             video.play();
-
-            collectEmotionData = "mulai"; // Start collecting emotion data
-            console.log("Emotion data collection started: ", collectEmotionData); // Debugging log
-            
             startBtn.style.display = 'none'; // Hide start button when video is playing
             pauseBtn.style.display = 'block'; // Show pause button when video is playing
             progressWrapper.style.display = 'block'; // Show progress bar when video starts
             progressBar.style.width = '0%'; // Reset progress bar to 0% initially
             videoCompleteMessage.style.display = 'none'; // Hide "Video Selesai" message initially
             videoFeed.style.display = 'block'; // Show video feed when playing
-            
-            
+            collectEmotionData();
         });
 
         // Pause button functionality
         pauseBtn.addEventListener('click', function() {
-            collectEmotionData = "stop";
-            console.log("Emotion data collection paused");
-
             video.pause();
             startBtn.style.display = 'block'; // Show start button when video is paused
             pauseBtn.style.display = 'none'; // Hide pause button when video is paused
+            clearInterval(emotionCollectionInterval);
         });
 
         // Replay button functionality
         replayBtn.addEventListener('click', function() {
-            collectEmotionData = "mulai"; // Start collecting emotion data again
-            console.log("Emotion data collection restarted");
-
             video.currentTime = 0; // Reset video to the beginning
             video.play(); // Play the video
             startBtn.style.display = 'none'; // Hide start button when video is playing
@@ -127,6 +115,8 @@
             videoCompleteMessage.style.display = 'none'; // Hide "Video Selesai" message initially
             replayBtn.style.display = 'none'; // Hide replay button after it's clicked
             videoFeed.style.display = 'block'; // Show video feed when replaying
+            emotionData = []; // Clear previous data
+            collectEmotionData();
         });
 
         // Event listener to track video progress
@@ -137,9 +127,6 @@
 
         // Check if the video has ended
         video.addEventListener('ended', function() {
-            collectEmotionData = "selesai";
-            console.log("Emotion data collection ended");
-            
             startBtn.style.display = 'none'; // Hide start button after video ends
             pauseBtn.style.display = 'none'; // Hide pause button after video ends
             replayBtn.style.display = 'block'; // Show replay button after video ends
@@ -147,15 +134,24 @@
             videoCompleteMessage.style.display = 'block'; // Show "Video Selesai" message after video ends
             videoFeed.style.display = 'none'; // Hide video feed after video ends
 
-            
+            localStorage.setItem('emotionData', JSON.stringify(emotionData));
+            console.log('Emotion data saved:', emotionData);
         });
+
+        let emotionCollectionInterval;
+        function collectEmotionData() {
+            emotionCollectionInterval = setInterval(function() {
+                socket.emit('request_face_data');  // Send request for face data to the server
+            }, 1000); // Collect data every 1 second
+        }
 
         // Initially disable the pause button
         pauseBtn.style.display = 'none'; // Hide pause button initially
         replayBtn.style.display = 'none'; // Hide replay button initially
-
     };
+</script>
 
+<script>
     const socket = io(); // connect to the server
     const videos = document.getElementById('videoElement');
 
@@ -181,29 +177,22 @@
 
     // Menerima data hasil analisis wajah dari server
     socket.on('analisis_wajah', function(data) {
+        
         document.getElementById('wajah').innerText = 'Face Detected: ' + data.face_detected;
         document.getElementById('arah_mata').innerText = 'Arah Mata: ' + data.arah_mata;
         document.getElementById('arah_kepala').innerText = 'Arah Kepala: ' + data.arah_kepala;
         document.getElementById('fokus').innerText = 'Fokus: ' + data.fokus;
         document.getElementById('emosi').innerText = 'Emosi: ' + data.emosi;
-        if (collectEmotionData == "mulai") {
-            let timestamp = new Date().toISOString();
-            let date = new Date(timestamp);
-            let formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
-            emotionData.push({
-                face_detected: data.face_detected,
-                arah_mata: data.arah_mata,
-                arah_kepala: data.arah_kepala,
-                fokus: data.fokus,
-                emosi: data.emosi,
-                timestamp: formattedDate
-            });  
-            console.log('Emotion:', emotionData); 
-        }
-        else if(collectEmotionData == "selesai"){
-            emotionData = []
-        }
-        else{} 
+
+        emotionData.push({
+            face_detected: data.face_detected,
+            arah_mata: data.arah_mata,
+            arah_kepala: data.arah_kepala,
+            fokus: data.fokus,
+            emosi: data.emosi,
+            timestamp: new Date().toISOString()
+        });
+
     });
 
     // Kirim frame setiap 500ms
