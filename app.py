@@ -30,6 +30,7 @@ from controller.materi import *
 from controller.daftarMatkul import *
 from controller.materiKuliah import *
 from controller.enrollment import *
+from controller.save_emo import *
 
 
 app = Flask(__name__)
@@ -506,6 +507,13 @@ def enrollment(id):
     if error:
         return error, 500
     return render_template('home.html', konten=konten, materi=materi, session=session)
+
+@app.route('/save-emotion-data', methods=['POST'])
+@login_required
+def save_emotion_data():
+    data = request.get_json()
+    sesi = session['id']
+    return save_emotion(data, sesi)
 ################################## END MODULE ENROLLMENT ##################################
 
 
@@ -533,23 +541,6 @@ def debug_db():
         connection.close()
 
 ################################## END DEBUG DB ##################################
-
-@app.route('/save-emotion-data', methods=['POST'])
-def save_emotion_data():
-    data = request.get_json()
-    emotion_data = data.get('emotionData')
-    if emotion_data:
-        random_filename = ''.join(random.choices(string.ascii_letters + string.digits, k=10)) + '.json'
-        file_path = os.path.join('emo_data', random_filename)
-        try:
-            with open(file_path, 'w') as f:
-                json.dump(emotion_data, f, indent=2)
-            return jsonify({'status': 'success', 'filename': random_filename}), 200
-        except Exception as e:
-            return jsonify({'status': 'error', 'message': str(e)}), 500
-    else:
-        return jsonify({'status': 'error', 'message': 'No emotion data received'}), 400
-
 
 if __name__ == '__main__':
     #app.run(debug=True, threaded=True)

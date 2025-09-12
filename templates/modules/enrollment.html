@@ -3,6 +3,7 @@
     <div class="col-sm-12">
         <div class="modal-content">
             <div class="modal-body">
+                <div id="materiIdContainer" style="display:none;" data-materi-id="{{ materi.id }}"></div>
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="card-title mb-0">{{ materi.judul_materi }}</h5>
@@ -20,7 +21,7 @@
             </div>
             <div class="modal-footer">
                 <div class="col-lg-9">    
-                    <video id="videoPlayer" width="100%" height="100%" style="max-height: 600px; height: 100%;">
+                    <video id="videoPlayer" width="100%" height="100%" style="max-height: 600px; height: 100%;" data-materi-id="{{ materi.id }}">
                         {% if materi %}
                             <source src="{{ url_for('static', filename='materi/' + materi.berkas) }}" type="video/mp4">
                         {% else %}
@@ -73,6 +74,7 @@
     
     let emotionData = [];
     let collectEmotionData = "stop";
+    var materiId = document.getElementById('materiIdContainer').getAttribute('data-materi-id');
     
     window.onload = function() {
         var video = document.getElementById('videoPlayer');
@@ -185,10 +187,14 @@
         document.getElementById('fokus').innerText = 'Fokus: ' + data.fokus;
         document.getElementById('emosi').innerText = 'Emosi: ' + data.emosi;
         if (collectEmotionData == "mulai") {
-            let timestamp = new Date().toISOString();
+            
+            let timestamp = new Date().toISOString();  // ISO format, '2025-09-12T16:11:00.000Z'
             let date = new Date(timestamp);
-            let formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
+            let formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
+
+            
             emotionData.push({
+                materi_id: materiId,
                 face_detected: data.face_detected,
                 arah_mata: data.arah_mata,
                 arah_kepala: data.arah_kepala,

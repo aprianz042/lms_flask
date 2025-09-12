@@ -1,362 +1,398 @@
 [
   {
+    "materi_id": "7",
+    "face_detected": true,
+    "arah_mata": "tengah",
+    "arah_kepala": "tengah",
+    "fokus": "fokus",
+    "emosi": "fear",
+    "timestamp": "2025-09-12 17:38:22"
+  },
+  {
+    "materi_id": "7",
     "face_detected": true,
     "arah_mata": "tengah",
     "arah_kepala": "tengah",
     "fokus": "fokus",
     "emosi": "sad",
-    "timestamp": "11/09/2025 18:54:29"
+    "timestamp": "2025-09-12 17:38:23"
   },
   {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "sad",
-    "timestamp": "11/09/2025 18:54:30"
-  },
-  {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "sad",
-    "timestamp": "11/09/2025 18:54:31"
-  },
-  {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "sad",
-    "timestamp": "11/09/2025 18:54:32"
-  },
-  {
+    "materi_id": "7",
     "face_detected": true,
     "arah_mata": "tengah",
     "arah_kepala": "tengah",
     "fokus": "fokus",
     "emosi": "neutral",
-    "timestamp": "11/09/2025 18:54:33"
+    "timestamp": "2025-09-12 17:38:24"
   },
   {
+    "materi_id": "7",
     "face_detected": true,
     "arah_mata": "tengah",
     "arah_kepala": "tengah",
     "fokus": "fokus",
-    "emosi": "sad",
-    "timestamp": "11/09/2025 18:54:34"
+    "emosi": "neutral",
+    "timestamp": "2025-09-12 17:38:25"
   },
   {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "sad",
-    "timestamp": "11/09/2025 18:54:35"
-  },
-  {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "sad",
-    "timestamp": "11/09/2025 18:54:36"
-  },
-  {
+    "materi_id": "7",
     "face_detected": true,
     "arah_mata": "tengah",
     "arah_kepala": "tengah",
     "fokus": "fokus",
     "emosi": "angry",
-    "timestamp": "11/09/2025 18:54:37"
+    "timestamp": "2025-09-12 17:38:26"
   },
   {
+    "materi_id": "7",
     "face_detected": true,
     "arah_mata": "tengah",
     "arah_kepala": "tengah",
     "fokus": "fokus",
-    "emosi": "happy",
-    "timestamp": "11/09/2025 18:54:38"
+    "emosi": "neutral",
+    "timestamp": "2025-09-12 17:38:27"
   },
   {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "happy",
-    "timestamp": "11/09/2025 18:54:38"
-  },
-  {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "happy",
-    "timestamp": "11/09/2025 18:54:40"
-  },
-  {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "happy",
-    "timestamp": "11/09/2025 18:54:40"
-  },
-  {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "happy",
-    "timestamp": "11/09/2025 18:54:42"
-  },
-  {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "happy",
-    "timestamp": "11/09/2025 18:54:43"
-  },
-  {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "happy",
-    "timestamp": "11/09/2025 18:54:44"
-  },
-  {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "happy",
-    "timestamp": "11/09/2025 18:54:45"
-  },
-  {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "happy",
-    "timestamp": "11/09/2025 18:54:45"
-  },
-  {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "happy",
-    "timestamp": "11/09/2025 18:54:47"
-  },
-  {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "happy",
-    "timestamp": "11/09/2025 18:54:48"
-  },
-  {
+    "materi_id": "7",
     "face_detected": true,
     "arah_mata": "tengah",
     "arah_kepala": "tengah",
     "fokus": "fokus",
     "emosi": "angry",
-    "timestamp": "11/09/2025 18:54:48"
+    "timestamp": "2025-09-12 17:38:28"
   },
   {
+    "materi_id": "7",
     "face_detected": true,
     "arah_mata": "tengah",
     "arah_kepala": "tengah",
     "fokus": "fokus",
     "emosi": "angry",
-    "timestamp": "11/09/2025 18:54:49"
+    "timestamp": "2025-09-12 17:38:29"
   },
   {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "sad",
-    "timestamp": "11/09/2025 18:54:50"
-  },
-  {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "happy",
-    "timestamp": "11/09/2025 18:54:52"
-  },
-  {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "happy",
-    "timestamp": "11/09/2025 18:54:53"
-  },
-  {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "sad",
-    "timestamp": "11/09/2025 18:54:54"
-  },
-  {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "surprise",
-    "timestamp": "11/09/2025 18:54:55"
-  },
-  {
+    "materi_id": "7",
     "face_detected": true,
     "arah_mata": "tengah",
     "arah_kepala": "tengah",
     "fokus": "fokus",
     "emosi": "angry",
-    "timestamp": "11/09/2025 18:54:56"
+    "timestamp": "2025-09-12 17:38:30"
   },
   {
+    "materi_id": "7",
+    "face_detected": true,
+    "arah_mata": "tengah",
+    "arah_kepala": "tengah",
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "timestamp": "2025-09-12 17:38:31"
+  },
+  {
+    "materi_id": "7",
+    "face_detected": true,
+    "arah_mata": "tengah",
+    "arah_kepala": "tengah",
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "timestamp": "2025-09-12 17:38:32"
+  },
+  {
+    "materi_id": "7",
+    "face_detected": true,
+    "arah_mata": "tengah",
+    "arah_kepala": "tengah",
+    "fokus": "fokus",
+    "emosi": "sad",
+    "timestamp": "2025-09-12 17:38:33"
+  },
+  {
+    "materi_id": "7",
     "face_detected": true,
     "arah_mata": "tengah",
     "arah_kepala": "tengah",
     "fokus": "fokus",
     "emosi": "angry",
-    "timestamp": "11/09/2025 18:54:56"
+    "timestamp": "2025-09-12 17:38:34"
   },
   {
+    "materi_id": "7",
     "face_detected": true,
     "arah_mata": "tengah",
     "arah_kepala": "tengah",
     "fokus": "fokus",
-    "emosi": "surprise",
-    "timestamp": "11/09/2025 18:54:58"
+    "emosi": "fear",
+    "timestamp": "2025-09-12 17:38:35"
   },
   {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "surprise",
-    "timestamp": "11/09/2025 18:54:59"
-  },
-  {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "surprise",
-    "timestamp": "11/09/2025 18:55:00"
-  },
-  {
+    "materi_id": "7",
     "face_detected": true,
     "arah_mata": "tengah",
     "arah_kepala": "tengah",
     "fokus": "fokus",
     "emosi": "neutral",
-    "timestamp": "11/09/2025 18:55:01"
+    "timestamp": "2025-09-12 17:38:36"
   },
   {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "neutral",
-    "timestamp": "11/09/2025 18:55:02"
-  },
-  {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "sad",
-    "timestamp": "11/09/2025 18:55:02"
-  },
-  {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "sad",
-    "timestamp": "11/09/2025 18:55:04"
-  },
-  {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "neutral",
-    "timestamp": "11/09/2025 18:55:05"
-  },
-  {
+    "materi_id": "7",
     "face_detected": true,
     "arah_mata": "tengah",
     "arah_kepala": "tengah",
     "fokus": "fokus",
     "emosi": "angry",
-    "timestamp": "11/09/2025 18:55:05"
+    "timestamp": "2025-09-12 17:38:37"
   },
   {
+    "materi_id": "7",
     "face_detected": true,
     "arah_mata": "tengah",
     "arah_kepala": "tengah",
     "fokus": "fokus",
     "emosi": "sad",
-    "timestamp": "11/09/2025 18:55:07"
+    "timestamp": "2025-09-12 17:38:38"
   },
   {
-    "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
-    "fokus": "fokus",
-    "emosi": "sad",
-    "timestamp": "11/09/2025 18:55:08"
-  },
-  {
+    "materi_id": "7",
     "face_detected": true,
     "arah_mata": "tengah",
     "arah_kepala": "tengah",
     "fokus": "fokus",
     "emosi": "neutral",
-    "timestamp": "11/09/2025 18:55:09"
+    "timestamp": "2025-09-12 17:38:39"
   },
   {
+    "materi_id": "7",
     "face_detected": true,
     "arah_mata": "tengah",
     "arah_kepala": "tengah",
     "fokus": "fokus",
-    "emosi": "sad",
-    "timestamp": "11/09/2025 18:55:10"
+    "emosi": "angry",
+    "timestamp": "2025-09-12 17:38:40"
   },
   {
+    "materi_id": "7",
+    "face_detected": true,
+    "arah_mata": "tengah",
+    "arah_kepala": "tengah",
+    "fokus": "fokus",
+    "emosi": "angry",
+    "timestamp": "2025-09-12 17:38:41"
+  },
+  {
+    "materi_id": "7",
+    "face_detected": true,
+    "arah_mata": "tengah",
+    "arah_kepala": "tengah",
+    "fokus": "fokus",
+    "emosi": "angry",
+    "timestamp": "2025-09-12 17:38:42"
+  },
+  {
+    "materi_id": "7",
+    "face_detected": true,
+    "arah_mata": "tengah",
+    "arah_kepala": "tengah",
+    "fokus": "fokus",
+    "emosi": "angry",
+    "timestamp": "2025-09-12 17:38:43"
+  },
+  {
+    "materi_id": "7",
+    "face_detected": true,
+    "arah_mata": "tengah",
+    "arah_kepala": "tengah",
+    "fokus": "fokus",
+    "emosi": "angry",
+    "timestamp": "2025-09-12 17:38:44"
+  },
+  {
+    "materi_id": "7",
+    "face_detected": true,
+    "arah_mata": "tengah",
+    "arah_kepala": "tengah",
+    "fokus": "fokus",
+    "emosi": "angry",
+    "timestamp": "2025-09-12 17:38:45"
+  },
+  {
+    "materi_id": "7",
+    "face_detected": true,
+    "arah_mata": "tengah",
+    "arah_kepala": "tengah",
+    "fokus": "fokus",
+    "emosi": "angry",
+    "timestamp": "2025-09-12 17:38:46"
+  },
+  {
+    "materi_id": "7",
+    "face_detected": true,
+    "arah_mata": "tengah",
+    "arah_kepala": "tengah",
+    "fokus": "fokus",
+    "emosi": "angry",
+    "timestamp": "2025-09-12 17:38:47"
+  },
+  {
+    "materi_id": "7",
+    "face_detected": true,
+    "arah_mata": "tengah",
+    "arah_kepala": "tengah",
+    "fokus": "fokus",
+    "emosi": "angry",
+    "timestamp": "2025-09-12 17:38:48"
+  },
+  {
+    "materi_id": "7",
+    "face_detected": true,
+    "arah_mata": "tengah",
+    "arah_kepala": "kiri",
+    "fokus": "tidak fokus",
+    "emosi": "Bad Processed",
+    "timestamp": "2025-09-12 17:38:49"
+  },
+  {
+    "materi_id": "7",
+    "face_detected": true,
+    "arah_mata": "tengah",
+    "arah_kepala": "kiri",
+    "fokus": "tidak fokus",
+    "emosi": "Bad Processed",
+    "timestamp": "2025-09-12 17:38:50"
+  },
+  {
+    "materi_id": "7",
+    "face_detected": true,
+    "arah_mata": "tengah",
+    "arah_kepala": "kiri",
+    "fokus": "tidak fokus",
+    "emosi": "Bad Processed",
+    "timestamp": "2025-09-12 17:38:51"
+  },
+  {
+    "materi_id": "7",
+    "face_detected": true,
+    "arah_mata": "tengah",
+    "arah_kepala": "kiri",
+    "fokus": "tidak fokus",
+    "emosi": "Bad Processed",
+    "timestamp": "2025-09-12 17:38:52"
+  },
+  {
+    "materi_id": "7",
+    "face_detected": true,
+    "arah_mata": "kanan",
+    "arah_kepala": "kiri",
+    "fokus": "fokus",
+    "emosi": "sad",
+    "timestamp": "2025-09-12 17:38:53"
+  },
+  {
+    "materi_id": "7",
+    "face_detected": true,
+    "arah_mata": "kanan",
+    "arah_kepala": "kiri",
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "timestamp": "2025-09-12 17:38:54"
+  },
+  {
+    "materi_id": "7",
+    "face_detected": true,
+    "arah_mata": "kanan",
+    "arah_kepala": "kiri",
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "timestamp": "2025-09-12 17:38:55"
+  },
+  {
+    "materi_id": "7",
+    "face_detected": true,
+    "arah_mata": "kanan",
+    "arah_kepala": "kiri",
+    "fokus": "fokus",
+    "emosi": "sad",
+    "timestamp": "2025-09-12 17:38:56"
+  },
+  {
+    "materi_id": "7",
+    "face_detected": true,
+    "arah_mata": "kiri",
+    "arah_kepala": "kanan",
+    "fokus": "fokus",
+    "emosi": "fear",
+    "timestamp": "2025-09-12 17:38:57"
+  },
+  {
+    "materi_id": "7",
+    "face_detected": true,
+    "arah_mata": "kiri",
+    "arah_kepala": "kanan",
+    "fokus": "fokus",
+    "emosi": "sad",
+    "timestamp": "2025-09-12 17:38:58"
+  },
+  {
+    "materi_id": "7",
+    "face_detected": true,
+    "arah_mata": "kiri",
+    "arah_kepala": "kanan",
+    "fokus": "fokus",
+    "emosi": "sad",
+    "timestamp": "2025-09-12 17:38:59"
+  },
+  {
+    "materi_id": "7",
+    "face_detected": true,
+    "arah_mata": "kiri",
+    "arah_kepala": "kanan",
+    "fokus": "fokus",
+    "emosi": "sad",
+    "timestamp": "2025-09-12 17:39:00"
+  },
+  {
+    "materi_id": "7",
     "face_detected": true,
     "arah_mata": "tengah",
     "arah_kepala": "tengah",
     "fokus": "fokus",
     "emosi": "neutral",
-    "timestamp": "11/09/2025 18:55:11"
+    "timestamp": "2025-09-12 17:39:01"
   },
   {
+    "materi_id": "7",
     "face_detected": true,
-    "arah_mata": "tengah",
-    "arah_kepala": "tengah",
+    "arah_mata": "kanan",
+    "arah_kepala": "kiri",
     "fokus": "fokus",
-    "emosi": "neutral",
-    "timestamp": "11/09/2025 18:55:12"
+    "emosi": "sad",
+    "timestamp": "2025-09-12 17:39:02"
   },
   {
+    "materi_id": "7",
+    "face_detected": true,
+    "arah_mata": "kanan",
+    "arah_kepala": "kiri",
+    "fokus": "fokus",
+    "emosi": "sad",
+    "timestamp": "2025-09-12 17:39:03"
+  },
+  {
+    "materi_id": "7",
+    "face_detected": true,
+    "arah_mata": "kanan",
+    "arah_kepala": "kiri",
+    "fokus": "fokus",
+    "emosi": "sad",
+    "timestamp": "2025-09-12 17:39:04"
+  },
+  {
+    "materi_id": "7",
     "face_detected": true,
     "arah_mata": "tengah",
     "arah_kepala": "tengah",
     "fokus": "fokus",
     "emosi": "sad",
-    "timestamp": "11/09/2025 18:55:12"
+    "timestamp": "2025-09-12 17:39:05"
   }
 ]
