@@ -4,6 +4,8 @@ import json
 import random
 import string
 
+from collections import Counter, defaultdict
+
 from flask import Flask, flash, render_template, Response, request, session, jsonify, redirect, url_for, send_file
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_socketio import SocketIO, emit
@@ -31,6 +33,7 @@ from controller.daftarMatkul import *
 from controller.materiKuliah import *
 from controller.enrollment import *
 from controller.save_emo import *
+from controller.emotion import *
 
 
 app = Flask(__name__)
@@ -515,6 +518,25 @@ def save_emotion_data():
     sesi = session['id']
     return save_emotion(data, sesi)
 ################################## END MODULE ENROLLMENT ##################################
+
+
+################################## MODULE EMOTION ##################################
+@app.route('/emotion/<int:materi>/<int:mahasiswa>')
+#@login_required
+def emotion(materi, mahasiswa):
+    konten = "emotion"
+    emotion, error = get_emotion(materi, mahasiswa)
+    if error:
+        return error, 500
+    grafik_emo = grafik_emotion(emotion['emo_file'])
+    grafik_fok = grafik_fokus(emotion['emo_file'])
+    return render_template('home.html', 
+                           konten=konten, 
+                           emotion=emotion, 
+                           grafik_emo=grafik_emo,
+                           grafik_fokus=grafik_fok,
+                           session=session)
+################################## END MODULE EMOTION ##################################
 
 
 ################################## DEBUG DB ##################################

@@ -47,6 +47,9 @@
                                         <a href="#" class="btn btn-danger btn-sm btn-block" data-toggle="modal" data-target="#modalHapus{{ materi.id }}">
                                             <i class="fa fa-trash-o"></i> Hapus
                                         </a>
+                                        <a href="#" class="btn btn-success btn-sm btn-block" data-toggle="modal" data-target="#showPeserta{{ materi.id }}">
+                                            <i class="fa fa-edit"></i> Cek
+                                        </a>
                                     </td>
                                 </tr>
 
@@ -323,8 +326,6 @@
     </div>
 </div>
 
-
-
 <div class="modal fade" id="modalHapus{{ edit.id }}" tabindex="-1" role="dialog" aria-labelledby="modalHapus" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -342,6 +343,35 @@
                 <button type="button" class="btn btn-danger" onclick="deleteMateri(event, '{{ edit.id }}')">
                     <i class="fa fa-trash-o"></i> Hapus
                 </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="showPeserta{{ edit.id }}" tabindex="-1" role="dialog" aria-labelledby="showMateri" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="showMateri">{{edit.judul_materi}}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                {% for m in peserta %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <a href="{{ url_for('emotion', materi=edit.id, mahasiswa=m.id_mahasiswa) }}" class="btn btn-sm btn-primary">
+                            <i class="fa fa-link"></i> {{ m.nim }} | {{ m.nama_mahasiswa }}  
+                        </a>
+                    </div>            
+                </div>
+                {% endfor %}
+            
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>

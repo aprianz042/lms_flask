@@ -1,0 +1,28 @@
+<!-- home.html -->
+<div class="content mt-3">
+  <div class="col-sm-12">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="card mb-4">
+            Materi <strong class="card-title">{{ emotion.judul_materi }}</strong></br>
+            Mahasiswa <strong>{{ emotion.nama_mahasiswa }}</strong></br>
+            <div class="card-header">            
+                <strong>Grafik Fokus</strong>
+            </div>
+            <div class="card-body">
+                <img src="data:image/png;base64,{{ grafik_fokus }}" alt="Fokus vs Waktu">
+            </div>
+        </div>
+      </div>
+
+      <img src="data:image/png;base64,{{ grafik_emo }}" alt="Fokus vs Waktu">
+
+      <div class="modal-footer">
+        <div class="col-lg-12">
+          <!-- kalau mau tampilkan file mentahnya -->
+          <small class="text-muted">Sumber data: {{ emotion.emo_file }}</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
