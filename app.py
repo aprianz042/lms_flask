@@ -465,7 +465,7 @@ def hapus_materi():
 ################################## END MODULE PELAJARAN ##################################
 
 
-################################## MODULE MAHASISWA ##################################
+################################## MODULE DAFTAR MATKUL ##################################
 @app.route('/daftarMatkul')
 @login_required
 def daftarMatkul():
@@ -526,16 +526,25 @@ def save_emotion_data():
 def emotion(materi, mahasiswa):
     konten = "emotion"
     emotion, error = get_emotion(materi, mahasiswa)
-    if error:
-        return error, 500
-    grafik_emo = grafik_emotion(emotion['emo_file'])
-    grafik_fok = grafik_fokus(emotion['emo_file'])
-    return render_template('home.html', 
-                           konten=konten, 
-                           emotion=emotion, 
-                           grafik_emo=grafik_emo,
-                           grafik_fokus=grafik_fok,
-                           session=session)
+    if emotion is not None:
+        grafik_emo = grafik_emotion(emotion['emo_file'])
+        grafik_fok = grafik_fokus(emotion['emo_file'])
+        grafik_pie = grafik_emotion_pie(emotion['emo_file'])
+        grafik_bar = grafik_emotion_bars(emotion['emo_file'])
+        return render_template('home.html', 
+                            konten=konten, 
+                            emotion=emotion, 
+                            grafik_emo=grafik_emo,
+                            grafik_fokus=grafik_fok,
+                            grafik_pie=grafik_pie,
+                            grafik_bar=grafik_bar,
+                            session=session)
+    else:
+        mahsw, error = get_mhs(mahasiswa)
+        return render_template('home.html', 
+                            konten=konten, 
+                            mahsw=mahsw,
+                            session=session)
 ################################## END MODULE EMOTION ##################################
 
 

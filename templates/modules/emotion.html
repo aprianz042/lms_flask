@@ -3,25 +3,67 @@
   <div class="col-sm-12">
     <div class="modal-content">
       <div class="modal-body">
-        <div class="card mb-4">
-            Materi <strong class="card-title">{{ emotion.judul_materi }}</strong></br>
-            Mahasiswa <strong>{{ emotion.nama_mahasiswa }}</strong></br>
-            <div class="card-header">            
-                <strong>Grafik Fokus</strong>
+        {% if emotion %}
+          <!-- Card Identitas -->
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5 class="card-title">{{ emotion.nama_mahasiswa }}</h5>
+              <p class="card-text">{{ emotion.judul_materi }}</p>
+            </div>
+            <div class="card-footer text-muted">
+              Last Access : {{ emotion.last_access }}
+            </div>
+          </div>
+
+          <!-- Card Grafik Fokus -->
+          <div class="card mb-3">
+            <div class="card-header">
+              <strong>Fokus Siswa</strong>
             </div>
             <div class="card-body">
-                <img src="data:image/png;base64,{{ grafik_fokus }}" alt="Fokus vs Waktu">
+              <img class="img-fluid d-block mx-auto" src="data:image/png;base64,{{ grafik_fokus }}" alt="Fokus vs Waktu">
             </div>
-        </div>
-      </div>
+          </div>
 
-      <img src="data:image/png;base64,{{ grafik_emo }}" alt="Fokus vs Waktu">
+          <!-- Dua Grafik Emosi dalam 1 Row -->
+          <div class="row">
+            <div class="col-12 col-md-4 mb-3">
+              <div class="card h-100">
+                <div class="card-header">
+                  <strong>Persentase Emosi</strong>
+                </div>
+                <div class="card-body">
+                  <img class="img-fluid d-block mx-auto" src="data:image/png;base64,{{ grafik_pie }}" alt="Persentase Emosi">
+                </div>
+              </div>
+            </div>
 
-      <div class="modal-footer">
-        <div class="col-lg-12">
-          <!-- kalau mau tampilkan file mentahnya -->
-          <small class="text-muted">Sumber data: {{ emotion.emo_file }}</small>
-        </div>
+            <div class="col-12 col-md-8 mb-3">
+              <div class="card h-100">
+                <div class="card-header">
+                  <strong>Distribusi Emosi</strong>
+                </div>
+                <div class="card-body">
+                  <img class="img-fluid d-block mx-auto" src="data:image/png;base64,{{ grafik_emo }}" alt="Distribusi Emosi">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <strong>Grafik per emosi</strong>
+            </div>
+            <div class="card-body">
+              <img class="img-fluid d-block mx-auto" src="data:image/png;base64,{{ grafik_bar }}" alt="Grafik per Emosi">
+            </div>
+          </div>
+
+        {% else %}
+          <div class="alert alert-danger" role="alert">
+            {{ mahsw.nama_mahasiswa }} belum mengakses materi
+          </div>
+        {% endif %}
       </div>
     </div>
   </div>

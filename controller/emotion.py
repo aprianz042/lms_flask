@@ -1,13 +1,15 @@
 from function.koneksi import get_db_connection
 import io, json, base64
 from collections import Counter, defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import render_template
 import matplotlib
 matplotlib.use("Agg")  # backend non-GUI untuk server
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+import numpy as np
+import math
 '''
 def get_emotion(materi, mahasiswa):
     connection = get_db_connection()
@@ -23,6 +25,20 @@ def get_emotion(materi, mahasiswa):
     finally:
         connection.close()
 '''
+
+def get_mhs(mahasiswa):
+    connection = get_db_connection()
+    if connection is None:
+        return None, "Error connecting to the database."
+    try:
+        with connection.cursor() as cursor:
+            sql_select = "SELECT * FROM mahasiswa WHERE id_mahasiswa = %s;"
+            cursor.execute(sql_select, (mahasiswa))
+            mhs = cursor.fetchone() 
+
+        return mhs, None
+    finally:
+        connection.close()
 
 
 def get_emotion(materi, mahasiswa):
@@ -55,7 +71,7 @@ def get_emotion(materi, mahasiswa):
         connection.close()
 
 def grafik_fokus(file_json):
-    JSON_PATH = f"emo_data/{file_json}"  # ganti jika perlu
+    JSON_PATH = f"emo_data/{file_json}"
     with open(JSON_PATH, "r", encoding="utf-8") as f:
         rows = json.load(f)
 
@@ -73,93 +89,49 @@ def grafik_fokus(file_json):
             data.append((t, focus_map[fval]))
 
     if not data:
-        return ""  # atau None
+        return ""
 
     # Urutkan
     data.sort(key=lambda x: x[0])
-    times = [t for t, _ in data]
-    ys    = [y for _, y in data]
+
+    # Waktu relatif dari awal +1 detik agar mulai 00:00:01
+    start_time = data[0][0] - timedelta(seconds=1)
+    rel_times = [(t - start_time).total_seconds() for t, _ in data]
+
+    # Fungsi format jam:menit:detik
+    def format_hhmmss(sec):
+        h, rem = divmod(int(sec), 3600)
+        m, s = divmod(rem, 60)
+        return f"{h:02d}:{m:02d}:{s:02d}"
+
+    ys = [y for _, y in data]
 
     # Plot
     fig, ax = plt.subplots(figsize=(10, 3))
-    ax.step(times, ys, where="post")
-    ax.scatter(times, ys, s=12)
+    ax.step(rel_times, ys, where="post")
+    ax.scatter(rel_times, ys, s=12)
     ax.set_yticks([0, 1], ["tidak fokus", "fokus"])
-    ax.set_xlabel("Timestamp")
-    #ax.set_ylabel("Fokus")
-    #ax.set_title("Grafik Kefokusan")
+
+    # Batasi jumlah label sumbu-x maksimal 10
+    max_labels = 10
+    if len(rel_times) > max_labels:
+        chosen_idx = np.linspace(0, len(rel_times) - 1, max_labels, dtype=int)
+        xticks = [rel_times[i] for i in chosen_idx]
+    else:
+        xticks = rel_times
+
+    ax.set_xticks(xticks)
+    ax.set_xticklabels([format_hhmmss(s) for s in xticks], rotation=45)
+
+    #ax.set_xlabel("Waktu")
     ax.grid(axis="y", linestyle="--", alpha=0.3)
-    fig.autofmt_xdate()
     fig.tight_layout()
 
-    # Return base64 (PNG)
     buf = io.BytesIO()
     fig.savefig(buf, format="png", dpi=140, bbox_inches="tight")
     plt.close(fig)
     buf.seek(0)
     return base64.b64encode(buf.read()).decode("ascii")
-
-
-def grafik_emotion_(file_json):
-    JSON_PATH = f"emo_data/{file_json}"
-    
-    classes = ["angry","disgust","fear","happy","neutral","sad","surprise"]
-
-    with open(JSON_PATH, "r", encoding="utf-8") as f:
-        rows = json.load(f)
-
-    df = pd.DataFrame(rows)
-    if df.empty or "timestamp" not in df or "emosi" not in df:
-        return ""  # atau None
-
-    # keep only target classes & timestamp valid
-    df = df[df["emosi"].isin(classes) & df["timestamp"].notna()].copy()
-    if df.empty:
-        return ""
-
-    # convert timestamp -> detik dari awal (untuk sumbu X numerik)
-    df["t"] = pd.to_datetime(df["timestamp"], format="%Y-%m-%d %H:%M:%S", errors="coerce")
-    df = df[df["t"].notna()]
-    if df.empty:
-        return ""
-    t0 = df["t"].min()
-    df["sec"] = (df["t"] - t0).dt.total_seconds()
-
-    # KDE butuh >=2 titik per kelas
-    valid_counts = df.groupby("emosi")["sec"].count()
-    use_classes = [c for c in classes if valid_counts.get(c, 0) >= 2]
-    if not use_classes:
-        return ""
-
-    # --- plot ridgeline ---
-    sns.set_theme(style="white")
-    g = sns.FacetGrid(
-        df[df["emosi"].isin(use_classes)],
-        row="emosi", hue="emosi",
-        row_order=use_classes,  # urut sesuai daftar yang kamu kasih
-        sharex=True, sharey=False,
-        height=1.1, aspect=6
-    )
-    g.map(sns.kdeplot, "sec", fill=True, alpha=.7, bw_adjust=.9, clip_on=False)
-
-    # bersihkan axis agar gaya "ridgeline"
-    for ax in g.axes.flatten():
-        ax.set_yticks([])
-        ax.set_ylabel("")
-        for spine in ("top", "right", "left"):
-            ax.spines[spine].set_visible(False)
-
-    g.set_titles(row_template="{row_name}")
-    g.set_xlabels("Detik dari awal")
-    g.figure.subplots_adjust(hspace=-0.35)
-
-    # --- Return base64 (PNG) ---
-    buf = io.BytesIO()
-    g.figure.savefig(buf, format="png", dpi=140, bbox_inches="tight")
-    plt.close(g.figure)
-    buf.seek(0)
-    return base64.b64encode(buf.read()).decode("ascii")
-
 
 def grafik_emotion(file_json, bw_adjust=0.8):
     JSON_PATH = f"emo_data/{file_json}"
@@ -210,7 +182,7 @@ def grafik_emotion(file_json, bw_adjust=0.8):
 
     #ax.set_xlabel("Detik dari awal")
     #ax.set_ylabel("Kepadatan")
-    ax.set_title("Distribusi Emosi")
+    #ax.set_title("Distribusi Emosi")
     ax.legend(ncol=4, fontsize=8)
     fig.tight_layout()
 
@@ -221,4 +193,156 @@ def grafik_emotion(file_json, bw_adjust=0.8):
     buf.seek(0)
     return base64.b64encode(buf.read()).decode("ascii")
 
-    
+def grafik_emotion_pie(file_json):
+    JSON_PATH = f"emo_data/{file_json}"
+    classes = ["angry", "disgust", "fear", "happy", "neutral", "sad", "surprise"]
+    BAD = {"Bad Processed"}
+
+    with open(JSON_PATH, "r", encoding="utf-8") as f:
+        rows = json.load(f)
+
+    # Filter: emosi valid, ada timestamp, bukan BAD, dan hanya fokus
+    rows = [
+        r for r in rows
+        if r.get("emosi") in classes
+        and r.get("timestamp")
+        and r.get("emosi") not in BAD
+        and r.get("fokus") == "fokus"
+    ]
+    if not rows:
+        return ""
+
+    # Hitung frekuensi per emosi
+    counts = {c: 0 for c in classes}
+    for r in rows:
+        counts[r["emosi"]] += 1
+
+    # Buang kelas nol agar tidak ada slice kosong
+    labels = [k.capitalize() for k, v in counts.items() if v > 0]
+    sizes  = [v for v in counts.values() if v > 0]
+    if not sizes:
+        return ""
+
+    total = sum(sizes)
+
+    # Tampilkan persen + jumlah
+    def autopct_fmt(pct):
+        n = int(round(pct * total / 100.0))
+        return f"{pct:.1f}%\n({n})"
+
+    fig, ax = plt.subplots(figsize=(5, 5))
+    ax.pie(
+        sizes,
+        labels=labels,
+        autopct=autopct_fmt,
+        startangle=90,
+        wedgeprops={"edgecolor": "white"},
+        textprops={"fontsize": 9}
+    )
+    ax.axis("equal")  # pie jadi lingkaran
+
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=140, bbox_inches="tight")
+    plt.close(fig)
+    buf.seek(0)
+    return base64.b64encode(buf.read()).decode("ascii")
+
+
+def grafik_emotion_bars(file_json):
+    JSON_PATH = f"emo_data/{file_json}"
+    classes = ["angry", "disgust", "fear", "happy", "neutral", "sad", "surprise"]
+    BAD = {"Bad Processed"}
+
+    color_map = {
+        "angry": "#E74C3C",
+        "disgust": "#27AE60",
+        "fear": "#8E44AD",
+        "happy": "#F1C40F",
+        "neutral": "#95A5A6",
+        "sad": "#3498DB",
+        "surprise": "#E67E22"
+    }
+
+    with open(JSON_PATH, "r", encoding="utf-8") as f:
+        rows = json.load(f)
+
+    rows = [
+        r for r in rows
+        if r.get("emosi") in classes
+        and r.get("timestamp")
+        and r.get("emosi") not in BAD
+    ]
+    if not rows:
+        return ""
+
+    def parse_ts(s):
+        try:
+            return datetime.strptime(s, "%Y-%m-%d %H:%M:%S")
+        except:
+            return None
+
+    times = [parse_ts(r["timestamp"]) for r in rows]
+    rows  = [r for r, t in zip(rows, times) if t is not None]
+    times = [t for t in times if t is not None]
+    if not times:
+        return ""
+
+    # Relatif dari awal +1 detik (mulai 00:00:01)
+    t0 = min(times)
+    start_time = t0 - timedelta(seconds=1)
+    for r, t in zip(rows, times):
+        r["sec"] = (t - start_time).total_seconds()
+
+    # Kumpulkan waktu per emosi yang muncul
+    x_by_class = {c: sorted([r["sec"] for r in rows if r["emosi"] == c]) for c in classes}
+    x_by_class = {k: v for k, v in x_by_class.items() if v}
+    if not x_by_class:
+        return ""
+
+    def format_hhmmss(sec):
+        h, rem = divmod(int(sec), 3600)
+        m, s = divmod(rem, 60)
+        return f"{h:02d}:{m:02d}:{s:02d}"
+
+    n = len(x_by_class)
+    fig, axes = plt.subplots(n, 1, figsize=(12, 2.6 * n), sharex=True)
+    if n == 1:
+        axes = [axes]
+
+    # Domain X global + xticks merata
+    all_secs = [s for lst in x_by_class.values() for s in lst]
+    xmin, xmax = min(all_secs), max(all_secs)
+    span = max(1.0, xmax - xmin)
+    left_margin, right_margin = 1.0, 1.0
+    max_labels = 10
+    xticks = (np.linspace(xmin, xmax, num=min(max_labels, max(2, len(all_secs))))
+              .tolist() if xmax > xmin else [xmin])
+
+    for ax, (emo, xs) in zip(axes, x_by_class.items()):
+        # Bar horizontal tipis di level Y = nama emosi (tak ada anotasi per-bar)
+        ax.barh([emo]*len(xs), [0.5]*len(xs), left=xs, height=0.5,
+                color=color_map.get(emo, "#7F8C8D"))
+
+        # Y = nama emosi
+        ax.set_yticks([emo])
+        ax.set_yticklabels([emo.capitalize()])
+
+        # Tampilkan label X (HH:MM:SS) DI SETIAP SUBPLOT
+        ax.set_xticks(xticks)
+        ax.set_xticklabels([format_hhmmss(s) for s in xticks], rotation=0, ha="right")
+        ax.tick_params(axis="x", which="both", labelbottom=True)  # penting
+
+        # Batas X + grid
+        ax.set_xlim(xmin - left_margin, xmax + right_margin)
+        ax.grid(axis="x", linestyle="--", alpha=0.3)
+
+        #ax.set_title(f"{emo.capitalize()} (n={len(xs)})", fontsize=11, pad=6)
+
+    #fig.supxlabel("Waktu (HH:MM:SS) dari awal", y=0.04)
+    fig.tight_layout(rect=[0, 0.06, 1, 1])
+
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=140, bbox_inches="tight")
+    plt.close(fig)
+    buf.seek(0)
+    return base64.b64encode(buf.read()).decode("ascii")
