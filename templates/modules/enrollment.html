@@ -4,6 +4,7 @@
         <div class="modal-content">
             <div class="modal-body">
                 <div id="materiIdContainer" style="display:none;" data-materi-id="{{ materi.id }}"></div>
+                <div id="materiJudulContainer" style="display:none;" data-materi-judul="{{ materi.judul_materi }}"></div>
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="card-title mb-0">{{ materi.judul_materi }}</h5>
@@ -75,6 +76,7 @@
     let emotionData = [];
     let collectEmotionData = "stop";
     var materiId = document.getElementById('materiIdContainer').getAttribute('data-materi-id');
+    var materiJudul = document.getElementById('materiJudulContainer').getAttribute('data-materi-judul');
     
     window.onload = function() {
         var video = document.getElementById('videoPlayer');
@@ -195,9 +197,10 @@
             
             emotionData.push({
                 materi_id: materiId,
+                judul_materi: materiJudul,
                 face_detected: data.face_detected,
-                arah_mata: data.arah_mata,
-                arah_kepala: data.arah_kepala,
+                //arah_mata: data.arah_mata,
+                //arah_kepala: data.arah_kepala,
                 fokus: data.fokus,
                 emosi: data.emosi,
                 timestamp: formattedDate
