@@ -19,7 +19,7 @@ client = genai.configure(api_key=gem_api)
 prompt = [
     """
     Tugas:
-    berikan analisis dari data yang diberikan tentang kefokusan dan emosi siswa pada saat pembelajaran daring. 
+    berikan analisis dari data yang diberikan tentang kefokusan dan emosi siswa pada saat pembelajaran daring, kategorikan emosi tersebut apakah positif atau negatif. 
     cukup jawab secara dominan dia fokus atau tidak, lalu dalam fokus tersebut sebutkan emosi dominannnya.
     juga berikan rekomendasi evaluasi tentang bagian materi mana yang harus diperbaiki oleh pengajar berdasarkan tingkat kefokusan dan emosi siswa tersebut.
     cukup jelaskan masing-masing dalam 1 paragraf saja. Jawaban jangan mengandung format-format bold atau miring.
