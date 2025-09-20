@@ -1,0 +1,703 @@
+############################################## Dependency #############################################################################################
+import cv2
+import numpy as np
+import mediapipe as mp
+from skimage.transform import PiecewiseAffineTransform, warp
+import matplotlib.pyplot as plt
+import math
+
+
+############################################## Mediapipe Utils ########################################################################################
+mp_drawing = mp.solutions.drawing_utils
+mp_drawing_styles = mp.solutions.drawing_styles
+mp_face_detection = mp.solutions.face_detection
+mp_selfie_segmentation = mp.solutions.selfie_segmentation
+
+mp_hands = mp.solutions.hands
+hands = mp_hands.Hands(static_image_mode=True, max_num_hands=2, min_detection_confidence=0.1)
+selfie_segmentation = mp_selfie_segmentation.SelfieSegmentation(model_selection=1)
+
+mp_face_mesh = mp.solutions.face_mesh
+drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
+#face_mesh = mp_face_mesh.FaceMesh(static_image_mode=True, refine_landmarks=True)
+face_mesh = mp_face_mesh.FaceMesh(
+    static_image_mode=True,
+    max_num_faces=1,
+    refine_landmarks=True,      
+    min_detection_confidence=0.6
+)
+
+face_mesh_cek = mp_face_mesh.FaceMesh(
+    static_image_mode=True,
+    max_num_faces=1,
+    refine_landmarks=True,      
+    min_detection_confidence=0.8
+)
+
+# Ambil daftar koneksi untuk Tesselation, Contours, dan Irises
+connections = {
+    "tesselation": (mp_face_mesh.FACEMESH_TESSELATION, 'cyan'),
+    "contours": (mp_face_mesh.FACEMESH_CONTOURS, 'red'),
+    "irises": (mp_face_mesh.FACEMESH_IRISES, 'magenta')
+}
+
+# Atur linewidth untuk setiap koneksi
+linewidths = {
+    "tesselation": 0.5,  # Lebih tipis
+    "contours": 2.5,  # Medium
+    "irises": 1.0  # Lebih tebal
+}
+
+############################################## Landmark Hand & Face ###################################################################################
+def landmark_tangan(tangan):
+    image_height, image_width, _ = tangan.shape
+    list_hand = []
+    
+    img_copy = tangan.copy()
+    results = hands.process(cv2.cvtColor(tangan, cv2.COLOR_BGR2RGB))
+    if results.multi_hand_landmarks:
+        for hand_no, hand_landmarks in enumerate(results.multi_hand_landmarks):
+            list_poin = []
+            mp_drawing.draw_landmarks(image = img_copy, landmark_list = hand_landmarks, connections = mp_hands.HAND_CONNECTIONS)
+            for i in range(21):
+                xc = int(hand_landmarks.landmark[mp_hands.HandLandmark(i).value].x * image_width)
+                yc = int(hand_landmarks.landmark[mp_hands.HandLandmark(i).value].y * image_height)
+                list_poin.append([xc, yc])
+            list_hand.append(list_poin)
+    return img_copy[:,:,::-1], list_hand
+
+def landmark_wajah(face):
+    annotated_image = face
+    results = face_mesh.process(cv2.cvtColor(face, cv2.COLOR_BGR2RGB))
+    if not results.multi_face_landmarks:
+        stat = None
+        return annotated_image, stat
+    else:
+        for face_landmarks in results.multi_face_landmarks:
+            mp_drawing.draw_landmarks(image=annotated_image,
+                                      landmark_list=face_landmarks,
+                                      connections=mp_face_mesh.FACEMESH_TESSELATION,
+                                      landmark_drawing_spec=None,
+                                      connection_drawing_spec=mp_drawing_styles.get_default_face_mesh_tesselation_style())
+            mp_drawing.draw_landmarks(image=annotated_image,
+                                      landmark_list=face_landmarks,
+                                      connections=mp_face_mesh.FACEMESH_CONTOURS,
+                                      landmark_drawing_spec=None,
+                                      connection_drawing_spec=mp_drawing_styles.get_default_face_mesh_contours_style())
+            mp_drawing.draw_landmarks(image=annotated_image,
+                                      landmark_list=face_landmarks,
+                                      connections=mp_face_mesh.FACEMESH_IRISES,
+                                      landmark_drawing_spec=None,
+                                      connection_drawing_spec=mp_drawing_styles.get_default_face_mesh_iris_connections_style())
+        return annotated_image, results.multi_face_landmarks[0].landmark
+
+def coordinate_landmark(wajah, landmark):
+    image = wajah.copy()
+    poin_masking = landmark
+    coordinates = np.array(poin_masking)
+    mask = np.zeros(image.shape[:2], dtype=np.uint8)    
+    cv2.fillPoly(mask, [coordinates], 1)    
+    masked_image = cv2.bitwise_and(image, image, mask=mask)
+    return masked_image
+
+def cek_landmark_wajah(face):
+    annotated_image = face
+    results = face_mesh_cek.process(annotated_image)
+    if not results.multi_face_landmarks:
+        return None
+    else:
+        stat = True
+        return stat
+
+############################################## Koreksi Head Roll ######################################################################################
+def correct_roll(image, roll, yaw):
+    h, w, _ = image.shape
+    img_rgb = image
+    results = face_mesh.process(img_rgb)
+    if not results.multi_face_landmarks:
+        print('Wajah tidak ditemukan!')
+        detected = False
+        return image, detected
+    for face_landmarks in results.multi_face_landmarks:
+        if roll > 83 and roll < 97:
+            detected = True
+            return image, detected
+        else:
+            left_eye = np.array([face_landmarks.landmark[33].x * w, face_landmarks.landmark[33].y * h])
+            right_eye = np.array([face_landmarks.landmark[263].x * w, face_landmarks.landmark[263].y * h])
+            dx, dy = right_eye[0] - left_eye[0], right_eye[1] - left_eye[1]
+            angle = np.degrees(np.arctan2(dy, dx))
+            center = (w // 2, h // 2)
+            M = cv2.getRotationMatrix2D(center, angle, 1)
+            corrected_image = cv2.warpAffine(image, M, (w, h))
+            detected = True
+            return corrected_image, detected
+        
+def get_face_mesh_3d(image):
+    h, w, _ = image.shape
+    img_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    results = face_mesh.process(img_rgb)
+    if not results.multi_face_landmarks:
+        print("Wajah tidak ditemukan!")
+        return None, None
+    face_landmarks = results.multi_face_landmarks[0].landmark
+    points = np.array([(lm.x * w, lm.y * h, lm.z * w) for lm in face_landmarks])
+    
+    return points, face_landmarks
+
+'''
+def compute_yaw_angle(points):
+    NOSE_IDX = 1  # Landmark hidung (pusat wajah)
+    CHIN_IDX = 152  # Landmark dagu
+    nose = points[NOSE_IDX]
+    chin = points[CHIN_IDX]
+    dx = chin[0] - nose[0]
+    dz = chin[2] - nose[2]
+    yaw_angle = np.degrees(np.arctan2(dx, dz))
+    return yaw_angle
+'''
+def compute_yaw_angle(points):
+    KANAN = 468    
+    KIRI = 173  
+    TENGAH = 168
+    eyeKanan = points[KANAN]
+    eyeKiri = points[KIRI]
+    tengah_ = points[TENGAH]
+    jkanan = abs(tengah_[0] - eyeKanan[0])
+    jkiri = abs(tengah_[0] - eyeKiri[0])
+    yaw = abs(jkanan / jkiri)
+    dx = round(yaw, 2)  
+    return dx
+
+def compute_head_angle(points):
+    NOSE_IDX = 164    # Landmark hidung (pusat wajah)
+    FOREHEAD_IDX = 151  # Landmark dahi (titik tinggi di wajah)
+    
+    nose = points[NOSE_IDX]
+    forehead = points[FOREHEAD_IDX]
+ 
+    HIDUNG = 4
+    PANGKAL = 2
+
+    hid = points[HIDUNG]
+    pang = points[PANGKAL]
+        
+    #=======yaw==========
+    r1, s1 = hid[0], hid[2]
+    r2, s2 = pang[0], hid[1]
+    fx = r2 - r1
+    fy = s2 - s1
+    _radians = math.atan2(fy, fx)
+    yaw = math.degrees(_radians)
+    yaw = 90 - yaw
+    yaw = abs(yaw)
+
+    #=======pitch==========
+    a1, b1 = nose[1], nose[2]
+    a2, b2 = forehead[1], forehead[2]
+    bx = a2 - a1
+    by = b2 - b1
+    _radian = math.atan2(by, bx)
+    pitch = math.degrees(_radian)
+    pitch = abs(pitch)
+    
+    #=======roll==========
+    x1, y1 = nose[0], nose[1]
+    x2, y2 = forehead[0], forehead[1]
+    dx = x2 - x1
+    dy = y2 - y1
+    theta_radian = math.atan2(dy, dx)
+    roll = math.degrees(theta_radian)
+    roll = abs(roll)
+
+    pitch = round(pitch, 2)
+    roll = round(roll, 2)  
+    yaw = round(yaw, 2)
+    return pitch, roll, yaw
+
+def convert_to_2d_xy(points):
+    points_2d_xy = points[:, :2]  # Ambil hanya X dan Y
+    return points_2d_xy
+
+def save_2d_face_ori(points_2d, task, gambar_asli):
+    filename = "face_2d_result_colored.png"
+    h, w = gambar_asli.shape[:2]    
+    canvas = np.ones_like(gambar_asli, dtype=np.uint8) * 255
+
+    color_map = {
+        "tesselation": (255, 0, 0),  # Biru
+        "contours": (0, 0, 255),     # Merah
+        "irises": (0, 255, 255)      # Kuning
+    }
+
+    # Ketebalan garis
+    linewidths = {
+        "tesselation": 1,
+        "contours": 2,
+        "irises": 1
+    }
+
+    # Pastikan koordinat integer dan dalam batas gambar
+    points_int = np.round(points_2d).astype(int)
+    points_int[:, 0] = np.clip(points_int[:, 0], 0, w - 1)
+    points_int[:, 1] = np.clip(points_int[:, 1], 0, h - 1)
+
+    # Gambar koneksi antar titik
+    for name, (conn, _) in connections.items():
+        color = color_map.get(name, (0, 0, 0))
+        thickness = linewidths.get(name, 1)
+        for start, end in conn:
+            pt1 = tuple(points_int[start])
+            pt2 = tuple(points_int[end])
+            cv2.line(canvas, pt1, pt2, color, thickness)
+
+    # Gambar titik
+    for x, y in points_int:
+        cv2.circle(canvas, (x, y), 2, (0, 0, 0), -1)
+
+    if task == 'simpan':
+        cv2.imwrite(filename, canvas)
+        print(f"Gambar 2D disimpan sebagai {filename}")
+        return None
+    else:
+        return canvas
+
+def rotate(points, angle, axis='z'):
+    """ Rotasi titik 3D berdasarkan sumbu (z = roll, y = yaw, x = pitch) """
+    angle_rad = np.radians(angle)
+    cos_a, sin_a = np.cos(angle_rad), np.sin(angle_rad)
+
+    if axis == 'z':  # Rotasi Roll
+        R = np.array([
+            [cos_a, -sin_a, 0],
+            [sin_a, cos_a, 0],
+            [0, 0, 1]
+        ])
+    elif axis == 'y':  # Rotasi Yaw
+        R = np.array([
+            [cos_a, 0, sin_a],
+            [0, 1, 0],
+            [-sin_a, 0, cos_a]
+        ])
+    elif axis == 'x':  # Rotasi Pitch
+        R = np.array([
+            [1, 0, 0],
+            [0, cos_a, -sin_a],
+            [0, sin_a, cos_a]
+        ])
+    else:
+        raise ValueError("Axis harus 'z' (roll), 'y' (yaw), atau 'x' (pitch)")
+
+    # Pusatkan titik sebelum rotasi
+    center = np.mean(points, axis=0)
+    rotated_points = np.dot(points - center, R.T) + center
+
+    return rotated_points
+
+############################################## Masking ################################################################################################
+# hasil masking == ukuran asli image
+def masking_img(images, f_poin, warna):
+    warna_dict = {'putih': (255, 255, 255),
+                  'hitam': (0, 0, 0),
+                  'biru': (0, 0, 255),
+                  'hijau': (0, 255, 0),
+                  'merah': (255, 0, 0)}
+
+    point_f = np.array(f_poin)
+    l_face = coordinate_landmark(images, f_poin)
+    l_faces = l_face.copy()
+    im_bwf = cv2.fillPoly(l_faces, pts=[point_f], color=warna_dict[warna])
+    return im_bwf
+
+
+# hasil masking ==  ukuran wajah
+def masking_img_(images, f_poin, warna):
+    warna_dict = {'putih': (255, 255, 255),
+                  'hitam': (0, 0, 0),
+                  'biru': (0, 0, 255),
+                  'hijau': (0, 255, 0),
+                  'merah': (255, 0, 0)}
+
+    point_f = np.array(f_poin)
+    l_face = coordinate_landmark(images, f_poin)
+    #l_faces = l_face.copy()
+    im_bwf = cv2.fillPoly(l_face, pts=[point_f], color=warna_dict[warna])
+    
+    x, y, w, h = cv2.boundingRect(np.array(f_poin, dtype=np.int32))
+    # Crop hasil sesuai bounding box
+    hasil_crop = im_bwf[y:y+h, x:x+w]
+    return hasil_crop
+
+############################################## Blurring_hand ##########################################################################################
+def blurring_hand(image):
+    max_hands=2
+    inpaint_radius=15 
+    dilate_size=21
+    method='NS'
+    
+    h, w, _ = image.shape
+    
+    # Get segmentation mask
+    results_seg = selfie_segmentation.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+    seg_mask = results_seg.segmentation_mask
+    seg_binary = (seg_mask > 0.5).astype(np.uint8) * 255
+
+    # Get hand polygons
+    results_hand = hands.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+    mask_total = np.zeros((h,w), dtype=np.uint8)
+
+    if results_hand.multi_hand_landmarks:
+        for hand_landmarks in results_hand.multi_hand_landmarks:
+            points = []
+            for lm in hand_landmarks.landmark:
+                px = int(lm.x * w)
+                py = int(lm.y * h)
+                points.append([px, py])
+            hull = cv2.convexHull(np.array(points, dtype=np.int32))
+
+            mask_hand = np.zeros((h,w), dtype=np.uint8)
+            cv2.fillPoly(mask_hand, [hull], 255)
+
+            # Intersect dengan segmentasi selfie
+            hand_only = cv2.bitwise_and(seg_binary, seg_binary, mask=mask_hand)
+            mask_total = cv2.bitwise_or(mask_total, hand_only)
+        detect_hand = True
+    else:
+        # Kalau tidak terdeteksi tangan, return image original
+        detect_hand = False
+        return image, detect_hand
+
+    # Dilate supaya benar-benar menutup area jari
+    kernel = np.ones((dilate_size,dilate_size), np.uint8)
+    mask_total = cv2.dilate(mask_total, kernel, iterations=1)
+
+    # Inpaint
+    flag = cv2.INPAINT_NS if method == 'NS' else cv2.INPAINT_TELEA
+    result = cv2.inpaint(image, mask_total, inpaintRadius=inpaint_radius, flags=flag)
+    return result, detect_hand
+
+def masking_tangan_canvas_hitam(image, warna='merah', max_hands=2, dilate_size=21):
+    warna_dict = {'putih': (255, 255, 255),
+                  'hitam': (0, 0, 0),
+                  'biru': (0, 0, 255),
+                  'hijau': (0, 255, 0),
+                  'merah': (255, 0, 0)}
+    
+    h, w, _ = image.shape
+
+    # Get segmentation mask
+    results_seg = selfie_segmentation.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+    seg_mask = results_seg.segmentation_mask
+    seg_binary = (seg_mask > 0.5).astype(np.uint8) * 255
+
+    # Get hand polygons
+    results_hand = hands.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+    mask_total = np.zeros((h,w), dtype=np.uint8)
+
+    if results_hand.multi_hand_landmarks:
+        for hand_landmarks in results_hand.multi_hand_landmarks:
+            points = []
+            for lm in hand_landmarks.landmark:
+                px = int(lm.x * w)
+                py = int(lm.y * h)
+                points.append([px, py])
+            hull = cv2.convexHull(np.array(points, dtype=np.int32))
+
+            mask_hand = np.zeros((h,w), dtype=np.uint8)
+            cv2.fillPoly(mask_hand, [hull], 255)
+
+            hand_only = cv2.bitwise_and(seg_binary, seg_binary, mask=mask_hand)
+            mask_total = cv2.bitwise_or(mask_total, hand_only)
+    else:
+        # Jika tidak ada tangan terdeteksi, kembalikan canvas hitam polos
+        return np.zeros_like(image)
+
+    # Pertebal mask agar menutup semua jari
+    kernel = np.ones((dilate_size,dilate_size), np.uint8)
+    mask_total = cv2.dilate(mask_total, kernel, iterations=1)
+
+    # Buat canvas hitam lalu isi area mask dengan warna sesuai
+    canvas = np.zeros_like(image)
+    canvas[mask_total == 255] = warna_dict[warna]
+
+    return canvas
+
+############################################## Crop Wajah #############################################################################################
+def potong_area(img, landmark_region):
+    mask = np.zeros_like(img, dtype=np.uint8)
+    cv2.fillConvexPoly(mask, np.array(landmark_region, dtype=np.int32), (255, 255, 255))
+    hasil = cv2.bitwise_and(img, mask)
+    return hasil
+
+def potong_area_(img, landmark_region):
+    mask = np.zeros_like(img, dtype=np.uint8)
+    cv2.fillConvexPoly(mask, np.array(landmark_region, dtype=np.int32), (255, 255, 255))
+    hasil = cv2.bitwise_and(img, mask)
+    x, y, w, h = cv2.boundingRect(np.array(landmark_region, dtype=np.int32))
+    hasil_crop = hasil[y:y+h, x:x+w]
+    return hasil_crop
+
+############################################## Luas Wajah #############################################################################################
+def luas_wajah(img):
+    mask_putih = np.all(img == [255, 255, 255], axis=-1)
+    luas_putih = np.sum(mask_putih)
+    return luas_putih
+
+############################################## Potong Tengah ##########################################################################################
+def spatial_divide(img, xh):
+    img_height, img_width, _ = img.shape
+    cropped_image_l = img[0:img_height, 0:xh]
+    cropped_image_r = img[0:img_height, xh:img_width]
+    return cropped_image_l, cropped_image_r
+
+############################################## Poin Landmark Wajah ####################################################################################
+def list_poin_tangan(list_poin):
+    poin_hand = [list_poin[0], list_poin[1], list_poin[2], list_poin[3], 
+                    list_poin[4], list_poin[5], list_poin[6], list_poin[7], 
+                    list_poin[8], list_poin[12], list_poin[16], 
+                    list_poin[20], list_poin[19], list_poin[18],list_poin[17]]
+    return poin_hand
+
+def list_poin_wajah(dua_D):
+    face_poin = [dua_D[152], dua_D[148], dua_D[176], dua_D[149], dua_D[150], dua_D[136], dua_D[172], dua_D[58], dua_D[132],
+                  dua_D[93], dua_D[234], dua_D[127], dua_D[162], dua_D[21], dua_D[54], dua_D[103], dua_D[67], dua_D[109],
+                  dua_D[10], dua_D[338], dua_D[297], dua_D[332], dua_D[284], dua_D[251], dua_D[389], dua_D[356], dua_D[454],
+                  dua_D[323], dua_D[361], dua_D[288], dua_D[397], dua_D[365], dua_D[379], dua_D[378], dua_D[400], dua_D[377]
+                 ]
+    return face_poin
+
+def wajah_kiri(dua_D):
+    face_poin = [dua_D[152], dua_D[175], dua_D[199], dua_D[200], dua_D[18], dua_D[17], dua_D[16], dua_D[15], dua_D[14], dua_D[13], dua_D[12], 
+                 dua_D[11], dua_D[0], dua_D[164], dua_D[2], dua_D[94], dua_D[4], dua_D[5], dua_D[195], dua_D[197], dua_D[6], dua_D[168], 
+                 dua_D[8], dua_D[9], dua_D[151], dua_D[10], 
+                 dua_D[109], dua_D[67], dua_D[103], dua_D[54], dua_D[21], dua_D[162], dua_D[127], dua_D[234], dua_D[93], dua_D[132], dua_D[58], 
+                 dua_D[172], dua_D[136], dua_D[150], dua_D[149], dua_D[176], dua_D[148]
+                 ]
+    return face_poin
+
+def wajah_kanan(dua_D):
+    face_poin = [dua_D[152], dua_D[175], dua_D[199], dua_D[200], dua_D[18], dua_D[17], dua_D[16], dua_D[15], dua_D[14], dua_D[13], dua_D[12], 
+                 dua_D[11], dua_D[0], dua_D[164], dua_D[2], dua_D[94], dua_D[4], dua_D[5], dua_D[195], dua_D[197], dua_D[6], dua_D[168], 
+                 dua_D[8], dua_D[9], dua_D[151], dua_D[10], 
+                 dua_D[338], dua_D[297], dua_D[332], dua_D[284], dua_D[251], dua_D[389], dua_D[356], dua_D[454], dua_D[323], dua_D[361], 
+                 dua_D[288], dua_D[397], dua_D[365], dua_D[379], dua_D[378], dua_D[400], dua_D[377] 
+                 ]
+    return face_poin
+
+def warp_poin(point, yaw): #poin warping baru (x lurus)
+    poin = point.copy()
+    yaw = abs(yaw)
+    if yaw < 10:
+        xp, yp = poin[13]
+    else:
+        xp, yp = poin[23]
+    poin[:26] = [(xp, y) for (_, y) in poin[:26]]
+    return poin
+
+############################################## Warping Wajah ke Warp Poin #############################################################################
+def images_warping(data_wajah, data_landmark_src, data_landmark_dst):
+    im = data_wajah
+    im_rgb = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
+    
+    src_landmarks = data_landmark_src  # bentuk (N, 2)
+    dst_landmarks = data_landmark_dst  # bentuk (N, 2)
+    
+    image_shape = im_rgb.shape
+    height, width = image_shape[:2]
+
+    tform = PiecewiseAffineTransform()
+    tform.estimate(dst_landmarks, src_landmarks)  # dari target ke source
+    
+    warped = warp(im_rgb, tform, output_shape=(height, width))
+    warped = (warped * 255).astype(np.uint8)
+    return warped
+    
+############################################## Show Image #############################################################################################
+def show_img(img):
+    plt.title('Result')
+    plt.axis('off')
+    plt.imshow(img)
+    plt.show()
+
+def show_images_grid(image_list, figsize=(12, 12)):
+    num_images = len(image_list)
+    max_cols = 6
+    cols = min(max_cols, num_images)
+    rows = math.ceil(num_images / cols)
+
+    total_slots = rows * cols
+    placeholder = np.ones((100, 100, 3), dtype=np.uint8) * 255  # putih
+    while len(image_list) < total_slots:
+        image_list.append((placeholder, None))
+    image_list = image_list[:total_slots]
+
+    fig, axs = plt.subplots(nrows=rows, ncols=cols, figsize=figsize)
+    axs = axs.flatten() if isinstance(axs, np.ndarray) else [axs]
+    fig.subplots_adjust(bottom=0.05)
+
+    for ax, (img, color) in zip(axs, image_list):
+        ax.axis('off')
+        if color:
+            ax.imshow(cv2.cvtColor(img, color))
+        else:
+            ax.imshow(img)
+    plt.show()
+
+############################################## Main Function ##########################################################################################
+def half_flip(img):  
+    try:
+        images = img   
+        img_h, img_w, _ = images.shape 
+        if img_h < 500:
+            new_height = 500                                          # ukuran tinggi image (sesuaikan)
+            (h, w) = images.shape[:2]
+            aspect_ratio = w / h
+            new_width = int(new_height * aspect_ratio)
+            images = cv2.resize(images, (new_width, new_height))      # resize tinggi image ke ukuran baru
+
+        output_list = []  
+        
+        ###### cuma untuk visualisasi ######
+        landm = images.copy() 
+        landn = images.copy()
+        land, _ = landmark_wajah(landm)
+        output_list.append((land, cv2.COLOR_RGB2BGR))
+        tang, _ = landmark_tangan(landn)
+        output_list.append((tang, None))
+        ###### cuma untuk visualisasi ######
+
+        img_ori = images.copy() 
+        points_, _ = get_face_mesh_3d(img_ori)
+        pitch, roll, yaw = compute_head_angle(points_)  
+        #print(f'pitch: {pitch}') 
+        #print(f'roll: {roll}') 
+        #print(f'yaw: {yaw}') 
+
+        img_roll, face_detected = correct_roll(img_ori, roll, yaw)                          # img_roll = headpose yang sudah di luruskan (yang diproses selanjutnya)
+        img_x = img_roll.copy()
+        img_r = img_roll.copy()                                   # img_roll yang tidak di proses (untuk visualisasi)
+
+        img_rr = img_roll.copy()
+        img_rr, hand_detected = blurring_hand(img_rr)
+        output_list.append((img_rr, cv2.COLOR_RGB2BGR))
+
+        if face_detected == True:
+            points_3d, _ = get_face_mesh_3d(img_r)
+            _, _, yaw_angle = compute_head_angle(points_3d)
+            #print(f'yaw: {yaw_angle}') 
+            
+            img_height, img_width, _ = img_roll.shape 
+
+            ######################## Proses Wajah - START #####################################################################################################
+            _, landmark_face = landmark_wajah(img_roll)      # proses landmarking wajah dari gambar yang sudah corect roll (img_roll)
+            dua_D = []                                            # proses mengkonversi koordinat landmark (x,y,z) dari 3D menjadi 2D
+            for i in range(len(landmark_face)):
+                ix = int(landmark_face[i].x * img_width)
+                iy = int(landmark_face[i].y * img_height)
+                dua_D.append([ix, iy])                            # dud_D = koordinat wajah 2D
+
+            ######################## landmarking full wajah - START #######################################################################################
+            poin_wajah_full = list_poin_wajah(dua_D)
+            wajah_full_masked = masking_img(img_roll, poin_wajah_full, 'putih')
+            output_list.append((wajah_full_masked, None))
+            ######################## END - landmarking full wajah #########################################################################################
+            
+            ######################## Proses Landmarking Tangan - START ########################################################################################
+            if hand_detected == True or yaw_angle > 1:                                    # jika tangan terdeteksi hanya 1
+                hand_masked = masking_tangan_canvas_hitam(img_x)
+                #output_list.append((hand_masked, None))
+                combine_face_hand = True
+                print("proses half 2d")
+
+                ######################## landmarking wajah kiri - START #######################################################################################
+                poin_wajah_kiri = wajah_kiri(dua_D)
+                face_kiri_masked = masking_img(img_roll, poin_wajah_kiri, 'putih')
+                landmark_warp_kiri = warp_poin(poin_wajah_kiri, yaw_angle)                # proses warping poin objek mask putih tengah wajah
+                output_list.append((face_kiri_masked, None))
+                ######################## END - landmarking wajah kiri #########################################################################################
+                
+                
+                ######################## landmarking wajah kanan - START ######################################################################################
+                poin_wajah_kanan = wajah_kanan(dua_D)
+                face_kanan_masked = masking_img(img_roll, poin_wajah_kanan, 'putih')
+                landmark_warp_kanan = warp_poin(poin_wajah_kanan, yaw_angle)              # proses warping poin objek mask putih tengah wajah
+                output_list.append((face_kanan_masked, None))
+                ######################## END - landmarking wajah kanan ########################################################################################
+
+
+                ######################## Combine Wajah & Hand - START #########################################################################################
+                # jika ada objek tangan, maka digabung dengan wajah
+                if combine_face_hand == True:       
+                    mask_hand_full = np.any(hand_masked != [0, 0, 0], axis=-1)
+                    hasil_full = wajah_full_masked
+                    hasil_full[mask_hand_full] = hand_masked[mask_hand_full]
+                    #output_list.append((hasil_full, None))
+                    
+                    mask_hand_kanan = np.any(hand_masked != [0, 0, 0], axis=-1)
+                    hasil_kanan = face_kanan_masked.copy()
+                    hasil_kanan[mask_hand_kanan] = hand_masked[mask_hand_kanan]
+            
+                    mask_hand_kiri = np.any(hand_masked != [0, 0, 0], axis=-1)    # Mask area non-hitam dari hand_masked
+                    hasil_kiri = face_kiri_masked.copy()                        # hasil_kanan = tangan kanan dan wajah kanan
+                    hasil_kiri[mask_hand_kiri] = hand_masked[mask_hand_kiri]      # hasil_kiri = tangan kiri dan wajah kanan
+                
+                # jika tidak ada objek tangan langsung pakai gambar marking wajah kiri kanan
+                else:                              
+                    hasil_kanan = face_kanan_masked.copy()                         # hasil_kiri = tangan kiri dan wajah kanan               
+                    hasil_kiri = face_kiri_masked.copy()                           # hasil_kiri = tangan kiri dan wajah kanan                
+
+                output_list.append((hasil_kiri, None))
+                output_list.append((hasil_kanan, None))
+                ######################## END - Combine Wajah & Hand ###########################################################################################
+                
+                ######################## warping wajah asli kiri - START ######################################################################################
+                poin_wajah_kiri = wajah_kiri(dua_D)
+                landmark_warp_kiri = warp_poin(poin_wajah_kiri, yaw_angle)
+                warpp_kiri = images_warping(img_rr, poin_wajah_kiri, landmark_warp_kiri)
+                output_list.append((warpp_kiri, None))
+                ######################## END - warping wajah asli kiri ########################################################################################
+                    
+                ######################## warping wajah asli kanan - START #####################################################################################                            
+                poin_wajah_kanan = wajah_kanan(dua_D)
+                landmark_warp_kanan = warp_poin(poin_wajah_kanan, yaw_angle)
+                warpp_kanan = images_warping(img_rr, poin_wajah_kanan, landmark_warp_kanan)
+                output_list.append((warpp_kanan, None))
+                ######################## END - warping wajah asli kanan #######################################################################################
+
+                ######################## proses membandingkan luas wajah kanan dan kiri  - START ##############################################################
+                luas_kiri = luas_wajah(hasil_kiri)
+                luas_kanan = luas_wajah(hasil_kanan)
+                if luas_kiri > luas_kanan:                                        # jika lebih luas kiri maka bagian kiri wajah yang dipakai
+                    #half_face = warpp_kiri
+                    clean_land_kiri = [ (max(0, int(x)), max(0, int(y))) for (x, y) in landmark_warp_kiri ]
+                    half_face = potong_area_(warpp_kiri, clean_land_kiri)       # proses memotong hanya bagian wajah
+                    output_list.append((half_face, None))
+                    flip_image = cv2.flip(half_face, 1)                           # flip wajah
+                    combine = np.concatenate((half_face, flip_image), axis=1)     # gabungkan wajah kanan kiri            
+                else:                                                             # jika lebih luas kanan maka bagian kanan wajah yang dipakai
+                    #half_face = warpp_kanan
+                    clean_land_kanan = [ (max(0, int(x)), max(0, int(y))) for (x, y) in landmark_warp_kanan ]
+                    half_face = potong_area_(warpp_kanan, clean_land_kanan)      # proses memotong hanya bagian wajah
+                    output_list.append((half_face, None))
+                    flip_image = cv2.flip(half_face, 1)                           # flip wajah
+                    combine = np.concatenate((flip_image, half_face), axis=1)     # gabungkan wajah kanan kanan
+                ######################## END - proses membandingkan luas wajah kanan dan kiri #################################################################
+
+                ######################## proses resize & save - START #########################################################################################
+                flip_output = combine                                             # flip_output = output proses wajah
+                flip_output = cv2.resize(flip_output, (224, 224))                 # resize gambar wajah output
+                flip_output = cv2.cvtColor(flip_output, cv2.COLOR_BGR2RGB)
+                output_list.append((flip_output, cv2.COLOR_BGR2RGB))
+                ######################## END - proses resize & save ##########################################################################################
+                return output_list
+                ######################## END - Proses Wajah ######################################################################################################     
+            else:                                                     # jika tidak ada tangan terdeteksi, maka tidak ada proses landmarking tangan
+                warpp_full = images_warping(img_r, poin_wajah_full, poin_wajah_full)
+                face_ori = potong_area_(warpp_full, poin_wajah_full)
+                face_ori = cv2.resize(face_ori, (224, 224))
+                face_ori = cv2.cvtColor(face_ori, cv2.COLOR_BGR2RGB)
+                output_list.append((face_ori, cv2.COLOR_BGR2RGB))
+                print("tidak proeses half 2d")
+                return output_list
+    except Exception as e:
+        return images
