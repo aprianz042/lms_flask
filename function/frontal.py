@@ -583,7 +583,7 @@ def half_flip(img):
             sum_of_hand = len(list_hand)
             if sum_of_hand > 0:                                    # jika tangan terdeteksi hanya 1
                 hand_masked = masking_tangan_canvas_hitam(img_roll)
-                output_list.append((hand_masked, None))
+                #output_list.append((hand_masked, None))
                 combine_face_hand = 'True'
             else:                                                     # jika tidak ada tangan terdeteksi, maka tidak ada proses landmarking tangan
                 combine_face_hand = False                             # tidak ada proses penggabungan dengan wajah 
