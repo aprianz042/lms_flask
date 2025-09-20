@@ -10,5 +10,5 @@ pymysql
 mediapipe
 scikit-image
 pycryptodome
-protobuf>=4.25.8
+protobuf==4.25.8
 grpcio-status==1.34.0
