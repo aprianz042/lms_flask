@@ -689,7 +689,6 @@ def half_flip(img):
                 flip_output = cv2.cvtColor(flip_output, cv2.COLOR_BGR2RGB)
                 #output_list.append((flip_output, cv2.COLOR_BGR2RGB))
                 ######################## END - proses resize & save ##########################################################################################
-                #return output_list
                 return flip_output
                 ######################## END - Proses Wajah ######################################################################################################     
             else:                                                     # jika tidak ada tangan terdeteksi, maka tidak ada proses landmarking tangan
@@ -697,9 +696,7 @@ def half_flip(img):
                 face_ori = potong_area_(warpp_full, poin_wajah_full)
                 face_ori = cv2.resize(face_ori, (224, 224))
                 face_ori = cv2.cvtColor(face_ori, cv2.COLOR_BGR2RGB)
-                #output_list.append((face_ori, cv2.COLOR_BGR2RGB))
-                #print("tidak proeses half 2d")
-                #return output_list
+
                 return face_ori
     except Exception as e:
         return images

@@ -1,14 +1,9 @@
 import os
 import base64
-import json
-import random
-import string
 
-from collections import Counter, defaultdict
-
-from flask import Flask, flash, render_template, Response, request, session, jsonify, redirect, url_for, send_file
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from flask_socketio import SocketIO, emit
+from flask import Flask, render_template, Response, request, session, jsonify, redirect, url_for
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
+from flask_socketio import SocketIO
 
 from function.koneksi import get_db_connection
 from function.head_data import *
