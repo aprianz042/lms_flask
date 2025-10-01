@@ -350,6 +350,88 @@ def grafik_emotion_bars(file_json):
     buf.seek(0)
     return base64.b64encode(buf.read()).decode("ascii")
 
+def grafik_emotion_lines(file_json):
+    JSON_PATH = f"emo_data/{file_json}"
+    
+    # Emotion mapping to numbers, including "Bad Processed" mapped to 0
+    emo_map = {
+        "angry": 1,
+        "fear": 2,
+        "disgust": 3,
+        "sad": 4,
+        "neutral": 5,
+        "happy": 6,
+        "surprise": 7,
+        "Bad Processed": 0  # This will be mapped to 0, but labeled as "distracted"
+    }
+
+    # Load the JSON data
+    with open(JSON_PATH, "r", encoding="utf-8") as f:
+        rows = json.load(f)
+
+    # Replace the emotion string with its numerical equivalent
+    data = []
+    for r in rows:
+        emotion = r.get("emosi")
+        ts = r.get("timestamp")
+        if emotion in emo_map and ts:
+            try:
+                t = datetime.strptime(ts, "%Y-%m-%d %H:%M:%S")
+            except ValueError:
+                continue
+            data.append((t, emo_map[emotion]))
+
+    if not data:
+        return ""
+
+    # Sort the data by timestamp
+    data.sort(key=lambda x: x[0])
+
+    # Calculate relative time (in seconds) from the first timestamp
+    start_time = data[0][0] - timedelta(seconds=1)
+    rel_times = [(t - start_time).total_seconds() for t, _ in data]
+
+    # Format time in HH:MM:SS
+    def format_hhmmss(sec):
+        h, rem = divmod(int(sec), 3600)
+        m, s = divmod(rem, 60)
+        return f"{h:02d}:{m:02d}:{s:02d}"
+
+    ys = [y for _, y in data]
+
+    # Create the plot
+    fig, ax = plt.subplots(figsize=(12, 6))
+    
+    # Plot the data as a line graph with red markers
+    ax.plot(rel_times, ys, marker='o', color="red", markersize=5, label="Emotion")  # Blue line with red markers
+    
+    # Set Y-axis ticks with emotion names (including "Bad Processed" as "distracted")
+    y_labels = [key.capitalize() if key != "Bad Processed" else "Distracted" for key in emo_map.keys()]
+    ax.set_yticks(list(emo_map.values()))
+    ax.set_yticklabels(y_labels)
+
+    # Limit the number of X-axis labels
+    max_labels = 10
+    if len(rel_times) > max_labels:
+        chosen_idx = np.linspace(0, len(rel_times) - 1, max_labels, dtype=int)
+        xticks = [rel_times[i] for i in chosen_idx]
+    else:
+        xticks = rel_times
+
+    # Set X-axis ticks and format
+    ax.set_xticks(xticks)
+    ax.set_xticklabels([format_hhmmss(s) for s in xticks], rotation=45)
+
+    ax.grid(axis="y", linestyle="--", alpha=0.3)
+    fig.tight_layout()
+
+    # Save the plot to a buffer and encode it as base64
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=140, bbox_inches="tight")
+    plt.close(fig)
+    buf.seek(0)
+    return base64.b64encode(buf.read()).decode("ascii")
+
 
 ########################### GEMINI #############################
 gem_api ='AIzaSyCwnXTOjCHT3rttgv7jI-UoYr2J5GCLcJg'
