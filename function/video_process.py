@@ -12,23 +12,9 @@ from function.frontal import half_flip
 #from function.frontalization import half_flip
 
 from function.func_headpose import main_front
-
 from deepface import DeepFace
+from function.predict_cnn import prediksi_cnn
 
-from keras.models import model_from_json
-from keras.preprocessing import image
-
-"""
-model = model_from_json(open("model/fer.json", "r").read())
-model.load_weights('model/fer.h5')
-
-def prediksi(img):
-    predictions = model.predict(img)
-    max_index = np.argmax(predictions[0])
-    emotions = ('angry', 'disgust', 'fear', 'happy', 'sad', 'surprise', 'neutral')
-    predicted_emotion = emotions[max_index]
-    return predicted_emotion
-"""
 
 def proses_img(data):
     # Data diterima dari klien dalam format base64
@@ -75,6 +61,9 @@ def analyze_emotion(frame):
         analysis = DeepFace.analyze(frame, actions=['emotion'], enforce_detection=False)
         dominant_emotion = analysis[0]['dominant_emotion']
         return dominant_emotion
+        
+        #pred = prediksi_cnn(frame)
+        #return pred
     except Exception as e:
         return "Error in analysis"
 
@@ -85,8 +74,8 @@ def frontal_video():
         if not ret:
             break
 
-        #frontal = half_flip(frame)
-        frontal = main_front(frame)
+        frontal = half_flip(frame)
+        #frontal = main_front(frame)
         _, jpeg = cv2.imencode('.jpg', frontal)
         frame_bytes = jpeg.tobytes()
 

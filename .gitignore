@@ -1,3 +1,4 @@
 .venv/
 .env
 function/model/shape_predictor_68_face_landmarks.dat
+function/model/model_cnn.pth
