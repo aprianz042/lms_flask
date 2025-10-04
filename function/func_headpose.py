@@ -31,7 +31,7 @@ def main_front(img_path):
 
         lmarks = feature_detection.get_landmarks(img)
         if lmarks.shape[0] == 0:
-            print("no face detected")
+            #print("no face detected")
             return img_path
         
         landmarks = lmarks[0]
