@@ -7,8 +7,8 @@ from PIL import Image
 from flask_socketio import SocketIO, emit
 from function.head_data import data_wajah
 
-#from function.frontal import half_flip
-from function.frontal_lms import half_flip
+from function.frontal import half_flip
+#from function.frontal_lms import half_flip
 #from function.frontalization import half_flip
 
 from function.func_headpose import main_front
@@ -38,7 +38,7 @@ def proses_img(data):
             emosi = analyze_emotion(img)
         else:
             fokus = "tidak fokus"
-            emosi = "Bad Processed"
+            emosi = "Not Processed"
 
     else:
         arah_mata = "Not Detected"

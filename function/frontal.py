@@ -114,6 +114,7 @@ def cek_landmark_wajah(face):
 def correct_roll(image, roll, yaw):
     h, w, _ = image.shape
     img_rgb = image
+    #img_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     results = face_mesh.process(img_rgb)
     if not results.multi_face_landmarks:
         print('Wajah tidak ditemukan!')
@@ -602,13 +603,13 @@ def half_flip(img):
             poin_wajah_full = list_poin_wajah(dua_D)
             wajah_full_masked = masking_img(img_roll, poin_wajah_full, 'putih')
             #output_list.append((wajah_full_masked, None))
-            if combine_face_hand == False and yaw_angle < 1:
+            if combine_face_hand == False and yaw_angle < 2:
                 #warpp_full = images_warping(img_r, poin_wajah_full, poin_wajah_full)
                 #face_ori = potong_area_(warpp_full, poin_wajah_full)
                 #face_ori = cv2.resize(face_ori, (224, 224))
                 #face_ori = cv2.cvtColor(face_ori, cv2.COLOR_BGR2RGB)
                 #return face_ori
-                frontal_miring = main_front(img_roll)
+                frontal_miring = main_front(img_r)
                 frontal_miring = cv2.cvtColor(frontal_miring, cv2.COLOR_BGR2RGB)
                 return frontal_miring
             ######################## END - landmarking full wajah #########################################################################################
