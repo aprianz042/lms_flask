@@ -543,6 +543,42 @@ def show_images_grid(image_list, figsize=(12, 12)):
             ax.imshow(img)
     plt.show()
 
+############################################## Oklusi tangan #############################################################################################
+def split_with_padding(hand_masked):
+    height, width = hand_masked.shape[:2]
+    mid_x = width // 2
+    left_part = np.zeros_like(hand_masked)
+    right_part = np.zeros_like(hand_masked)
+
+    # Copy bagian kiri ke left_part
+    left_part[:, :mid_x] = hand_masked[:, :mid_x]
+    # Copy bagian kanan ke right_part
+    right_part[:, mid_x:] = hand_masked[:, mid_x:]
+
+    # Deteksi pixel merah (RGB)
+    red_mask_left = (left_part[:, :, 0] == 255) & (left_part[:, :, 1] == 0) & (left_part[:, :, 2] == 0)
+    red_mask_right = (right_part[:, :, 0] == 255) & (right_part[:, :, 1] == 0) & (right_part[:, :, 2] == 0)
+
+    red_count_left = np.sum(red_mask_left)
+    red_count_right = np.sum(red_mask_right)
+
+    if red_count_left == 0 and red_count_right == 0:
+        occlusion = None
+    elif red_count_left < red_count_right:
+        occlusion = "left"
+    else:
+        occlusion = "right"
+
+    return left_part, right_part, occlusion
+
+############################################## combine wajah #############################################################################################
+def combine_wajah(warpp, landmark_warp):
+    clean_land_kiri = [ (max(0, int(x)), max(0, int(y))) for (x, y) in landmark_warp ]
+    half_face = potong_area_(warpp, clean_land_kiri)       
+    flip_image = cv2.flip(half_face, 1)                           
+    combine = np.concatenate((half_face, flip_image), axis=1)
+    return combine
+
 ############################################## Main Function ##########################################################################################
 def half_flip(img):  
     try:
@@ -585,9 +621,11 @@ def half_flip(img):
             sum_of_hand = len(list_hand)
             if sum_of_hand > 0:                                    # jika tangan terdeteksi hanya 1
                 hand_masked = masking_tangan_canvas_hitam(img_roll)
+                left, right, occlusion = split_with_padding(hand_masked)
                 #output_list.append((hand_masked, None))
                 combine_face_hand = 'True'
-            else:                                                     # jika tidak ada tangan terdeteksi, maka tidak ada proses landmarking tangan
+            else:          
+                occlusion = None                                           # jika tidak ada tangan terdeteksi, maka tidak ada proses landmarking tangan
                 combine_face_hand = False                             # tidak ada proses penggabungan dengan wajah 
             ######################## END - Proses Landmarking Tangan ##########################################################################################
 
@@ -638,13 +676,13 @@ def half_flip(img):
                 hasil_full[mask_hand_full] = hand_masked[mask_hand_full]
                 #output_list.append((hasil_full, None))
                 
-                mask_hand_kanan = np.any(hand_masked != [0, 0, 0], axis=-1)
+                mask_hand_kanan = np.any(right != [0, 0, 0], axis=-1)
                 hasil_kanan = face_kanan_masked.copy()
-                hasil_kanan[mask_hand_kanan] = hand_masked[mask_hand_kanan]
+                hasil_kanan[mask_hand_kanan] = right[mask_hand_kanan]
         
-                mask_hand_kiri = np.any(hand_masked != [0, 0, 0], axis=-1)    # Mask area non-hitam dari hand_masked
+                mask_hand_kiri = np.any(left != [0, 0, 0], axis=-1)    # Mask area non-hitam dari hand_masked
                 hasil_kiri = face_kiri_masked.copy()                        # hasil_kanan = tangan kanan dan wajah kanan
-                hasil_kiri[mask_hand_kiri] = hand_masked[mask_hand_kiri]      # hasil_kiri = tangan kiri dan wajah kanan
+                hasil_kiri[mask_hand_kiri] = left[mask_hand_kiri]      # hasil_kiri = tangan kiri dan wajah kanan
             
             # jika tidak ada objek tangan langsung pakai gambar marking wajah kiri kanan
             else:                              
@@ -672,24 +710,19 @@ def half_flip(img):
             ######################## proses membandingkan luas wajah kanan dan kiri  - START ##############################################################
             luas_kiri = luas_wajah(hasil_kiri)
             luas_kanan = luas_wajah(hasil_kanan)
-            if luas_kiri > luas_kanan:                                        # jika lebih luas kiri maka bagian kiri wajah yang dipakai
-                #half_face = warpp_kiri
-                clean_land_kiri = [ (max(0, int(x)), max(0, int(y))) for (x, y) in landmark_warp_kiri ]
-                half_face = potong_area_(warpp_kiri, clean_land_kiri)       # proses memotong hanya bagian wajah
-                #output_list.append((half_face, None))
-                flip_image = cv2.flip(half_face, 1)                           # flip wajah
-                combine = np.concatenate((half_face, flip_image), axis=1)     # gabungkan wajah kanan kiri            
-            else:                                                             # jika lebih luas kanan maka bagian kanan wajah yang dipakai
-                #half_face = warpp_kanan
-                clean_land_kanan = [ (max(0, int(x)), max(0, int(y))) for (x, y) in landmark_warp_kanan ]
-                half_face = potong_area_(warpp_kanan, clean_land_kanan)      # proses memotong hanya bagian wajah
-                #output_list.append((half_face, None))
-                flip_image = cv2.flip(half_face, 1)                           # flip wajah
-                combine = np.concatenate((flip_image, half_face), axis=1)     # gabungkan wajah kanan kanan
+            if occlusion == "right":
+                out_ = combine_wajah(warpp_kanan, landmark_warp_kanan)            
+            elif occlusion == "left":
+                out_ = combine_wajah(warpp_kiri, landmark_warp_kiri)
+            else:
+                if luas_kiri > luas_kanan:                                        # jika lebih luas kiri maka bagian kiri wajah yang dipakai
+                    out_ = combine_wajah(warpp_kiri, landmark_warp_kiri)
+                else:                                                             # jika lebih luas kanan maka bagian kanan wajah yang dipakai
+                    out_ = combine_wajah(warpp_kanan, landmark_warp_kanan)
             ######################## END - proses membandingkan luas wajah kanan dan kiri #################################################################
 
             ######################## proses resize & save - START #########################################################################################
-            flip_output = combine                                             # flip_output = output proses wajah
+            flip_output = out_                                             # flip_output = output proses wajah
             flip_output = cv2.resize(flip_output, (224, 224))                 # resize gambar wajah output
             flip_output = cv2.cvtColor(flip_output, cv2.COLOR_BGR2RGB)
             #output_list.append((flip_output, cv2.COLOR_BGR2RGB))
