@@ -572,11 +572,14 @@ def split_with_padding(hand_masked):
     return left_part, right_part, occlusion
 
 ############################################## combine wajah #############################################################################################
-def combine_wajah(warpp, landmark_warp):
+def combine_wajah(warpp, landmark_warp, occ):
     clean_land_kiri = [ (max(0, int(x)), max(0, int(y))) for (x, y) in landmark_warp ]
     half_face = potong_area_(warpp, clean_land_kiri)       
-    flip_image = cv2.flip(half_face, 1)                           
-    combine = np.concatenate((half_face, flip_image), axis=1)
+    flip_image = cv2.flip(half_face, 1)
+    if occ == 1:                           
+        combine = np.concatenate((half_face, flip_image), axis=1)
+    else:
+        combine = np.concatenate((flip_image, half_face), axis=1)
     return combine
 
 ############################################## Main Function ##########################################################################################
@@ -711,14 +714,18 @@ def half_flip(img):
             luas_kiri = luas_wajah(hasil_kiri)
             luas_kanan = luas_wajah(hasil_kanan)
             if occlusion == "right":
-                out_ = combine_wajah(warpp_kanan, landmark_warp_kanan)            
+                occ = 2
+                out_ = combine_wajah(warpp_kanan, landmark_warp_kanan, occ)            
             elif occlusion == "left":
-                out_ = combine_wajah(warpp_kiri, landmark_warp_kiri)
+                occ = 1
+                out_ = combine_wajah(warpp_kiri, landmark_warp_kiri, occ)
             else:
                 if luas_kiri > luas_kanan:                                        # jika lebih luas kiri maka bagian kiri wajah yang dipakai
-                    out_ = combine_wajah(warpp_kiri, landmark_warp_kiri)
+                    occ = 1
+                    out_ = combine_wajah(warpp_kiri, landmark_warp_kiri, occ)
                 else:                                                             # jika lebih luas kanan maka bagian kanan wajah yang dipakai
-                    out_ = combine_wajah(warpp_kanan, landmark_warp_kanan)
+                    occ = 2
+                    out_ = combine_wajah(warpp_kanan, landmark_warp_kanan, occ)
             ######################## END - proses membandingkan luas wajah kanan dan kiri #################################################################
 
             ######################## proses resize & save - START #########################################################################################
