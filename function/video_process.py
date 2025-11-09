@@ -35,23 +35,31 @@ def proses_img(data):
             img = half_flip(img)
             if img is not None:
                 print("proses half2d")
-            emosi = analyze_emotion(img)
+            
+            emosi, status_e, index_i = analyze_emotion(img)
+            print(f'{emosi} - {status_e} - {index_i}')
         else:
             fokus = "tidak fokus"
             emosi = "Not Processed"
+            status_e = "disengaged"
+            index_i = 0
 
     else:
         arah_mata = "Not Detected"
         arah_kepala = "Not Detected"
         emosi = "Not Processed"
         fokus = "Not Detected"
+        status_e = "disengaged"
+        index_i = 0
     
     data = {
         "face_detected": face_detected,
         "arah_mata": arah_mata,
         "arah_kepala": arah_kepala,
         "fokus": fokus,
-        "emosi" : emosi
+        "emosi": emosi,
+        "status": status_e,
+        "indeks": index_i
         }
     
     emit('analisis_wajah', data)
@@ -60,12 +68,60 @@ def analyze_emotion(frame):
     try:
         analysis = DeepFace.analyze(frame, actions=['emotion'], enforce_detection=False)
         dominant_emotion = analysis[0]['dominant_emotion']
-        return dominant_emotion
+        emotion_dict = {
+            'angry': round(analysis[0]['emotion']['angry'], 4),
+            'disgust': round(analysis[0]['emotion']['disgust'], 4),
+            'fear': round(analysis[0]['emotion']['fear'], 4),
+            'happy': round(analysis[0]['emotion']['happy'], 4),
+            'sadness': round(analysis[0]['emotion']['sad'], 4),
+            'surprise': round(analysis[0]['emotion']['surprise'], 4),
+            'neutral': round(analysis[0]['emotion']['neutral'], 4),
+        }
+        e_status, e_index = engagement(emotion_dict)
+        return dominant_emotion, e_status, e_index
         
         #pred = prediksi_cnn(frame)
         #return pred
     except Exception as e:
         return "Error in analysis"
+    
+
+def engagement(prob):
+    weights = {
+        "angry": 0.1,
+        "disgust": 0.9,
+        "fear": 0.5,
+        "happy": 1.1,
+        "sadness": 0.3,   
+        "surprise": 0.7,
+        "neutral": 1.4
+    }
+    ei = 0.0
+    for emotion in weights:
+        if emotion in prob:
+            ei += float(prob[emotion]) * float(weights[emotion])
+
+    neutral = float(prob.get('neutral', 0))
+    happy = float(prob.get('happy', 0))
+    surprise = float(prob.get('surprise', 0))
+    angry = float(prob.get('angry', 0))
+    fear = float(prob.get('fear', 0))
+    sadness = float(prob.get('sadness', 0))
+    disgust = float(prob.get('disgust', 0))
+
+    if (neutral > 0.6 or happy > 0.5 or surprise > 0.6):
+        status = "engaged"
+    elif(angry > 0.2 or fear > 0.3 or sadness > 0.3 or disgust > 0.3):
+        status = "disengaged"
+    else:
+        status = "disengaged"
+        ei = 0.0         
+    ei = round(float(ei), 2)
+    return status, ei
+
+
+
+
 
 def frontal_video():
     cap = cv2.VideoCapture(0)  
@@ -115,7 +171,7 @@ def generate_video(socketio):
             arah_mata = "Not Detected"
             arah_kepala = "Not Detected"
         
-        emosi = analyze_emotion(frame)
+        emosi, e_status, e_index = analyze_emotion(frame)
         #data = json.dumps({"face_detected": face_detected, "arah_mata": arah_mata, "arah_kepala": arah_kepala})
         data = {
             "face_detected": face_detected,

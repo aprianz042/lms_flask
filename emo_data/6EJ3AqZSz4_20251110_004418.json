@@ -1,0 +1,442 @@
+[
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "sad",
+    "status": "engaged",
+    "indeks": 50.11,
+    "timestamp": "2025-11-10 00:43:34"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "sad",
+    "status": "engaged",
+    "indeks": 52.33,
+    "timestamp": "2025-11-10 00:43:35"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "sad",
+    "status": "engaged",
+    "indeks": 49.86,
+    "timestamp": "2025-11-10 00:43:36"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "status": "engaged",
+    "indeks": 54.21,
+    "timestamp": "2025-11-10 00:43:37"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "status": "engaged",
+    "indeks": 78.74,
+    "timestamp": "2025-11-10 00:43:38"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "status": "engaged",
+    "indeks": 81.89,
+    "timestamp": "2025-11-10 00:43:39"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "status": "engaged",
+    "indeks": 77.5,
+    "timestamp": "2025-11-10 00:43:40"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "status": "engaged",
+    "indeks": 79.03,
+    "timestamp": "2025-11-10 00:43:41"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "fear",
+    "status": "engaged",
+    "indeks": 42.36,
+    "timestamp": "2025-11-10 00:43:42"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "tidak fokus",
+    "emosi": "Not Processed",
+    "status": "disengaged",
+    "indeks": 0,
+    "timestamp": "2025-11-10 00:43:43"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "tidak fokus",
+    "emosi": "Not Processed",
+    "status": "disengaged",
+    "indeks": 0,
+    "timestamp": "2025-11-10 00:43:44"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "sad",
+    "status": "disengaged",
+    "indeks": 30.07,
+    "timestamp": "2025-11-10 00:43:45"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "sad",
+    "status": "engaged",
+    "indeks": 35.86,
+    "timestamp": "2025-11-10 00:43:46"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "happy",
+    "status": "engaged",
+    "indeks": 60.14,
+    "timestamp": "2025-11-10 00:43:47"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "sad",
+    "status": "disengaged",
+    "indeks": 30.12,
+    "timestamp": "2025-11-10 00:43:48"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "sad",
+    "status": "engaged",
+    "indeks": 30.82,
+    "timestamp": "2025-11-10 00:43:49"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "status": "engaged",
+    "indeks": 67.18,
+    "timestamp": "2025-11-10 00:43:50"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "happy",
+    "status": "engaged",
+    "indeks": 60.27,
+    "timestamp": "2025-11-10 00:43:51"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "happy",
+    "status": "engaged",
+    "indeks": 65.05,
+    "timestamp": "2025-11-10 00:43:52"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "status": "engaged",
+    "indeks": 71.46,
+    "timestamp": "2025-11-10 00:43:53"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "status": "engaged",
+    "indeks": 87.59,
+    "timestamp": "2025-11-10 00:43:54"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "sad",
+    "status": "engaged",
+    "indeks": 33.29,
+    "timestamp": "2025-11-10 00:43:55"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "status": "engaged",
+    "indeks": 83.23,
+    "timestamp": "2025-11-10 00:43:56"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "status": "engaged",
+    "indeks": 51.25,
+    "timestamp": "2025-11-10 00:43:57"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "status": "engaged",
+    "indeks": 74.43,
+    "timestamp": "2025-11-10 00:43:58"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "status": "engaged",
+    "indeks": 60.47,
+    "timestamp": "2025-11-10 00:43:59"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "status": "engaged",
+    "indeks": 83.32,
+    "timestamp": "2025-11-10 00:44:00"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "angry",
+    "status": "engaged",
+    "indeks": 26.37,
+    "timestamp": "2025-11-10 00:44:01"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "angry",
+    "status": "engaged",
+    "indeks": 26.73,
+    "timestamp": "2025-11-10 00:44:02"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "happy",
+    "status": "engaged",
+    "indeks": 59.09,
+    "timestamp": "2025-11-10 00:44:03"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "status": "engaged",
+    "indeks": 53.7,
+    "timestamp": "2025-11-10 00:44:04"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "status": "engaged",
+    "indeks": 52.44,
+    "timestamp": "2025-11-10 00:44:05"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "status": "engaged",
+    "indeks": 57.66,
+    "timestamp": "2025-11-10 00:44:06"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "status": "engaged",
+    "indeks": 70.01,
+    "timestamp": "2025-11-10 00:44:07"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "status": "engaged",
+    "indeks": 75.47,
+    "timestamp": "2025-11-10 00:44:08"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "angry",
+    "status": "engaged",
+    "indeks": 38.09,
+    "timestamp": "2025-11-10 00:44:09"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "happy",
+    "status": "engaged",
+    "indeks": 63.38,
+    "timestamp": "2025-11-10 00:44:10"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "sad",
+    "status": "engaged",
+    "indeks": 38.6,
+    "timestamp": "2025-11-10 00:44:11"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "sad",
+    "status": "engaged",
+    "indeks": 54.45,
+    "timestamp": "2025-11-10 00:44:12"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "status": "engaged",
+    "indeks": 82.61,
+    "timestamp": "2025-11-10 00:44:13"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "status": "engaged",
+    "indeks": 74.49,
+    "timestamp": "2025-11-10 00:44:14"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "status": "engaged",
+    "indeks": 61.33,
+    "timestamp": "2025-11-10 00:44:15"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "status": "engaged",
+    "indeks": 80.29,
+    "timestamp": "2025-11-10 00:44:16"
+  },
+  {
+    "materi_id": "7",
+    "judul_materi": "Konten 15 Detiks",
+    "face_detected": true,
+    "fokus": "fokus",
+    "emosi": "neutral",
+    "status": "engaged",
+    "indeks": 78.6,
+    "timestamp": "2025-11-10 00:44:17"
+  }
+]

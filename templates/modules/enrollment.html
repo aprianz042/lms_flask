@@ -62,6 +62,8 @@
                     <p id="arah_kepala">Arah Kepala: </p>
                     <p id="fokus">Fokus: </p>
                     <p id="emosi">Emosi: </p>
+                    <p id="status">Status: </p>
+                    <p id="indeks">Engagement Index: </p>
                 </div>
             </div>
         </div>
@@ -188,6 +190,8 @@
         document.getElementById('arah_kepala').innerText = 'Arah Kepala: ' + data.arah_kepala;
         document.getElementById('fokus').innerText = 'Fokus: ' + data.fokus;
         document.getElementById('emosi').innerText = 'Emosi: ' + data.emosi;
+        document.getElementById('status').innerText = 'Status: ' + data.status;
+        document.getElementById('indeks').innerText = 'Engagement Index: ' + data.indeks;
         if (collectEmotionData == "mulai") {
             
             let timestamp = new Date().toISOString();  // ISO format, '2025-09-12T16:11:00.000Z'
@@ -203,6 +207,8 @@
                 //arah_kepala: data.arah_kepala,
                 fokus: data.fokus,
                 emosi: data.emosi,
+                status: data.status,
+                indeks: data.indeks,
                 timestamp: formattedDate
             });  
             console.log('Emotion:', emotionData); 
