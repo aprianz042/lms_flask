@@ -110,9 +110,11 @@
                 <li class="{{ 'active' if request.endpoint == 'daftarMatkul' or request.endpoint == 'materiKuliah/<int:id>'  else '' }}"><a href="{{ url_for('daftarMatkul') }}"> <i class="menu-icon fa fa-copy"></i>Mata Kuliah</a></li>
                 {% endif %}
 
+                <!--
                 <h3 class="menu-title">Debug</h3>
                 <li><a href="{{ url_for('debug_db') }}"> <i class="menu-icon fa fa-sign-out"></i>Debug DB </a></li>
                 <li><a href="{{ url_for('debug_video') }}"> <i class="menu-icon fa fa-camera"></i>Debug Video </a></li>
+            -->
                 
             </ul>
         </div><!-- /.navbar-collapse -->
