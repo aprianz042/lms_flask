@@ -535,7 +535,8 @@ def emotion(materi, mahasiswa):
                             grafik_fokus=grafik_fok,
                             grafik_pie=grafik_pie,
                             grafik_bar=grafik_bar,
-                            analisis=analisis,
+                            analisis=analisis[0],
+                            evaluasi=analisis[1],
                             session=session)
     else:
         mahsw, error = get_mhs(mahasiswa)

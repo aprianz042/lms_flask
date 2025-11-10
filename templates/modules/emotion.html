@@ -18,7 +18,7 @@
           <!-- Card Grafik Fokus -->
           <div class="card mb-3">
             <div class="card-header">
-              <strong>Fokus Siswa</strong>
+              <strong>Engagement Siswa</strong>
             </div>
             <div class="card-body">
               <img class="img-fluid d-block mx-auto" src="data:image/png;base64,{{ grafik_fokus }}" alt="Fokus vs Waktu">
@@ -61,12 +61,22 @@
 
           <div class="card">
             <div class="card-header">
-              <strong>Analisis</strong>
+              <strong>Ringkasan Engagement Siswa</strong>
             </div>
             <div class="card-body">
               <p>{{ analisis }}</p>
             </div>
           </div>
+
+          <div class="card">
+            <div class="card-header">
+              <strong>Rekomendasi Perbaikan</strong>
+            </div>
+            <div class="card-body">
+              <p>{{ evaluasi }}</p>
+            </div>
+          </div>
+
 
         {% else %}
           <div class="alert alert-danger" role="alert">

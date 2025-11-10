@@ -78,24 +78,18 @@ def grafik_fokus(file_json):
     with open(JSON_PATH, "r", encoding="utf-8") as f:
         rows = json.load(f)
 
-    engagement_map = {
-        "Highly Engaged": 4,    
-        "Confused": 3,
-        "Boredom": 2,
-        "Sleepy": 1,
-        "Very Not Engaged": 0
-        }
+    focus_map = {"fokus": 1, "tidak fokus": 0}
 
     data = []
     for r in rows:
-        fval = r.get("engagement")
+        fval = r.get("fokus")
         ts = r.get("timestamp")
-        if fval in engagement_map and ts:
+        if fval in focus_map and ts:
             try:
                 t = datetime.strptime(ts, "%Y-%m-%d %H:%M:%S")
             except ValueError:
                 continue
-            data.append((t, engagement_map[fval]))
+            data.append((t, focus_map[fval]))
 
     if not data:
         return ""
@@ -119,7 +113,7 @@ def grafik_fokus(file_json):
     fig, ax = plt.subplots(figsize=(10, 3))
     ax.step(rel_times, ys, where="post")
     ax.scatter(rel_times, ys, s=12)
-    ax.set_yticks([0, 1, 2, 3, 4], ["Very Not Engaged", "Sleepy", "Boredom", "Confused", "Highly Engaged"])
+    ax.set_yticks([0, 1], ["tidak fokus", "fokus"])
 
     # Batasi jumlah label sumbu-x maksimal 10
     max_labels = 10
@@ -154,7 +148,7 @@ def grafik_emotion(file_json, bw_adjust=0.8):
         except Exception:
             return None
 
-    BAD = {"No face detected"}
+    BAD = {"Bad Processed"}
     rows = [r for r in rows if r.get("emosi") in classes and r.get("timestamp") and r.get("emosi") not in BAD]
 
     if not rows:
@@ -205,7 +199,7 @@ def grafik_emotion(file_json, bw_adjust=0.8):
 def grafik_emotion_pie(file_json):
     JSON_PATH = f"emo_data/{file_json}"
     classes = ["angry", "disgust", "fear", "happy", "neutral", "sad", "surprise"]
-    BAD = {"No face detected"}
+    BAD = {"Bad Processed"}
 
     with open(JSON_PATH, "r", encoding="utf-8") as f:
         rows = json.load(f)
@@ -216,6 +210,7 @@ def grafik_emotion_pie(file_json):
         if r.get("emosi") in classes
         and r.get("timestamp")
         and r.get("emosi") not in BAD
+        and r.get("fokus") == "fokus"
     ]
     if not rows:
         return ""
@@ -367,7 +362,7 @@ def grafik_emotion_lines(file_json):
         "neutral": 5,
         "happy": 6,
         "surprise": 7,
-        "No face detected": 0  # This will be mapped to 0, but labeled as "distracted"
+        "Bad Processed": 0  # This will be mapped to 0, but labeled as "distracted"
     }
 
     # Load the JSON data
@@ -411,7 +406,7 @@ def grafik_emotion_lines(file_json):
     ax.plot(rel_times, ys, marker='o', color="red", markersize=5, label="Emotion")  # Blue line with red markers
     
     # Set Y-axis ticks with emotion names (including "Bad Processed" as "distracted")
-    y_labels = [key.capitalize() if key != "No face detected" else "No Face" for key in emo_map.keys()]
+    y_labels = [key.capitalize() if key != "Bad Processed" else "Distracted" for key in emo_map.keys()]
     ax.set_yticks(list(emo_map.values()))
     ax.set_yticklabels(y_labels)
 
@@ -457,9 +452,10 @@ client = genai.configure(api_key=gem_api)
 prompt = [
     """
     Tugas:
-    berikan analisis secara singkat dari data yang diberikan tentang engagement siswa pada saat pembelajaran daring, lalu sebutkan emosi dominannnya.
-    juga berikan rekomendasi evaluasi tentang bagian materi mana yang harus diperbaiki oleh pengajar berdasarkan tingkat engagement siswa tersebut.
-    cukup jelaskan masing-masing dalam 1 paragraf saja. Pisahkan analisis dan rekomendasi dengan karakter ';' Jawaban jangan mengandung format-format bold atau miring.
+    berikan analisis dari data yang diberikan tentang kefokusan dan emosi siswa pada saat pembelajaran daring. 
+    cukup jawab secara dominan dia fokus atau tidak, lalu dalam fokus tersebut sebutkan emosi dominannnya.
+    juga berikan rekomendasi evaluasi tentang bagian materi mana yang harus diperbaiki oleh pengajar berdasarkan tingkat kefokusan dan emosi siswa tersebut.
+    cukup jelaskan masing-masing dalam 1 paragraf saja. Jawaban jangan mengandung format-format bold atau miring.
     """
 ]
 
@@ -468,5 +464,4 @@ def analisis_gemini(file_json):
     with open(JSON_PATH, 'r') as file:
         data = json.load(file)
     x = run_task(data, prompt)
-    parts = x.split(";")
-    return parts
+    return x

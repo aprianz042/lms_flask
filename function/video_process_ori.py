@@ -29,42 +29,37 @@ def proses_img(data):
     if face_detected == True:
         arah_mata = data_["arah_mata"]
         arah_kepala = data_["arah_kepala"]
-        
-        img = half_flip(img)
-        if img is not None:
-            print("proses half2d")
-        
-        emosi, _ = analyze_emotion(img)
-        w_emo = emo_i(emosi)
-        
-        if (arah_kepala == "tengah") and (arah_mata != "tertutup" and arah_mata != "Error"):
-            w_head = 1
-            w_eye = 2.5
+        if (arah_kepala == "kiri" and arah_mata == "kanan") or (arah_kepala == "kanan" and arah_mata == "kiri") or (arah_kepala == "tengah" and arah_mata == "tengah"):
+            fokus = "fokus"
 
-        elif (arah_kepala == "kiri" or arah_kepala == "kanan") and (arah_mata != "tertutup" and arah_mata != "Error"):
-            w_head = 0
-            w_eye = 2.5
-
-        elif (arah_kepala == "tengah" and arah_mata == "tertutup"):
-            w_head = 1
-            w_eye = 0
-
+            img = half_flip(img)
+            if img is not None:
+                print("proses half2d")
+            
+            emosi, status_e, index_i = analyze_emotion(img)
+            print(f'{emosi} - {status_e} - {index_i}')
         else:
-            w_head = 0
-            w_eye = 0
+            fokus = "tidak fokus"
+            emosi = "Not Processed"
+            status_e = "disengaged"
+            index_i = 0
 
     else:
-        emosi = "No face detected"
-        w_emo = 0
-        w_head = 0
-        w_eye = 0
+        arah_mata = "Not Detected"
+        arah_kepala = "Not Detected"
+        emosi = "Not Processed"
+        fokus = "Not Detected"
+        status_e = "disengaged"
+        index_i = 0
     
-    indeks_i = engagement_index(w_head, w_eye, w_emo)
-
     data = {
         "face_detected": face_detected,
+        "arah_mata": arah_mata,
+        "arah_kepala": arah_kepala,
+        "fokus": fokus,
         "emosi": emosi,
-        "engagement": indeks_i
+        "status": status_e,
+        "indeks": index_i
         }
     
     emit('analisis_wajah', data)
@@ -82,43 +77,16 @@ def analyze_emotion(frame):
             'surprise': round(analysis[0]['emotion']['surprise'], 4),
             'neutral': round(analysis[0]['emotion']['neutral'], 4),
         }
-        return dominant_emotion, emotion_dict
+        e_status, e_index = engagement(emotion_dict)
+        return dominant_emotion, e_status, e_index
         
         #pred = prediksi_cnn(frame)
         #return pred
     except Exception as e:
         return "Error in analysis"
     
-def emo_i(emo):
-    weights = {
-        "angry": 0.1,
-        "disgust": 0.9,
-        "fear": 0.5,
-        "happy": 1.1,
-        "sadness": 0.3,   
-        "surprise": 0.7,
-        "neutral": 1.4
-    }
-    ei = weights.get(emo, 0)
-    return ei
 
-def engagement_index(whead, weye, wemo):
-    sumW = whead + weye + wemo
-    if sumW > 4.5:
-        ei = "Highly Engaged"
-    elif sumW >= 4 and sumW < 4.5:
-        ei = "Confused"
-    elif sumW >= 2.5 and sumW < 4:
-        ei = "Boredom"
-    elif sumW < 2.5 and sumW != 0:
-        ei = "Sleepy"
-    else:
-        ei = "Very Not Engaged"
-    return ei
-
-    
-
-def engagement_ori(prob):
+def engagement(prob):
     weights = {
         "angry": 0.1,
         "disgust": 0.9,
@@ -203,7 +171,7 @@ def generate_video(socketio):
             arah_mata = "Not Detected"
             arah_kepala = "Not Detected"
         
-        emosi, _ = analyze_emotion(frame)
+        emosi, e_status, e_index = analyze_emotion(frame)
         #data = json.dumps({"face_detected": face_detected, "arah_mata": arah_mata, "arah_kepala": arah_kepala})
         data = {
             "face_detected": face_detected,
