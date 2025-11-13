@@ -41,10 +41,56 @@
             <div class="col-12 col-md-8 mb-3">
               <div class="card h-100">
                 <div class="card-header">
-                  <strong>Distribusi Emosi</strong>
+                  <strong>Kesimpulan</strong>
                 </div>
                 <div class="card-body">
-                  <img class="img-fluid d-block mx-auto" src="data:image/png;base64,{{ grafik_emo }}" alt="Distribusi Emosi">
+                  <!--<img class="img-fluid d-block mx-auto" src="data:image/png;base64,{{ grafik_emo }}" alt="Distribusi Emosi">-->
+                  <div class="card-body">
+            
+                    <p class="text-center">
+                      <strong>Siswa dinyatakan {{ kesimpulan }}</strong>
+                    </p>
+
+                    <div class="progress-group">
+                      Highly Engaged
+                      <span class="float-right"><b>{{ detail.get('Highly Engaged', 0) }} %</b></span>
+                      <div class="progress progress-sm">
+                        <div class="progress-bar bg-danger" style="width: {{ detail.get('Highly Engaged', 0) }}%" ></div>
+                      </div>
+                    </div>
+
+                    <div class="progress-group">
+                      Confused
+                      <span class="float-right"><b>{{ detail.get('Confused', 0) }} %</b></span>
+                      <div class="progress progress-sm">
+                        <div class="progress-bar bg-success" style="width: {{ detail.get('Confused', 0) }}%" ></div>
+                      </div>
+                    </div>
+
+                    <div class="progress-group">
+                      Boredom
+                      <span class="float-right"><b>{{ detail.get('Boredom', 0) }} %</b></span>
+                      <div class="progress progress-sm">
+                        <div class="progress-bar bg-primary" style="width: {{ detail.get('Boredom', 0) }}%" ></div>
+                      </div>
+                    </div>
+
+                    <div class="progress-group">
+                      Sleepy
+                      <span class="float-right"><b>{{ detail.get('Sleepy', 0) }} %</b></span>
+                      <div class="progress progress-sm">
+                        <div class="progress-bar bg-warning" style="width: {{ detail.get('Sleepy', 0) }}%" ></div>
+                      </div>
+                    </div>
+
+                    <div class="progress-group">
+                      Very Not Engaged
+                      <span class="float-right"><b>{{ detail.get('Very Not Engaged', 0) }} %</b></span>
+                      <div class="progress progress-sm">
+                        <div class="progress-bar bg-secondary" style="width: {{ detail.get('Very Not Engaged', 0) }}%" ></div>
+                      </div>
+                    </div>            
+                  </div>
                 </div>
               </div>
             </div>

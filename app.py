@@ -528,6 +528,7 @@ def emotion(materi, mahasiswa):
         #grafik_bar = grafik_emotion_bars(emotion['emo_file'])
         grafik_bar = grafik_emotion_lines(emotion['emo_file'])
         analisis = analisis_gemini(emotion['emo_file'])
+        konklusi = kesimpulan(emotion['emo_file'])
         return render_template('home.html', 
                             konten=konten, 
                             emotion=emotion, 
@@ -537,6 +538,8 @@ def emotion(materi, mahasiswa):
                             grafik_bar=grafik_bar,
                             analisis=analisis[0],
                             evaluasi=analisis[1],
+                            kesimpulan=konklusi[0],
+                            detail=konklusi[1],
                             session=session)
     else:
         mahsw, error = get_mhs(mahasiswa)

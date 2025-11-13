@@ -438,6 +438,22 @@ def grafik_emotion_lines(file_json):
     return base64.b64encode(buf.read()).decode("ascii")
 
 
+######################### Dominan Engagement ######################
+def kesimpulan(file_json):
+    JSON_PATH = f"emo_data/{file_json}"
+    with open(JSON_PATH, "r", encoding="utf-8") as f:
+        rows = json.load(f)
+    engagement_counts = Counter(row['engagement'] for row in rows)
+    total = sum(engagement_counts.values())
+    if engagement_counts:
+        engagement_terbanyak = engagement_counts.most_common(1)[0][0]
+    else:
+        engagement_terbanyak = None
+    # Persentase dibulatkan 2 angka di belakang koma
+    engagement_persen = {kategori: round((jumlah / total * 100), 2) for kategori, jumlah in engagement_counts.items()}
+    return engagement_terbanyak, engagement_persen
+
+
 ########################### GEMINI #############################
 gem_api ='AIzaSyCwnXTOjCHT3rttgv7jI-UoYr2J5GCLcJg'
 
@@ -457,6 +473,7 @@ client = genai.configure(api_key=gem_api)
 prompt = [
     """
     Tugas:
+    Pertama jadikan timestamp pertama menjadi detik ke 00:00:01, selanjutnya
     berikan analisis secara singkat dari data yang diberikan tentang engagement siswa pada saat pembelajaran daring, lalu sebutkan emosi dominannnya.
     juga berikan rekomendasi evaluasi tentang bagian materi mana yang harus diperbaiki oleh pengajar berdasarkan tingkat engagement siswa tersebut.
     cukup jelaskan masing-masing dalam 1 paragraf saja. Pisahkan analisis dan rekomendasi dengan karakter ';' Jawaban jangan mengandung format-format bold atau miring.
