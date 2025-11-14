@@ -79,41 +79,44 @@ def grafik_fokus(file_json):
         rows = json.load(f)
 
     engagement_map = {
-        "Highly Engaged": 4,    
+        "Highly Engaged": 4,     
         "Confused": 3,
         "Boredom": 2,
         "Sleepy": 1,
         "Very Not Engaged": 0
-        }
+    }
+
+    # Fungsi untuk ubah string elapsed_time "00:00:01" jadi detik (int)
+    def hms_to_seconds(s):
+        h, m, sec = map(int, s.split(":"))
+        return h * 3600 + m * 60 + sec
 
     data = []
     for r in rows:
         fval = r.get("engagement")
-        ts = r.get("timestamp")
-        if fval in engagement_map and ts:
+        etime = r.get("elapsed_time")
+        if fval in engagement_map and etime:
             try:
-                t = datetime.strptime(ts, "%Y-%m-%d %H:%M:%S")
-            except ValueError:
+                seconds = hms_to_seconds(etime)
+            except Exception:
                 continue
-            data.append((t, engagement_map[fval]))
+            data.append((seconds, engagement_map[fval]))
 
     if not data:
         return ""
 
-    # Urutkan
+    # Urutkan berdasarkan waktu
     data.sort(key=lambda x: x[0])
 
-    # Waktu relatif dari awal +1 detik agar mulai 00:00:01
-    start_time = data[0][0] - timedelta(seconds=1)
-    rel_times = [(t - start_time).total_seconds() for t, _ in data]
+    # Siapkan data grafik
+    rel_times = [t for t, _ in data]
+    ys = [y for _, y in data]
 
     # Fungsi format jam:menit:detik
     def format_hhmmss(sec):
         h, rem = divmod(int(sec), 3600)
         m, s = divmod(rem, 60)
         return f"{h:02d}:{m:02d}:{s:02d}"
-
-    ys = [y for _, y in data]
 
     # Plot
     fig, ax = plt.subplots(figsize=(10, 3))
@@ -132,7 +135,6 @@ def grafik_fokus(file_json):
     ax.set_xticks(xticks)
     ax.set_xticklabels([format_hhmmss(s) for s in xticks], rotation=45)
 
-    #ax.set_xlabel("Waktu")
     ax.grid(axis="y", linestyle="--", alpha=0.3)
     fig.tight_layout()
 
@@ -142,34 +144,33 @@ def grafik_fokus(file_json):
     buf.seek(0)
     return base64.b64encode(buf.read()).decode("ascii")
 
+
 def grafik_emotion(file_json, bw_adjust=0.8):
     JSON_PATH = f"emo_data/{file_json}"
     classes = ["angry", "disgust", "fear", "happy", "neutral", "sad", "surprise"]
+    BAD = {"No face detected"}
+
     with open(JSON_PATH, "r", encoding="utf-8") as f:
         rows = json.load(f)
 
-    def parse_ts(s):
-        try:
-            return datetime.strptime(s, "%Y-%m-%d %H:%M:%S")
-        except Exception:
-            return None
-
-    BAD = {"No face detected"}
-    rows = [r for r in rows if r.get("emosi") in classes and r.get("timestamp") and r.get("emosi") not in BAD]
-
+    # Filter: hanya data valid dan punya elapsed_time
+    rows = [r for r in rows if r.get("emosi") in classes and r.get("elapsed_time") and r.get("emosi") not in BAD]
     if not rows:
         return ""
 
-    # konversi timestamp -> detik dari awal
-    times = [parse_ts(r["timestamp"]) for r in rows]
-    rows = [r for r, t in zip(rows, times) if t is not None]
-    times = [t for t in times if t is not None]
-    if not times:
-        return ""
+    def hms_to_seconds(s):
+        h, m, sec = map(int, s.split(":"))
+        return h * 3600 + m * 60 + sec
 
-    t0 = min(times)
-    for r, t in zip(rows, times):
-        r["sec"] = (t - t0).total_seconds()
+    for r in rows:
+        try:
+            r["sec"] = hms_to_seconds(r["elapsed_time"])
+        except Exception:
+            r["sec"] = None
+
+    rows = [r for r in rows if r["sec"] is not None]
+    if not rows:
+        return ""
 
     # kumpulkan x per kelas
     x_by_class = {c: [r["sec"] for r in rows if r["emosi"] == c] for c in classes}
@@ -186,21 +187,20 @@ def grafik_emotion(file_json, bw_adjust=0.8):
         if len(xs) >= 2:
             sns.kdeplot(xs, fill=True, alpha=0.35, bw_adjust=bw_adjust, label=cls, ax=ax)
         elif len(xs) == 1:
-            # kalau hanya 1 titik, KDE tidak bisa; tampilkan titiknya saja
             ax.scatter(xs, [0], s=22, label=f"{cls} (1)")
 
-    #ax.set_xlabel("Detik dari awal")
+    #ax.set_xlabel("Detik sejak mulai")
     #ax.set_ylabel("Kepadatan")
     #ax.set_title("Distribusi Emosi")
     ax.legend(ncol=4, fontsize=8)
     fig.tight_layout()
 
-    # --- return base64 PNG ---
     buf = io.BytesIO()
     fig.savefig(buf, format="png", dpi=140, bbox_inches="tight")
     plt.close(fig)
     buf.seek(0)
     return base64.b64encode(buf.read()).decode("ascii")
+
 
 def grafik_emotion_pie(file_json):
     JSON_PATH = f"emo_data/{file_json}"
@@ -210,11 +210,11 @@ def grafik_emotion_pie(file_json):
     with open(JSON_PATH, "r", encoding="utf-8") as f:
         rows = json.load(f)
 
-    # Filter: emosi valid, ada timestamp, bukan BAD, dan hanya fokus
+    # Filter: emosi valid, punya elapsed_time, bukan BAD
     rows = [
         r for r in rows
         if r.get("emosi") in classes
-        and r.get("timestamp")
+        and r.get("elapsed_time")
         and r.get("emosi") not in BAD
     ]
     if not rows:
@@ -225,15 +225,13 @@ def grafik_emotion_pie(file_json):
     for r in rows:
         counts[r["emosi"]] += 1
 
-    # Buang kelas nol agar tidak ada slice kosong
+    # Buang kelas nol kosong
     labels = [k.capitalize() for k, v in counts.items() if v > 0]
     sizes  = [v for v in counts.values() if v > 0]
     if not sizes:
         return ""
 
     total = sum(sizes)
-
-    # Tampilkan persen + jumlah
     def autopct_fmt(pct):
         n = int(round(pct * total / 100.0))
         return f"{pct:.1f}%\n({n})"
@@ -247,13 +245,14 @@ def grafik_emotion_pie(file_json):
         wedgeprops={"edgecolor": "white"},
         textprops={"fontsize": 9}
     )
-    ax.axis("equal")  # pie jadi lingkaran
+    ax.axis("equal")
 
     buf = io.BytesIO()
     fig.savefig(buf, format="png", dpi=140, bbox_inches="tight")
     plt.close(fig)
     buf.seek(0)
     return base64.b64encode(buf.read()).decode("ascii")
+
 
 
 def grafik_emotion_bars(file_json):
@@ -274,32 +273,30 @@ def grafik_emotion_bars(file_json):
     with open(JSON_PATH, "r", encoding="utf-8") as f:
         rows = json.load(f)
 
+    # Filter hanya kelas yang relevan dan ada elapsed_time
     rows = [
         r for r in rows
         if r.get("emosi") in classes
-        and r.get("timestamp")
+        and r.get("elapsed_time")
         and r.get("emosi") not in BAD
     ]
     if not rows:
         return ""
 
-    def parse_ts(s):
+    # Ubah elapsed_time ke detik
+    def hms_to_seconds(s):
+        h, m, sec = map(int, s.split(":"))
+        return h * 3600 + m * 60 + sec
+
+    for r in rows:
         try:
-            return datetime.strptime(s, "%Y-%m-%d %H:%M:%S")
-        except:
-            return None
+            r["sec"] = hms_to_seconds(r["elapsed_time"])
+        except Exception:
+            r["sec"] = None
 
-    times = [parse_ts(r["timestamp"]) for r in rows]
-    rows  = [r for r, t in zip(rows, times) if t is not None]
-    times = [t for t in times if t is not None]
-    if not times:
+    rows = [r for r in rows if r["sec"] is not None]
+    if not rows:
         return ""
-
-    # Relatif dari awal +1 detik (mulai 00:00:01)
-    t0 = min(times)
-    start_time = t0 - timedelta(seconds=1)
-    for r, t in zip(rows, times):
-        r["sec"] = (t - start_time).total_seconds()
 
     # Kumpulkan waktu per emosi yang muncul
     x_by_class = {c: sorted([r["sec"] for r in rows if r["emosi"] == c]) for c in classes}
@@ -344,8 +341,6 @@ def grafik_emotion_bars(file_json):
         ax.set_xlim(xmin - left_margin, xmax + right_margin)
         ax.grid(axis="x", linestyle="--", alpha=0.3)
 
-        #ax.set_title(f"{emo.capitalize()} (n={len(xs)})", fontsize=11, pad=6)
-
     #fig.supxlabel("Waktu (HH:MM:SS) dari awal", y=0.04)
     fig.tight_layout(rect=[0, 0.06, 1, 1])
 
@@ -355,10 +350,11 @@ def grafik_emotion_bars(file_json):
     buf.seek(0)
     return base64.b64encode(buf.read()).decode("ascii")
 
+
 def grafik_emotion_lines(file_json):
     JSON_PATH = f"emo_data/{file_json}"
-    
-    # Emotion mapping to numbers, including "Bad Processed" mapped to 0
+
+    # Emotion mapping to numbers, including "No face detected" mapped to 0
     emo_map = {
         "angry": 1,
         "fear": 2,
@@ -374,27 +370,32 @@ def grafik_emotion_lines(file_json):
     with open(JSON_PATH, "r", encoding="utf-8") as f:
         rows = json.load(f)
 
+    # Convert elapsed_time "00:00:01" to seconds (int)
+    def hms_to_seconds(s):
+        h, m, sec = map(int, s.split(":"))
+        return h * 3600 + m * 60 + sec
+
     # Replace the emotion string with its numerical equivalent
     data = []
     for r in rows:
         emotion = r.get("emosi")
-        ts = r.get("timestamp")
-        if emotion in emo_map and ts:
+        etime = r.get("elapsed_time")
+        if emotion in emo_map and etime:
             try:
-                t = datetime.strptime(ts, "%Y-%m-%d %H:%M:%S")
-            except ValueError:
+                seconds = hms_to_seconds(etime)
+            except Exception:
                 continue
-            data.append((t, emo_map[emotion]))
+            data.append((seconds, emo_map[emotion]))
 
     if not data:
         return ""
 
-    # Sort the data by timestamp
+    # Sort the data by elapsed_time seconds
     data.sort(key=lambda x: x[0])
 
-    # Calculate relative time (in seconds) from the first timestamp
-    start_time = data[0][0] - timedelta(seconds=1)
-    rel_times = [(t - start_time).total_seconds() for t, _ in data]
+    # Use elapsed_time (in seconds) directly
+    rel_times = [t for t, _ in data]
+    ys = [y for _, y in data]
 
     # Format time in HH:MM:SS
     def format_hhmmss(sec):
@@ -402,15 +403,11 @@ def grafik_emotion_lines(file_json):
         m, s = divmod(rem, 60)
         return f"{h:02d}:{m:02d}:{s:02d}"
 
-    ys = [y for _, y in data]
-
     # Create the plot
     fig, ax = plt.subplots(figsize=(12, 6))
-    
-    # Plot the data as a line graph with red markers
-    ax.plot(rel_times, ys, marker='o', color="red", markersize=5, label="Emotion")  # Blue line with red markers
-    
-    # Set Y-axis ticks with emotion names (including "Bad Processed" as "distracted")
+    ax.plot(rel_times, ys, marker='o', color="red", markersize=5, label="Emotion")
+
+    # Set Y-axis ticks with emotion names
     y_labels = [key.capitalize() if key != "No face detected" else "No Face" for key in emo_map.keys()]
     ax.set_yticks(list(emo_map.values()))
     ax.set_yticklabels(y_labels)
@@ -423,7 +420,7 @@ def grafik_emotion_lines(file_json):
     else:
         xticks = rel_times
 
-    # Set X-axis ticks and format
+    # Set X-axis ticks and label format
     ax.set_xticks(xticks)
     ax.set_xticklabels([format_hhmmss(s) for s in xticks], rotation=45)
 
@@ -436,6 +433,7 @@ def grafik_emotion_lines(file_json):
     plt.close(fig)
     buf.seek(0)
     return base64.b64encode(buf.read()).decode("ascii")
+
 
 
 ######################### Dominan Engagement ######################
@@ -473,9 +471,8 @@ client = genai.configure(api_key=gem_api)
 prompt = [
     """
     Tugas:
-    Pertama jadikan timestamp pertama menjadi detik ke 00:00:01, selanjutnya
     berikan analisis secara singkat dari data yang diberikan tentang engagement siswa pada saat pembelajaran daring, lalu sebutkan emosi dominannnya.
-    juga berikan rekomendasi evaluasi tentang bagian materi mana yang harus diperbaiki oleh pengajar berdasarkan tingkat engagement siswa tersebut.
+    juga berikan rekomendasi evaluasi tentang bagian (menit dan detik dari elapsed_time) materi mana yang harus diperbaiki oleh pengajar berdasarkan tingkat engagement siswa tersebut.
     cukup jelaskan masing-masing dalam 1 paragraf saja. Pisahkan analisis dan rekomendasi dengan karakter ';' Jawaban jangan mengandung format-format bold atau miring.
     """
 ]
