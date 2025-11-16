@@ -10,7 +10,18 @@ def get_mahasiswa():
     
     try:
         with connection.cursor() as cursor:
-            cursor.execute('SELECT * FROM mahasiswa')
+            sql_data = """
+                SELECT 
+                    m.*,
+                    k.nama_kelas
+                FROM 
+                    mahasiswa m
+                JOIN 
+                    kelas k ON m.id_kelas = k.id_kelas
+                ORDER BY 
+                    k.nama_kelas ASC, m.nama_mahasiswa ASC;
+                """
+            cursor.execute(sql_data)
             mahasiswa = cursor.fetchall() 
 
             cursor.execute('SELECT * FROM prodi')
@@ -60,7 +71,7 @@ def add_mahasiswa(data):
                 asdaf, 
                 nomor_telepon, 
                 program_studi, 
-                kelas, 
+                id_kelas, 
                 password, 
                 tahun_angkatan, 
                 tanggal_lahir, 
@@ -113,7 +124,7 @@ def edit_mahasiswa(data):
                     asdaf = %s, 
                     nomor_telepon = %s, 
                     program_studi = %s, 
-                    kelas = %s, 
+                    id_kelas = %s, 
                     tahun_angkatan = %s, 
                     tanggal_lahir = %s, 
                     jenis_kelamin = %s

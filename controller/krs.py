@@ -8,8 +8,7 @@ def get_krs():
     
     try:
         with connection.cursor() as cursor:
-            cursor.execute(
-                """
+            sql_data = """
                 SELECT 
                     p.id_pengampu,
                     p.id_prodi,
@@ -33,10 +32,9 @@ def get_krs():
                 JOIN 
                     mata_kuliah mk ON p.id_mata_kuliah = mk.id_mata_kuliah
                 JOIN 
-                    kelas k ON p.id_kelas = k.id_kelas
-                ORDER BY 
-                    p.id_kelas ASC, mk.nama_mata_kuliah ASC;
-                """)
+                    kelas k ON p.id_kelas = k.id_kelas;
+                """
+            cursor.execute(sql_data)
             data = cursor.fetchall()
 
             cursor.execute(
@@ -85,6 +83,7 @@ def get_krs():
             d_krs = []
             for mahasiswa_id, data in mahasiswa_mata_kuliah.items():
                 d_krs.append({
+                    'id_mahasiswa': mahasiswa_id,
                     'nama_mahasiswa': data['nama_mahasiswa'],
                     'mata_kuliah': data['mata_kuliah'],  
                     'nama_kelas': data['nama_kelas'],
@@ -95,7 +94,45 @@ def get_krs():
         connection.close()
 
 
-def add_krs(data):
+def get_krs_data():
+    connection = get_db_connection()
+    if connection is None:
+        return None, "Error connecting to the database."
+    try:
+        with connection.cursor() as cursor:
+            sql_data = """
+                SELECT 
+                    p.id_pengampu,
+                    p.id_prodi,
+                    p.id_pengajar,
+                    p.id_mata_kuliah,
+                    p.id_kelas,
+                    p.tahun_ajaran,
+                    p.semester,
+                    pr.nama_prodi,
+                    pr.kode_prodi,
+                    pg.nama_pengajar,
+                    mk.nama_mata_kuliah,
+                    mk.kode_mata_kuliah,
+                    k.nama_kelas
+                FROM 
+                    pengampu p
+                JOIN 
+                    prodi pr ON p.id_prodi = pr.id_prodi
+                JOIN 
+                    pengajar pg ON p.id_pengajar = pg.id_pengajar
+                JOIN 
+                    mata_kuliah mk ON p.id_mata_kuliah = mk.id_mata_kuliah
+                JOIN 
+                    kelas k ON p.id_kelas = k.id_kelas;
+                """
+            cursor.execute(sql_data)
+            data = cursor.fetchall()
+            return data
+    finally:
+        connection.close()
+
+def add_krs_ori(data):
     id_ampuan = data.get('id_ampuan')
 
     connection = get_db_connection()
@@ -162,7 +199,167 @@ def add_krs(data):
             cursor.executemany(sql_insert, data_to_insert)
             connection.commit()
 
-        return jsonify({"message": "Berhasil menambahkan pengampu"}), 201
+        return jsonify({"message": "Berhasil menambahkan KRS"}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        connection.close()
+
+def add_krs(data):
+    id_ampuan = data.get('id_ampuan')
+
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            sql_data = """
+                SELECT 
+                    p.id_pengampu,
+                    p.id_prodi,
+                    p.id_pengajar,
+                    p.id_mata_kuliah,
+                    p.id_kelas,
+                    p.tahun_ajaran,
+                    p.semester,
+                    pr.nama_prodi,
+                    pr.kode_prodi,
+                    pg.nama_pengajar,
+                    mk.nama_mata_kuliah,
+                    mk.kode_mata_kuliah,
+                    k.nama_kelas
+                FROM 
+                    pengampu p
+                JOIN 
+                    prodi pr ON p.id_prodi = pr.id_prodi
+                JOIN 
+                    pengajar pg ON p.id_pengajar = pg.id_pengajar
+                JOIN 
+                    mata_kuliah mk ON p.id_mata_kuliah = mk.id_mata_kuliah
+                JOIN 
+                    kelas k ON p.id_kelas = k.id_kelas
+                WHERE 
+                    p.id_pengampu = %s
+                ORDER BY 
+                    p.id_kelas ASC, mk.nama_mata_kuliah ASC;
+                """
+            cursor.execute(sql_data, (id_ampuan,))
+            krs = cursor.fetchall()
+
+            sql_mhs = "SELECT * FROM mahasiswa WHERE id_kelas = %s"
+            mahasiswa_data = []
+            for kelas_data in krs:
+                cursor.execute(sql_mhs, (kelas_data['id_kelas'],))
+                mahasiswa_data.extend(cursor.fetchall())
+
+            data_to_insert = []
+            for mahasiswa in mahasiswa_data:
+                # Validasi: cek apakah record sudah ada di tabel krs
+                cek_sql = """
+                SELECT 1 FROM krs 
+                WHERE 
+                    id_mahasiswa = %s AND
+                    id_mata_kuliah = %s AND
+                    id_kelas = %s AND
+                    id_pengampu = %s
+                LIMIT 1;
+                """
+                data_cek = (
+                    mahasiswa['id_mahasiswa'],
+                    krs[0]['id_mata_kuliah'],
+                    krs[0]['id_kelas'],
+                    krs[0]['id_pengampu']
+                )
+                cursor.execute(cek_sql, data_cek)
+                sudah_ada = cursor.fetchone()
+                if sudah_ada:
+                    continue  # Skip kalau sudah ada
+
+                # Append ke list insert jika belum ada
+                data = (
+                    mahasiswa['id_mahasiswa'],
+                    krs[0]['id_mata_kuliah'],
+                    krs[0]['id_kelas'],
+                    krs[0]['id_pengampu'],
+                    '',
+                    krs[0]['tahun_ajaran'],
+                    krs[0]['semester'],
+                    'on_going'
+                )
+                data_to_insert.append(data)
+
+            if data_to_insert:
+                sql_insert = """
+                INSERT INTO krs (id_mahasiswa, id_mata_kuliah, id_kelas, id_pengampu, nilai, tahun_ajaran, semester, status)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """
+                cursor.executemany(sql_insert, data_to_insert)
+                connection.commit()
+
+        return jsonify({"message": "Berhasil menambahkan KRS"}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        connection.close()
+
+
+def add_krs_single(data):
+    id_ampuan = data.get('id_ampuan_s')
+    id_mahasiswa = data.get('id_mhs')
+    tahun_ajaranS = data.get('tahun_ajaranS')
+
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            sql_data = """
+                SELECT 
+                    p.id_pengampu,
+                    p.id_prodi,
+                    p.id_pengajar,
+                    p.id_mata_kuliah,
+                    p.id_kelas,
+                    p.tahun_ajaran,
+                    p.semester,
+                    pr.nama_prodi,
+                    pr.kode_prodi,
+                    pg.nama_pengajar,
+                    mk.nama_mata_kuliah,
+                    mk.kode_mata_kuliah,
+                    k.nama_kelas
+                FROM 
+                    pengampu p
+                JOIN 
+                    prodi pr ON p.id_prodi = pr.id_prodi
+                JOIN 
+                    pengajar pg ON p.id_pengajar = pg.id_pengajar
+                JOIN 
+                    mata_kuliah mk ON p.id_mata_kuliah = mk.id_mata_kuliah
+                JOIN 
+                    kelas k ON p.id_kelas = k.id_kelas
+                WHERE 
+                    p.id_pengampu = %s
+                ORDER BY 
+                    p.id_kelas ASC, mk.nama_mata_kuliah ASC;
+                """
+            cursor.execute(sql_data, (id_ampuan,))  
+            krs = cursor.fetchall()
+           
+            sql_insert = """
+            INSERT INTO krs (id_mahasiswa, id_mata_kuliah, id_kelas, id_pengampu, nilai, tahun_ajaran, semester, status)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """
+
+            cursor.execute(sql_insert, (
+                id_mahasiswa,
+                krs[0]['id_mata_kuliah'],  
+                krs[0]['id_kelas'],        
+                krs[0]['id_pengampu'],     
+                '',                        
+                tahun_ajaranS,
+                krs[0]['semester'],
+                'on_going'  
+            ))
+            connection.commit()
+
+        return jsonify({"message": "Berhasil menambahkan KRS"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:

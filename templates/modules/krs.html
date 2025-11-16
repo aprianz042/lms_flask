@@ -13,8 +13,9 @@
             </div>
             <div class="card-body card-block">
                 <button type="button" class="btn btn-success mb-1" data-toggle="modal" data-target="#add_krs">
-                    Tambah KRS
+                    Tambah / Update KRS per Pengampu
                 </button>
+                
 
                 <table id="bootstrap-data-table-export" class="table table-striped table-bordered">
                     <thead>
@@ -38,10 +39,10 @@
                             {% endfor %}
                             </td>
                             <td>
-                                <a href="#" class="btn btn-primary btn-sm btn-block" data-toggle="modal" data-target="#modalEdit{{ op.id_krs }}">
+                                <a href="#" class="btn btn-primary btn-sm btn-block" data-toggle="modal" data-target="#modalEdit{{ op.id_mahasiswa }}">
                                     <i class="fa fa-edit"></i> Edit
                                 </a>
-                                <a href="#" class="btn btn-danger btn-sm btn-block" data-toggle="modal" data-target="#modalHapus{{ op.id_krs }}">
+                                <a href="#" class="btn btn-danger btn-sm btn-block" data-toggle="modal" data-target="#modalHapus{{ op.id_mahasiswa }}">
                                     <i class="fa fa-trash-o"></i> Hapus
                                 </a>
                             </td>
@@ -98,8 +99,8 @@
 </div>
 
 <!-- Modal Edit Pengampu -->
-{% for edit in pengampu %}
-<div class="modal fade" id="modalEdit{{ edit.id_krs }}" tabindex="-1" role="dialog" aria-labelledby="modalEdit" aria-hidden="true">
+{% for edit in d_krs %}
+<div class="modal fade" id="modalEdit{{ edit.id_mahasiswa }}" tabindex="-1" role="dialog" aria-labelledby="modalEdit" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -109,48 +110,40 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="dataFormEdit{{ edit.id_krs }}" class="form-horizontal">
-                    <input type="text" id="id_pengampu" name="id_pengampu" value="{{ edit.id_krs }}" class="form-control" hidden>
-
+                <form id="dataSingle{{ edit.id_mahasiswa }}" class="form-horizontal">
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_prodi" class="form-control-label">Program Studi</label></div>
+                        <div class="col col-md-3"><label for="nama" class="form-control-label">Nama Mahasiswa</label></div>
                         <div class="col-12 col-md-9">
-                            <select name="id_prodi" id="id_prodi" class="form-control" required>
-                                {% for daftar in daftar_prodi %}
-                                <option value="{{ daftar.id_prodi }}" {% if edit.id_prodi == daftar.id_prodi %}selected{% endif %}>{{ daftar.nama_prodi }}</option>
-                                {% endfor %}
-                            </select>
+                            <input type="text" id="nama_mahasiswa" name="nama_mahasiswa" value="{{ edit.nama_mahasiswa }}" class="form-control" disabled>
                         </div>
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_pengajar" class="form-control-label">Pengajar</label></div>
+                        <div class="col col-md-3"><label for="kelas" class="form-control-label">Kelas</label></div>
                         <div class="col-12 col-md-9">
-                            <select name="id_pengajar" id="id_pengajar" class="form-control" required>
-                                {% for d in pengajar %}
-                                <option value="{{ d.id_pengajar }}" {% if edit.id_pengajar == d.id_pengajar %}selected{% endif %}>{{ d.nama_pengajar }}</option>
-                                {% endfor %}
-                            </select>
+                            <input type="text" id="kelas" name="kelas" value="{{ edit.nama_kelas }}" class="form-control" disabled>
                         </div>
                     </div>
 
+                    {% for mk in edit.mata_kuliah %}
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_mata_kuliah" class="form-control-label">Mata Kuliah</label></div>
+                        <div class="col col-md-3">
+                            <label for="mata_kuliah_{{ loop.index }}" class="form-control-label"></label>
+                        </div>
                         <div class="col-12 col-md-9">
-                            <select name="id_mata_kuliah" id="id_mata_kuliah" class="form-control" required>
-                                {% for e in matkul %}
-                                <option value="{{ e.id_mata_kuliah }}" {% if edit.id_mata_kuliah == e.id_mata_kuliah %}selected{% endif %}>{{ e.nama_mata_kuliah }}</option>
-                                {% endfor %}
-                            </select>
+                            <input type="text" id="mata_kuliah_{{ loop.index }}" name="mata_kuliah" value="{{ mk }}" class="form-control" disabled>
                         </div>
                     </div>
+                    {% endfor %}
 
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_kelas" class="form-control-label">Kelas</label></div>
+                        <div class="col col-md-3"><label for="id_ampuan_s" class="form-control-label">Tambah Mata Kuliah</label></div>
                         <div class="col-12 col-md-9">
-                            <select name="id_kelas" id="id_kelas" class="form-control" required>
-                                {% for f in kelas %}
-                                <option value="{{ f.id_kelas }}" {% if edit.id_kelas == f.id_kelas %}selected{% endif %}>{{ f.nama_kelas }}</option>
+                            <select name="id_ampuan_s" id="id_ampuan_s" class="form-control" required>
+                                {% for pl in data %}
+                                    {% if pl.nama_kelas == edit.nama_kelas %}
+                                        <option value="{{ pl.id_pengampu }}">{{ pl.nama_kelas }} - {{ pl.nama_mata_kuliah }}</option>
+                                    {% endif %}
                                 {% endfor %}
                             </select>
                         </div>
@@ -159,51 +152,21 @@
                     <div class="row form-group">
                         <div class="col col-md-3"><label for="tahun_ajaran" class="form-control-label">Tahun Ajaran</label></div>
                         <div class="col-12 col-md-9">
-                            <input type="text" id="tahun_ajaran" name="tahun_ajaran" value="{{ edit.tahun_ajaran }}" class="form-control" required>
+                            <input type="text" id="tahun_ajaranS" name="tahun_ajaranS" class="form-control">
                         </div>
                     </div>
 
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="semester" class="form-control-label">Semester</label></div>
-                        <div class="col-12 col-md-9">
-                            <select name="semester" id="semester" class="form-control" required>
-                                <option value="ganjil"  {% if edit.semester == "ganjil" %}selected{% endif %}>Ganjil</option>
-                                <option value="genap"  {% if edit.semester == "genap" %}selected{% endif %}>Genap</option>
-                            </select>
-                        </div>
-                    </div>
-
+                    <input type="text" id="id_mahasiswa" name="id_mahasiswa" value="{{ edit.id_mahasiswa }}" class="form-control" hidden>
                 </form>
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                <button type="submit" form="dataFormEdit{{ edit.id_krs }}" class="btn btn-primary" onclick="updateKRS(event, '{{ edit.id_krs }}')">Simpan Perubahan</button>
+                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
+                <button type="submit" form="dataSingle{{ edit.id_mahasiswa }}" class="btn btn-primary" onclick="updatePengampu(event, '{{ edit.id_mahasiswa }}')">
+                    <i class="fa fa-dot-circle-o"></i> Tambah KRS
+                </button>
             </div>
-        </div>
-    </div>
-</div>
 
-<div class="modal fade" id="modalHapus{{ edit.id_krs }}" tabindex="-1" role="dialog" aria-labelledby="modalHapus" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalHapus">Konfirmasi Penghapusan</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                Apakah kamu yakin ingin menghapus pengampu a.n. <b>{{edit.nama_pengajar}}</b> 
-                dengan mata kuliah <b>{{edit.nama_mata_kuliah}}</b> 
-                pada kelas <b>{{edit.nama_kelas}}</b> ?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-danger" onclick="deleteKRS(event, '{{ edit.id_krs }}')">
-                    <i class="fa fa-trash-o"></i> Hapus
-                </button>
-            </div>
         </div>
     </div>
 </div>
@@ -218,6 +181,7 @@
     }
 
     const form = document.getElementById('dataForm');
+    const singleF = document.getElementById('dataSingle');
     const responseMessage = document.getElementById('responseMessage');
     const responseText = document.getElementById('responseText');
     const responseMessageModal = document.getElementById('responseMessageModal');
@@ -259,6 +223,54 @@
             window.location.reload();
         });
     });
+
+    
+    function updatePengampu(event, pengampuId) {
+        event.preventDefault();
+
+        const form_S = document.getElementById('dataSingle' + pengampuId);
+        if (!form_S) {
+            console.error("Form with ID dataFormEdit" + pengampuId + " not found!");
+            return;
+        }
+
+        const id_ampuanS= form_S['id_ampuan_s'].value;
+        const id_mhs = form_S['id_mahasiswa'].value;
+        const tahun_ajaranS = form_S['tahun_ajaranS'].value;
+        
+        responseMessage.style.display = 'none';
+        responseMessageModal.style.display = 'none';
+
+        fetch('http://127.0.0.1:5000/insert_krs_single', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+                id_ampuan_s: id_ampuanS,
+                id_mhs: id_mhs,
+                tahun_ajaranS: tahun_ajaranS
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                sessionStorage.setItem("responseMessage", "success");
+                sessionStorage.setItem("responseText", data.message);
+                form.reset();
+                window.location.reload();
+            } else if (data.error) {
+                sessionStorage.setItem("responseMessage", "error");
+                sessionStorage.setItem("responseText", data.error);
+                window.location.reload();
+            }
+        })
+        .catch(error => {
+            sessionStorage.setItem("responseMessage", "error");
+            sessionStorage.setItem("responseText", error.message);
+            window.location.reload();
+        });
+    }
 
     function updateKRS(event, pengampuId) {
         event.preventDefault();

@@ -47,10 +47,21 @@ class User(UserMixin):
         self.user_id = user_id 
         self.level = level
 
+
+#@login_manager.user_loader
+#def load_user(id_user):
+#    id, nama, no_id, level = proses_login(id_user)
+#    return User(id, nama, no_id, level) 
+
 @login_manager.user_loader
 def load_user(id_user):
-    id, nama, no_id, level = proses_login(id_user)
-    return User(id, nama, no_id, level) 
+    level = session.get('level')
+    result = proses_login(id_user, level)
+    if result is None:
+        return None  # Flask-Login requirement!
+    print(result)
+    id, nama, no_id, level = result
+    return User(id, nama, no_id, level)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -66,6 +77,7 @@ def login():
             session['user_id'] = no_id
             session['nama'] = nama
             session['level'] = level
+            print(session)
             return redirect(url_for('home'))
         else:
             return jsonify({"error": "Username / Password Salah !!!"}), 400
@@ -356,12 +368,13 @@ def hapus_pengampu():
 @login_required
 def krs():
     konten = "krs"
-    data, d_krs, error = get_krs()
+    data_, d_krs_, error = get_krs()
+    data_krs = get_krs_data()
     if error:
         return error, 500
     return render_template('home.html', 
-                           data=data, 
-                           d_krs=d_krs,
+                           data=data_krs, 
+                           d_krs=d_krs_,
                            konten=konten)
 
 @app.route('/insert_krs', methods=['POST'])
@@ -369,6 +382,13 @@ def krs():
 def add_record_krs():
     data = request.get_json()
     return add_krs(data)
+
+@app.route('/insert_krs_single', methods=['POST'])
+@login_required
+def add_record_krs_single():
+    data = request.get_json()
+    print(data)
+    return add_krs_single(data)
 
 @app.route('/edit_krs', methods=['POST'])
 @login_required

@@ -35,7 +35,7 @@
                             <td>{{ op.nama_mahasiswa }}</td>
                             <td>{{ op.nim }}</td>
                             <td>{{ op.program_studi }}</td>
-                            <td>{{ op.kelas }}</td>
+                            <td>{{ op.nama_kelas }}</td>
                             <td>{{ op.jenis_kelamin }}</td>
                             <td>
                                 <a href="#" class="btn btn-primary btn-sm btn-block" data-toggle="modal" data-target="#modalEdit{{ op.id_mahasiswa }}">
@@ -261,8 +261,8 @@
                         <div class="col col-md-3"><label for="kelas" class="form-control-label">Kelas</label></div>
                         <div class="col-12 col-md-9">
                             <select name="kelas" id="kelas" class="form-control" required>
-                                {% for k in kelas %}
-                                <option value="{{ k.id_kelas }}" {% if k.id_kelas == edit.kelas %}selected{% endif %}>{{ k.nama_kelas }}</option>
+                                {% for kl in kelas %}
+                                <option value="{{ kl.id_kelas }}" {% if kl.id_kelas|string == edit.id_kelas|string %}selected{% endif %}>{{ kl.nama_kelas }}</option>
                                 {% endfor %}
                             </select>
                         </div>
