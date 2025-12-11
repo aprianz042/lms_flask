@@ -1,20 +1,35 @@
-import google.generativeai as genai
+import google as genai
 import json
 
-gem_api ='AIzaSyCwnXTOjCHT3rttgv7jI-UoYr2J5GCLcJg'
+#gem_api ='AIzaSyCwnXTOjCHT3rttgv7jI-UoYr2J5GCLcJg'
+gem_api ='AIzaSyCXUVou2QMVr6gFSaAfCElnYRfDr-PTmqA'
+
+#client = genai.configure(api_key=gem_api)
+client = genai.Client(api_key=gem_api)
+
+def get_gemini_response_25(data, prompt):
+    # Panggil model untuk menghasilkan konten
+    data_str = json.dumps(data, indent=4)    
+    full_prompt = f"{prompt[0]}\n\nData Siswa:\n{data_str}"
+    
+    response = client.models.generate_content(
+        model="gemini-2.5-flash", # Model yang ingin Anda gunakan
+        contents=full_prompt
+    )
+    return response.text
+
 
 def get_gemini_response(data, prompt):
     data_str = json.dumps(data, indent=4)    
     full_prompt = f"{prompt[0]}\n\nData Siswa:\n{data_str}"    
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    model = genai.GenerativeModel('gemini-2.5-flash')
     response = model.generate_content([full_prompt])
     return response.text
 
-def run_task(data, prompt):
-    response=get_gemini_response(data, prompt)
-    return response
 
-client = genai.configure(api_key=gem_api)
+def run_task(data, prompt):
+    response=get_gemini_response_25(data, prompt)
+    return response
 
 prompt = [
     """

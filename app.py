@@ -547,7 +547,7 @@ def emotion(materi, mahasiswa):
         grafik_pie = grafik_emotion_pie(emotion['emo_file'])
         #grafik_bar = grafik_emotion_bars(emotion['emo_file'])
         grafik_bar = grafik_emotion_lines(emotion['emo_file'])
-        analisis = analisis_gemini(emotion['emo_file'])
+        analisis, rekom = analisis_gemini(emotion['emo_file'])
         konklusi = kesimpulan(emotion['emo_file'])
         return render_template('home.html', 
                             konten=konten, 
@@ -556,8 +556,8 @@ def emotion(materi, mahasiswa):
                             grafik_fokus=grafik_fok,
                             grafik_pie=grafik_pie,
                             grafik_bar=grafik_bar,
-                            analisis=analisis[0],
-                            evaluasi=analisis[1],
+                            analisis=analisis,
+                            evaluasi=rekom,
                             kesimpulan=konklusi[0],
                             detail=konklusi[1],
                             session=session)

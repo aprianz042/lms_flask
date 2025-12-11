@@ -458,7 +458,7 @@ gem_api ='AIzaSyCwnXTOjCHT3rttgv7jI-UoYr2J5GCLcJg'
 def get_gemini_response(data, prompt):
     data_str = json.dumps(data, indent=4)    
     full_prompt = f"{prompt[0]}\n\nData Siswa:\n{data_str}"    
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    model = genai.GenerativeModel('gemini-2.5-flash')
     response = model.generate_content([full_prompt])
     return response.text
 
@@ -468,19 +468,27 @@ def run_task(data, prompt):
 
 client = genai.configure(api_key=gem_api)
 
-prompt = [
+prompt1 = [
     """
     Tugas:
-    berikan analisis secara singkat dari data yang diberikan tentang engagement siswa pada saat pembelajaran daring, lalu sebutkan emosi dominannnya.
-    juga berikan rekomendasi evaluasi tentang bagian (menit dan detik dari elapsed_time) materi mana yang harus diperbaiki oleh pengajar berdasarkan tingkat engagement siswa tersebut.
-    cukup jelaskan masing-masing dalam 1 paragraf saja. Pisahkan analisis dan rekomendasi dengan karakter ';' Jawaban jangan mengandung format-format bold atau miring.
+    berikan analisis secara singkat dari data yang diberikan tentang engagement siswa pada saat pembelajaran daring, lalu sebutkan emosi dominannnya. 
+    cukup jelaskan dalam 1 paragraf singkat saja. Jawaban jangan mengandung format-format bold atau miring    
     """
 ]
+
+prompt2 = [
+    """
+    Tugas:
+    berikan rekomendasi evaluasi tentang bagian (menit dan detik dari elapsed_time) materi mana yang harus diperbaiki oleh pengajar berdasarkan tingkat engagement siswa tersebut. 
+    cukup jelaskan dalam 1 paragraf singkat saja. Jawaban jangan mengandung format-format bold atau miring    
+    """
+]
+
 
 def analisis_gemini(file_json):
     JSON_PATH = f"emo_data/{file_json}"
     with open(JSON_PATH, 'r') as file:
         data = json.load(file)
-    x = run_task(data, prompt)
-    parts = x.split(";")
-    return parts
+    x = run_task(data, prompt1)
+    y = run_task(data, prompt2)
+    return x, y
