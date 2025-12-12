@@ -8,6 +8,7 @@ from flask_socketio import SocketIO, emit
 from function.head_data import data_wajah
 
 from function.frontal import half_flip
+from function.debug_vid import half_flip_debug
 #from function.frontal_lms import half_flip
 #from function.frontalization import half_flip
 
@@ -162,7 +163,7 @@ def frontal_video():
         if not ret:
             break
 
-        frontal = half_flip(frame)
+        frontal = half_flip_debug(frame)
         #frontal = main_front(frame)
         _, jpeg = cv2.imencode('.jpg', frontal)
         frame_bytes = jpeg.tobytes()
