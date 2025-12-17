@@ -453,8 +453,10 @@ def kesimpulan(file_json):
 
 
 ########################### GEMINI #############################
-#gem_api ='AIzaSyCwnXTOjCHT3rttgv7jI-UoYr2J5GCLcJg'
-gem_api ='AIzaSyCXUVou2QMVr6gFSaAfCElnYRfDr-PTmqA'
+gem_api ='AIzaSyCwnXTOjCHT3rttgv7jI-UoYr2J5GCLcJg'
+#gem_api ='AIzaSyCXUVou2QMVr6gFSaAfCElnYRfDr-PTmqA'
+#gem_api ='AIzaSyCBIK0EcJl5D-LX9bddqWb7dQMbMOXRjLM'
+#gem_api ='AIzaSyCIv9wUEUszC7Py_lo_XEMMrz5vWP59IMY'
 
 def get_gemini_response(data, prompt):
     data_str = json.dumps(data, indent=4)    
@@ -485,11 +487,41 @@ prompt2 = [
     """
 ]
 
+prompt_fix = [
+    """
+    Tugas:
+    1. Berikan analisis singkat tentang engagement siswa dan emosi dominan.
+    2. Berikan rekomendasi evaluasi menit/detik materi yang perlu diperbaiki.
+    Jawab dalam format JSON:
+    {
+    "analisis": "...",
+    "rekomendasi": "..."
+    }
+    Jangan gunakan bold/miring.
+    Jawablah dengan format JSON valid tanpa teks tambahan apa pun.
+    Jangan gunakan ``` dalam jawaban.
+    Hanya berisi dua key: analisis dan rekomendasi.
+    """
+]
 
-def analisis_gemini(file_json):
+def analisis_gemini_ori(file_json):
     JSON_PATH = f"emo_data/{file_json}"
     with open(JSON_PATH, 'r') as file:
         data = json.load(file)
     x = run_task(data, prompt1)
     y = run_task(data, prompt2)
+    return x, y
+
+
+def analisis_gemini(file_json):
+    JSON_PATH = f"emo_data/{file_json}"
+    with open(JSON_PATH, 'r') as file:
+        data = json.load(file)
+
+    response = run_task(data, prompt_fix)
+    print(response)
+    parsed = json.loads(response)
+
+    x = parsed["analisis"]
+    y = parsed["rekomendasi"]
     return x, y
