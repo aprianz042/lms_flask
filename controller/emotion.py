@@ -453,7 +453,8 @@ def kesimpulan(file_json):
 
 
 ########################### GEMINI #############################
-gem_api ='AIzaSyCwnXTOjCHT3rttgv7jI-UoYr2J5GCLcJg'
+#gem_api ='AIzaSyCwnXTOjCHT3rttgv7jI-UoYr2J5GCLcJg'
+gem_api ='AIzaSyCXUVou2QMVr6gFSaAfCElnYRfDr-PTmqA'
 
 def get_gemini_response(data, prompt):
     data_str = json.dumps(data, indent=4)    
