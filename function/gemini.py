@@ -1,8 +1,7 @@
 import google as genai
 import json
 
-#gem_api ='AIzaSyCwnXTOjCHT3rttgv7jI-UoYr2J5GCLcJg'
-gem_api ='AIzaSyCXUVou2QMVr6gFSaAfCElnYRfDr-PTmqA'
+gem_api =''
 
 #client = genai.configure(api_key=gem_api)
 client = genai.Client(api_key=gem_api)
