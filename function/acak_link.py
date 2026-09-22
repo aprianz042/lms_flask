@@ -4,7 +4,7 @@ import base64
 import os
 
 def encrypt(plain_text):
-    key = "MySecretKey123!"
+    key = ""
     cipher = AES.new(key, AES.MODE_CBC)  # CBC mode
     ct_bytes = cipher.encrypt(pad(plain_text.encode(), AES.block_size))
     iv = base64.b64encode(cipher.iv).decode('utf-8')
@@ -12,7 +12,7 @@ def encrypt(plain_text):
     return iv + ":" + ct  # Combine IV and ciphertext
 
 def decrypt(encrypted_text):
-    key = "MySecretKey123!"
+    key = ""
     iv, ct = encrypted_text.split(":")
     iv = base64.b64decode(iv)
     ct = base64.b64decode(ct)
